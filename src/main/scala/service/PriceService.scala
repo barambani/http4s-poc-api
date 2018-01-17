@@ -3,6 +3,7 @@ package service
 import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import errors.ApiError
 import model.DomainModel._
 

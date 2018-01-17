@@ -4,21 +4,26 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import fs2.StreamApp
+import instances.ErrorConversionInstances._
+import instances.MonadErrorInstances._
 import io.circe.generic.auto._
 import model.DomainModel._
+import monix.execution.Scheduler
 import org.http4s.circe._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.{EntityDecoder, EntityEncoder}
 import service.{Dependencies, Logger, PriceService}
 
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
-import scala.language.higherKinds
+import scala.concurrent.ExecutionContext
 import codecs.ServiceCodec._
 
 object Main extends StreamApp[IO] {
 
-  implicit val execution: ExecutionContextExecutor =
+  implicit val execution: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
+
+  implicit val scheduler: Scheduler =
+    Scheduler.global
 
   /**
     * encoding / decoding

@@ -20,7 +20,7 @@ sealed trait CurrencyT
 sealed trait DiscountAmountT
 sealed trait DiscountReasonT
 
-trait DomainModel {
+object DomainModel {
 
   type UserId       = Long @@ UserIdT
   type UserAddress  = String @@ UserAddressT
@@ -51,5 +51,3 @@ trait DomainModel {
 
   final case class ServiceSignature(name: String, version: String, buildTime: Instant)
 }
-
-object DomainModel extends DomainModel

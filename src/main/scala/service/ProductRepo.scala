@@ -5,6 +5,7 @@ import cats.instances.list._
 import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import cats.syntax.traverse._
 import errors.ApiError
 import model.DomainModel._

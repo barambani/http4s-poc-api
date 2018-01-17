@@ -2,7 +2,7 @@ package service
 
 import cats.MonadError
 import cats.effect.IO
-import dependencies.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi}
+import dependencies.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
 import errors.{ApiError, DependencyFailure}
 import lib.syntax.ByNameNaturalTransformationSyntax._
 import lib.syntax.FutureModuleSyntax._
@@ -30,30 +30,32 @@ object Dependencies {
 
       def user: UserId => IO[User] =
         id => DummyTeamTwoHttpApi.user(id)
-          .adaptError(
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.user for the id $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => DummyTeamOneHttpApi.usersPreferences(id)
-          .adaptError(
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences with parameter $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Product] =
         ps => DummyTeamTwoHttpApi.product(ps)
-          .adaptError(
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products for the ids $ps", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
-      def cachedProduct: ProductId => IO[Product] = ???
+      def cachedProduct: ProductId => IO[Option[Product]] =
+        pId => TeamThreeCacheApi.get(pId).lift
+
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
-          .adaptError(
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice with parameters <$p> and <$pref>", s"${thr.getMessage}")
           )
           .liftIntoMonadError

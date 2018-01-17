@@ -4,6 +4,7 @@ import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import errors.{ApiError, InvalidShippingCountry}
 import model.DomainModel._
 
@@ -24,7 +25,7 @@ final case class PreferenceFetcherImpl[F[_]](
     } yield valid
 
   private def validate(p: UserPreferences): F[UserPreferences] =
-    if(p.destination.country != "Italy")
+    if(p.destination.country != "Italy") // No very meaningful but it's to show the pattern
       F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy")) <* logger.error(s"InvalidShippingCountry Cannot ship outside Italy")
     else
       p.pure[F]
