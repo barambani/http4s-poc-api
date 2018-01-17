@@ -5,7 +5,7 @@ import java.util.concurrent.ForkJoinPool
 import cats.effect.IO
 import fs2.StreamApp
 import io.circe.generic.auto._
-import model.DomainModel$._
+import model.DomainModel._
 import org.http4s.circe._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.{EntityDecoder, EntityEncoder}
@@ -13,6 +13,7 @@ import service.{Dependencies, Logger, PriceService}
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.language.higherKinds
+import codecs.ServiceCodec._
 
 object Main extends StreamApp[IO] {
 

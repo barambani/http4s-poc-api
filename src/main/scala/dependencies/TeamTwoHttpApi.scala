@@ -1,6 +1,6 @@
 package dependencies
 
-import model.DomainModel$._
+import model.DomainModel._
 import monix.eval.Task
 
 sealed trait TeamTwoHttpApi {

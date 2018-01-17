@@ -7,7 +7,7 @@ import cats.MonadError
 import errors.ApiError
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityEncoder, HttpService, Method}
-import model.DomainModel$._
+import model.DomainModel._
 
 import scala.language.higherKinds
 

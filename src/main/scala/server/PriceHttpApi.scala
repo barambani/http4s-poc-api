@@ -5,7 +5,7 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import errors.{ApiError, DependencyFailure, InvalidParameters, UnknownFailure}
-import model.DomainModel$._
+import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
 import service.PriceService

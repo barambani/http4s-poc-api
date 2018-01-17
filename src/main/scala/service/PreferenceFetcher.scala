@@ -5,7 +5,7 @@ import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import errors.{ApiError, InvalidShippingCountry}
-import model.DomainModel$._
+import model.DomainModel._
 
 sealed trait PreferenceFetcher[F[_]] {
   def fetchUserPreferences: UserId => F[UserPreferences]

@@ -20,7 +20,7 @@ sealed trait CurrencyT
 sealed trait DiscountAmountT
 sealed trait DiscountReasonT
 
-trait DomainModel$ {
+trait DomainModel {
 
   type UserId       = Long @@ UserIdT
   type UserAddress  = String @@ UserAddressT
@@ -38,7 +38,7 @@ trait DomainModel$ {
   type DiscountAmount = BigDecimal @@ DiscountAmountT
   type DiscountReason = String @@ DiscountReasonT
 
-  final case class Discount(discount: Discount, discountReason: DiscountReason)
+  final case class Discount(discount: DiscountAmount, discountReason: DiscountReason)
   final case class Price(amount: MoneyAmount, currency: Currency, discount: Option[Discount])
   final case class ShipmentDestination(address: UserAddress, country: Country)
   final case class UserPreferences(destination: ShipmentDestination, currency: Currency)
@@ -52,4 +52,4 @@ trait DomainModel$ {
   final case class ServiceSignature(name: String, version: String, buildTime: Instant)
 }
 
-object DomainModel$ extends DomainModel$
+object DomainModel extends DomainModel

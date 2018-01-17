@@ -4,6 +4,7 @@ import cats.Eval.always
 import cats.arrow.FunctionK
 import cats.effect.IO
 import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
@@ -26,7 +27,7 @@ object ByNameNaturalTransformation {
         IO.fromFuture(IO.eval(always(fa)))
     }
 
-  implicit def taskToIo: ByNameNaturalTransformation[Task, IO] =
+  implicit def taskToIo(implicit s: Scheduler): ByNameNaturalTransformation[Task, IO] =
     new ByNameNaturalTransformation[Task, IO] {
       def apply[A](fa: => Task[A]): IO[A] = fa.toIO
     }

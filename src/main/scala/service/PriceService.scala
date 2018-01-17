@@ -2,8 +2,9 @@ package service
 
 import cats.MonadError
 import cats.syntax.apply._
+import cats.syntax.flatMap._
 import errors.ApiError
-import model.DomainModel$._
+import model.DomainModel._
 
 import scala.language.higherKinds
 

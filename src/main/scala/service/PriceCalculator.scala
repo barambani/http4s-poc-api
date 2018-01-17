@@ -5,7 +5,7 @@ import cats.instances.list._
 import cats.syntax.all._
 import cats.syntax.traverse._
 import errors.ApiError
-import model.DomainModel$._
+import model.DomainModel._
 
 import scala.language.higherKinds
 

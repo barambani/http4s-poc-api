@@ -7,7 +7,8 @@ import errors.{ApiError, DependencyFailure}
 import lib.syntax.ByNameNaturalTransformationSyntax._
 import lib.syntax.FutureModuleSyntax._
 import lib.syntax.MonixTaskModuleSyntax._
-import model.DomainModel$._
+import model.DomainModel._
+import monix.execution.Scheduler
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
@@ -24,7 +25,7 @@ object Dependencies {
 
   def apply[F[_]](implicit F: Dependencies[F]): Dependencies[F] = F
 
-  implicit def ioDependencies(implicit err: MonadError[IO, ApiError], ec: ExecutionContext): Dependencies[IO] =
+  implicit def ioDependencies(implicit err: MonadError[IO, ApiError], ec: ExecutionContext, s: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
