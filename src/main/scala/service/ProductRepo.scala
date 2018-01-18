@@ -29,5 +29,8 @@ final case class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Depend
     } yield product
 
   private def httpFetch(id: ProductId): F[Product] =
-    dep.product(id) <* logger.info(s"Product $id not in cache, fetched from the repo")
+    for {
+      prod  <- dep.product(id)                        <* logger.info(s"Product $id not in cache, fetched from the repo")
+      _     <- dep.storeProductToCache(prod.id)(prod) <* logger.info(s"Product $id stored to cache")
+    } yield prod
 }

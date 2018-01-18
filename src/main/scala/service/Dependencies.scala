@@ -19,6 +19,7 @@ trait Dependencies[F[_]] {
   def product: ProductId => F[Product]
   def cachedProduct: ProductId => F[Option[Product]]
   def productPrice: Product => UserPreferences => F[Price]
+  def storeProductToCache: ProductId => Product => F[Unit]
 }
 
 object Dependencies {
@@ -52,6 +53,8 @@ object Dependencies {
       def cachedProduct: ProductId => IO[Option[Product]] =
         pId => TeamThreeCacheApi.get(pId).lift
 
+      def storeProductToCache: ProductId => Product => IO[Unit] =
+        pId => p => TeamThreeCacheApi.put(pId)(p).lift
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
