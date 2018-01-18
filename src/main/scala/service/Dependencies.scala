@@ -5,8 +5,7 @@ import cats.effect.IO
 import dependencies.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
 import errors.{ApiError, DependencyFailure}
 import lib.syntax.ByNameNaturalTransformationSyntax._
-import lib.syntax.FutureModuleSyntax._
-import lib.syntax.MonixTaskModuleSyntax._
+import lib.syntax.ErrorAdaptSyntax._
 import model.DomainModel._
 import monix.execution.Scheduler
 
@@ -31,21 +30,21 @@ object Dependencies {
 
       def user: UserId => IO[User] =
         id => DummyTeamTwoHttpApi.user(id)
-          .adaptError[ApiError](
+          .adapt[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.user for the id $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => DummyTeamOneHttpApi.usersPreferences(id)
-          .adaptError[ApiError](
+          .adapt[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences with parameter $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Product] =
         ps => DummyTeamTwoHttpApi.product(ps)
-          .adaptError[ApiError](
+          .adapt[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products for the ids $ps", s"${thr.getMessage}")
           )
           .liftIntoMonadError
@@ -58,7 +57,7 @@ object Dependencies {
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
-          .adaptError[ApiError](
+          .adapt[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice with parameters <$p> and <$pref>", s"${thr.getMessage}")
           )
           .liftIntoMonadError
