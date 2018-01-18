@@ -30,21 +30,21 @@ object Dependencies {
 
       def user: UserId => IO[User] =
         id => DummyTeamTwoHttpApi.user(id)
-          .adapt[ApiError](
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.user for the id $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => DummyTeamOneHttpApi.usersPreferences(id)
-          .adapt[ApiError](
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences with parameter $id", s"${thr.getMessage}")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Product] =
         ps => DummyTeamTwoHttpApi.product(ps)
-          .adapt[ApiError](
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products for the ids $ps", s"${thr.getMessage}")
           )
           .liftIntoMonadError
@@ -57,7 +57,7 @@ object Dependencies {
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
-          .adapt[ApiError](
+          .adaptError[ApiError](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice with parameters <$p> and <$pref>", s"${thr.getMessage}")
           )
           .liftIntoMonadError
