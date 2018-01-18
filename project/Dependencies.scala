@@ -10,17 +10,20 @@ object Dependencies {
   private val circeVersion      = "0.9.0"
   private val scalaCheckVersion = "1.13.5"
 
+  private val http4sExtendVersion = "0.0.4"
+
   val externalDependencies = Seq(
-    "org.typelevel"       %% "cats-core"            % catsVersion withSources(),
-    "org.typelevel"       %% "cats-effect"          % catsEffectVersion withSources(),
-    "io.monix"            %% "monix"                % monixVersion withSources(),
-    "org.scalaz"          %% "scalaz-concurrent"    % scalazVersion withSources(),
-    "org.http4s"          %% "http4s-dsl"           % http4sVersion withSources(),
-    "org.http4s"          %% "http4s-blaze-server"  % http4sVersion withSources(),
-    "org.http4s"          %% "http4s-blaze-client"  % http4sVersion withSources(),
-    "org.http4s"          %% "http4s-circe"         % http4sVersion withSources(),
-    "io.circe"            %% "circe-generic"        % circeVersion withSources(),
-    "io.circe"            %% "circe-literal"        % circeVersion withSources(),
-    "org.scalacheck"      %% "scalacheck"           % scalaCheckVersion % "test" withSources()
+    "org.typelevel"         %% "cats-core"            % catsVersion withSources(),
+    "org.typelevel"         %% "cats-effect"          % catsEffectVersion withSources(),
+    "io.monix"              %% "monix"                % monixVersion withSources(),
+    "org.scalaz"            %% "scalaz-concurrent"    % scalazVersion withSources(),
+    "org.http4s"            %% "http4s-dsl"           % http4sVersion withSources(),
+    "org.http4s"            %% "http4s-blaze-server"  % http4sVersion withSources(),
+    "org.http4s"            %% "http4s-blaze-client"  % http4sVersion withSources(),
+    "org.http4s"            %% "http4s-circe"         % http4sVersion withSources(),
+    "io.circe"              %% "circe-generic"        % circeVersion withSources(),
+    "io.circe"              %% "circe-literal"        % circeVersion withSources(),
+    "com.github.barambani"  %% "http4s-extend"        % http4sExtendVersion withSources(),
+    "org.scalacheck"        %% "scalacheck"           % scalaCheckVersion % "test" withSources()
   )
 }

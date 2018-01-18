@@ -2,7 +2,6 @@ package server
 
 import java.time.Instant
 
-//import buildInfo.BuildInfo
 import cats.MonadError
 import errors.ApiError
 import org.http4s.dsl.Http4sDsl
@@ -23,8 +22,8 @@ sealed abstract class HealthCheckHttpApi[F[_]](
 
   private val serviceSignature =
     ServiceSignature(
-      name      = "", //BuildInfo.name,
-      version   = "", //BuildInfo.version,
+      name      = "",
+      version   = "",
       buildTime = Instant.now()
     )
 }

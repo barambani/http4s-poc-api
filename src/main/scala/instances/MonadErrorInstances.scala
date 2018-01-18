@@ -3,8 +3,8 @@ package instances
 import cats.MonadError
 import cats.effect.IO
 import errors.ApiError
-import lib.ErrorInvariantMap
-import lib.syntax.MonadErrorModuleSyntax._
+import http4s.extend.ErrorInvariantMap
+import http4s.extend.syntax.MonadErrorModuleSyntax._
 
 object MonadErrorInstances {
 

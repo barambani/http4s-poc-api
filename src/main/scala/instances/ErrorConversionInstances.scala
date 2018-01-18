@@ -1,7 +1,7 @@
 package instances
 
 import errors.{ApiError, UnknownFailure}
-import lib.ErrorInvariantMap
+import http4s.extend.ErrorInvariantMap
 
 object ErrorConversionInstances {
 
