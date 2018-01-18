@@ -42,8 +42,8 @@ object Main extends StreamApp[IO] {
     */
   def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
-      .mountService(HealthCheckHttpApi[IO].service(), "/api-pricing/info")
-      .mountService(PriceHttpApi[IO].service(pricingIo), "/api-pricing/pricing")
+      .mountService(HealthCheckHttpApi[IO].service(), "/pricing-api/health-check")
+      .mountService(PriceHttpApi[IO].service(pricingIo), "/pricing-api/prices")
       .serve
 
   private def pricingIo: PriceService[IO] =
