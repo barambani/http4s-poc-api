@@ -1,4 +1,4 @@
-package dependencies
+package external
 
 import model.DomainModel._
 

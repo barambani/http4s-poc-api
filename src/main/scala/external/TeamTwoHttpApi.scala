@@ -1,4 +1,4 @@
-package dependencies
+package external
 
 import model.DomainModel._
 import monix.eval.Task

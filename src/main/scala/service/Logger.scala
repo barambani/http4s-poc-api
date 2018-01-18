@@ -2,7 +2,7 @@ package service
 
 import cats.MonadError
 import cats.effect.IO
-import dependencies.LoggingApiImpl
+import external.LoggingApiImpl
 import errors.ApiError
 
 sealed trait Logger[F[_]] {

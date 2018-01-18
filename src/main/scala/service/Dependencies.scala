@@ -2,7 +2,7 @@ package service
 
 import cats.MonadError
 import cats.effect.IO
-import dependencies.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
+import external.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
 import errors.{ApiError, DependencyFailure}
 import http4s.extend.syntax.ByNameNaturalTransformationSyntax._
 import http4s.extend.syntax.ErrorAdaptSyntax._
