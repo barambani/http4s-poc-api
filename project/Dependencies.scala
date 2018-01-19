@@ -1,4 +1,4 @@
-import sbt._
+import sbt.{ModuleID, _}
 
 object Dependencies {
 
@@ -25,5 +25,9 @@ object Dependencies {
     "io.circe"              %% "circe-literal"        % circeVersion withSources(),
     "com.github.barambani"  %% "http4s-extend"        % http4sExtendVersion withSources(),
     "org.scalacheck"        %% "scalacheck"           % scalaCheckVersion % "test" withSources()
+  )
+
+  val compilerPlugins: Seq[ModuleID] = Seq(
+    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
   )
 }
