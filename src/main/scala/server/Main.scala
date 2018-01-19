@@ -19,22 +19,22 @@ import codecs.ServiceCodec._
 
 object Main extends StreamApp[IO] {
 
-  implicit val execution: ExecutionContext =
+  implicit val futureExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
 
-  implicit val scheduler: Scheduler =
+  implicit val monixTaskScheduler: Scheduler =
     Scheduler.global
 
   /**
     * encoding / decoding
     */
-  implicit val requestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
+  implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
     jsonOf[IO, PricesRequestPayload]
 
-  implicit val pricingPayloadEncoder: EntityEncoder[IO, Seq[Price]] =
+  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, Seq[Price]] =
     jsonEncoderOf[IO, Seq[Price]]
 
-  implicit val serviceInfoPayloadEncoder: EntityEncoder[IO, ServiceSignature] =
+  implicit val healthCheckResponsePayloadEncoder: EntityEncoder[IO, ServiceSignature] =
     jsonEncoderOf[IO, ServiceSignature]
 
   /**
@@ -43,9 +43,9 @@ object Main extends StreamApp[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .mountService(HealthCheckHttpApi[IO].service(), "/pricing-api/health-check")
-      .mountService(PriceHttpApi[IO].service(pricingIo), "/pricing-api/prices")
+      .mountService(PriceHttpApi[IO].service(priceService), "/pricing-api/prices")
       .serve
 
-  private def pricingIo: PriceService[IO] =
+  private def priceService: PriceService[IO] =
     PriceService(Dependencies[IO], Logger[IO])
 }

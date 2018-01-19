@@ -4,23 +4,23 @@ import java.time.Instant
 
 import shapeless.tag.@@
 
-sealed trait UserIdT
-sealed trait UserAddressT
-sealed trait CountryT
-
-sealed trait UserPurchaseTimeT
-
-sealed trait ProductIdT
-sealed trait ProductSpecT
-sealed trait ProductSaleStartT
-sealed trait ProductSaleEndT
-
-sealed trait MoneyAmountT
-sealed trait CurrencyT
-sealed trait DiscountAmountT
-sealed trait DiscountReasonT
-
 object DomainModel {
+
+  sealed trait UserIdT
+  sealed trait UserAddressT
+  sealed trait CountryT
+
+  sealed trait UserPurchaseTimeT
+
+  sealed trait ProductIdT
+  sealed trait ProductSpecT
+  sealed trait ProductSaleStartT
+  sealed trait ProductSaleEndT
+
+  sealed trait MoneyAmountT
+  sealed trait CurrencyT
+  sealed trait DiscountAmountT
+  sealed trait DiscountReasonT
 
   type UserId       = Long @@ UserIdT
   type UserAddress  = String @@ UserAddressT

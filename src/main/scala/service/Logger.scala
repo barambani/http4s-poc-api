@@ -13,7 +13,7 @@ sealed trait Logger[F[_]] {
 
 object Logger {
 
-  def apply[F[_]](implicit F: Logger[F]): Logger[F] = F
+  @inline def apply[F[_]](implicit F: Logger[F]): Logger[F] = F
 
   implicit def ioLogger(implicit err: MonadError[IO, ApiError]): Logger[IO] =
     new Logger[IO] {

@@ -9,7 +9,7 @@ import errors.{ApiError, InvalidShippingCountry}
 import model.DomainModel._
 
 sealed trait PreferenceFetcher[F[_]] {
-  def fetchUserPreferences: UserId => F[UserPreferences]
+  def userPreferences: UserId => F[UserPreferences]
 }
 
 final case class PreferenceFetcherImpl[F[_]](
@@ -18,10 +18,10 @@ final case class PreferenceFetcherImpl[F[_]](
     implicit
       F: MonadError[F, ApiError]) extends PreferenceFetcher[F] {
 
-  def fetchUserPreferences: UserId => F[UserPreferences] =
+  def userPreferences: UserId => F[UserPreferences] =
     id => for {
       pres  <- dependencies.usersPreferences(id)  <* logger.info(s"Preferences for $id collected")
-      valid <- validate(pres)                     <* logger.info(s"validated prefs for $id")
+      valid <- validate(pres)                     <* logger.info(s"Preferences for $id validated")
     } yield valid
 
   private def validate(p: UserPreferences): F[UserPreferences] =

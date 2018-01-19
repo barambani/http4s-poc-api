@@ -13,18 +13,18 @@ import model.DomainModel._
 import scala.language.higherKinds
 
 sealed trait ProductRepo[F[_]] {
-  def fetchProducts: Seq[ProductId] => F[List[Product]]
+  def storedProducts: Seq[ProductId] => F[List[Product]]
 }
 
 final case class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
 
   // TODO: Run in parallel in F
-  def fetchProducts: Seq[ProductId] => F[List[Product]] =
+  def storedProducts: Seq[ProductId] => F[List[Product]] =
     _.toList.map { id => (cacheMissFetch(id) compose dep.cachedProduct)(id) }.sequence
 
   private def cacheMissFetch: ProductId => F[Option[Product]] => F[Product] =
-    id => cacheRes => for {
-      mayBeProduct <- cacheRes
+    id => cacheResult => for {
+      mayBeProduct <- cacheResult
       product      <- mayBeProduct.fold(httpFetch(id)){ _.pure[F] <* logger.info(s"Product $id found in cache") }
     } yield product
 

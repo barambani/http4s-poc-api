@@ -10,7 +10,7 @@ object Dependencies {
   private val circeVersion      = "0.9.0"
   private val scalaCheckVersion = "1.13.5"
 
-  private val http4sExtendVersion = "0.0.4"
+  private val http4sExtendVersion = "0.0.5"
 
   val externalDependencies = Seq(
     "org.typelevel"         %% "cats-core"            % catsVersion withSources(),

@@ -23,7 +23,7 @@ trait Dependencies[F[_]] {
 
 object Dependencies {
 
-  def apply[F[_]](implicit F: Dependencies[F]): Dependencies[F] = F
+  @inline def apply[F[_]](implicit F: Dependencies[F]): Dependencies[F] = F
 
   implicit def ioDependencies(implicit err: MonadError[IO, ApiError], ec: ExecutionContext, s: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {
