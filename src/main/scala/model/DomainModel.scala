@@ -39,7 +39,7 @@ object DomainModel {
   type DiscountReason = String @@ DiscountReasonT
 
   final case class Discount(discount: DiscountAmount, discountReason: DiscountReason)
-  final case class Price(amount: MoneyAmount, currency: Currency, discount: Option[Discount])
+  final case class Price(amount: MoneyAmount, currency: Currency, discount: Option[Discount], priceTimeStamp: Instant)
   final case class ShipmentDestination(address: UserAddress, country: Country)
   final case class UserPreferences(destination: ShipmentDestination, currency: Currency)
   final case class ProductSale(starts: ProductSaleStart, ends: ProductSaleEnd)
@@ -49,5 +49,5 @@ object DomainModel {
 
   final case class PricesRequestPayload(userId: UserId, productIds: Seq[ProductId])
 
-  final case class ServiceSignature(name: String, version: String, buildTime: Instant)
+  final case class ServiceSignature(name: String, version: String, scalaVersion: String, scalaOrganization: String, buildTime: String)
 }

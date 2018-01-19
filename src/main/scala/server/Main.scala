@@ -44,6 +44,7 @@ object Main extends StreamApp[IO] {
     BlazeBuilder[IO]
       .mountService(HealthCheckHttpApi[IO].service(), "/pricing-api/health-check")
       .mountService(PriceHttpApi[IO].service(priceService), "/pricing-api/prices")
+      .enableHttp2(true)
       .serve
 
   private def priceService: PriceService[IO] =
