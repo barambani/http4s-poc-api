@@ -1,4 +1,3 @@
-import sbt.librarymanagement.syntax
 import sbt.librarymanagement.syntax.ExclusionRule
 import sbt.{ModuleID, _}
 
@@ -20,19 +19,13 @@ object Dependencies {
   /*
    * Transitive dependencies to exclude
    */
-  private val http4sTransitiveDependencies: Seq[ExclusionRule] = Seq(
+  private val transitiveDependencies: Seq[ExclusionRule] = Seq(
     ("org.typelevel", "cats-core_2.12"),
     ("org.typelevel", "cats-effect_2.12"),
-    ("io.circe",      "circe-generic_2.12"),
-    ("io.circe",      "circe-literal_2.12")
+    ("io.circe"     , "circe-generic_2.12"),
+    ("io.circe"     , "circe-literal_2.12"),
+    ("org.scalaz"   , "scalaz-concurrent_2.12")
   ) map (ex => ExclusionRule(ex._1, ex._2))
-
-  private val monixTransitiveDependencies: Seq[ExclusionRule] = Seq(
-    ("org.typelevel", "cats-effect_2.12")
-  ) map (ex => ExclusionRule(ex._1, ex._2))
-
-  private val http4sExtendTransitiveDependencies: Seq[syntax.ExclusionRule] =
-    http4sTransitiveDependencies ++ monixTransitiveDependencies
 
   /*
    * Dependencies and compiler plugins
@@ -40,15 +33,15 @@ object Dependencies {
   val externalDependencies = Seq(
     "org.typelevel"         %% "cats-core"            % catsVersion         withSources(),
     "org.typelevel"         %% "cats-effect"          % catsEffectVersion   withSources(),
-    "io.monix"              %% "monix"                % monixVersion        excludeAll(monixTransitiveDependencies:_*) withSources(),
+    "io.monix"              %% "monix"                % monixVersion        excludeAll(transitiveDependencies:_*) withSources(),
     "org.scalaz"            %% "scalaz-concurrent"    % scalazVersion       withSources(),
-    "org.http4s"            %% "http4s-dsl"           % http4sVersion       excludeAll(http4sTransitiveDependencies:_*) withSources(),
+    "org.http4s"            %% "http4s-dsl"           % http4sVersion       excludeAll(transitiveDependencies:_*) withSources(),
     "org.http4s"            %% "http4s-blaze-server"  % http4sVersion       withSources(),
     "org.http4s"            %% "http4s-blaze-client"  % http4sVersion       withSources(),
     "org.http4s"            %% "http4s-circe"         % http4sVersion       withSources(),
     "io.circe"              %% "circe-generic"        % circeVersion        withSources(),
     "io.circe"              %% "circe-literal"        % circeVersion        withSources(),
-    "com.github.barambani"  %% "http4s-extend"        % http4sExtendVersion excludeAll(http4sExtendTransitiveDependencies:_*) withSources()
+    "com.github.barambani"  %% "http4s-extend"        % http4sExtendVersion excludeAll(transitiveDependencies:_*) withSources()
   )
 
   val testDependencies = Seq(

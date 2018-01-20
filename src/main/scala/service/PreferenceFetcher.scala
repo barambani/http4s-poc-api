@@ -12,21 +12,27 @@ sealed trait PreferenceFetcher[F[_]] {
   def userPreferences: UserId => F[UserPreferences]
 }
 
-final case class PreferenceFetcherImpl[F[_]](
-  dependencies: Dependencies[F],
-  logger      : Logger[F])(
-    implicit
-      F: MonadError[F, ApiError]) extends PreferenceFetcher[F] {
+object PreferenceFetcher {
 
-  def userPreferences: UserId => F[UserPreferences] =
-    id => for {
-      pres  <- dependencies.usersPreferences(id)  <* logger.info(s"Preferences for $id collected")
-      valid <- validate(pres)                     <* logger.info(s"Preferences for $id validated")
-    } yield valid
+  @inline def apply[F[_] : MonadError[?[_], ApiError]](dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
+    new PreferenceFetcherImpl(dependencies, logger)
 
-  private def validate(p: UserPreferences): F[UserPreferences] =
-    if(p.destination.country != "Italy") // No very meaningful but it's to show the pattern
-      F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy")) <* logger.error(s"InvalidShippingCountry Cannot ship outside Italy")
-    else
-      p.pure[F]
+  private final class PreferenceFetcherImpl[F[_]](
+    dependencies: Dependencies[F],
+    logger      : Logger[F])(
+      implicit
+        F: MonadError[F, ApiError]) extends PreferenceFetcher[F] {
+
+    def userPreferences: UserId => F[UserPreferences] =
+      id => for {
+        pres  <- dependencies.usersPreferences(id)  <* logger.info(s"Preferences for $id collected")
+        valid <- validate(pres)                     <* logger.info(s"Preferences for $id validated")
+      } yield valid
+
+    private def validate(p: UserPreferences): F[UserPreferences] =
+      if(p.destination.country != "Italy") // No very meaningful but it's to show the pattern
+        F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy")) <* logger.error(s"InvalidShippingCountry Cannot ship outside Italy")
+      else
+        p.pure[F]
+  }
 }

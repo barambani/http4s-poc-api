@@ -16,21 +16,27 @@ sealed trait ProductRepo[F[_]] {
   def storedProducts: Seq[ProductId] => F[List[Product]]
 }
 
-final case class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
+object ProductRepo {
 
-  // TODO: Run in parallel in F
-  def storedProducts: Seq[ProductId] => F[List[Product]] =
-    _.toList.map { id => (cacheMissFetch(id) compose dep.cachedProduct)(id) }.sequence
+  @inline def apply[F[_] : MonadError[?[_], ApiError]](dependencies: Dependencies[F], logger: Logger[F]): ProductRepo[F] =
+    new ProductRepoImpl(dependencies, logger)
 
-  private def cacheMissFetch: ProductId => F[Option[Product]] => F[Product] =
-    id => cacheResult => for {
-      mayBeProduct <- cacheResult
-      product      <- mayBeProduct.fold(httpFetch(id)){ _.pure[F] <* logger.info(s"Product $id found in cache") }
-    } yield product
+  private final class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
 
-  private def httpFetch(id: ProductId): F[Product] =
-    for {
-      prod  <- dep.product(id)                        <* logger.info(s"Product $id not in cache, fetched from the repo")
-      _     <- dep.storeProductToCache(prod.id)(prod) <* logger.info(s"Product $id stored to cache")
-    } yield prod
+    // TODO: Run in parallel in F
+    def storedProducts: Seq[ProductId] => F[List[Product]] =
+      _.toList.map { id => (cacheMissFetch(id) compose dep.cachedProduct)(id) }.sequence
+
+    private def cacheMissFetch: ProductId => F[Option[Product]] => F[Product] =
+      id => cacheResult => for {
+        mayBeProduct <- cacheResult
+        product      <- mayBeProduct.fold(httpFetch(id)){ _.pure[F] <* logger.info(s"Product $id found in cache") }
+      } yield product
+
+    private def httpFetch(id: ProductId): F[Product] =
+      for {
+        prod  <- dep.product(id)                        <* logger.info(s"Product $id not in cache, fetched from the repo")
+        _     <- dep.storeProductToCache(prod.id)(prod) <* logger.info(s"Product $id stored to cache")
+      } yield prod
+  }
 }
