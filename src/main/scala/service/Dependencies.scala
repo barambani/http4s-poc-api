@@ -4,8 +4,8 @@ import cats.MonadError
 import cats.effect.IO
 import external.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
 import errors.{ApiError, DependencyFailure}
-import http4s.extend.syntax.ByNameNaturalTransformationSyntax._
-import http4s.extend.syntax.ErrorAdaptSyntax._
+import http4s.extend.syntax.naturalTransformation._
+import http4s.extend.syntax.errorAdapt._
 import model.DomainModel._
 import monix.execution.Scheduler
 

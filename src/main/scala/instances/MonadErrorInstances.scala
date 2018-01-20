@@ -4,7 +4,7 @@ import cats.MonadError
 import cats.effect.IO
 import errors.ApiError
 import http4s.extend.ErrorInvariantMap
-import http4s.extend.syntax.MonadErrorModuleSyntax._
+import http4s.extend.syntax.monadError._
 
 object MonadErrorInstances {
 
