@@ -13,20 +13,20 @@ object ServiceCodec {
     * Encoders
     */
   implicit val instantEncoder: Encoder[Instant] =
-    stringEncoder(_.toString)
+    encoderFor(_.toString)
 
   implicit def taggedStringEncoder[T]: Encoder[String @@ T] =
-    stringEncoder(identity)
+    encoderFor(identity)
 
   implicit def taggedBigDecimalEncoder[T]: Encoder[BigDecimal @@ T] =
-    stringEncoder(_.toString)
+    encoderFor(_.toString)
 
   /**
     * Decoders
     */
   implicit val instantDecoder: Decoder[Instant] =
-    stringDecoder(Instant.parse)
+    decoderFor(Instant.parse)
 
   implicit def taggedLongDecoder[T]: Decoder[Long @@ T] =
-    stringDecoderMap(_.toLong)(tag[T].apply)
+    decoderMapFor(_.toLong)(tag[T].apply)
 }
