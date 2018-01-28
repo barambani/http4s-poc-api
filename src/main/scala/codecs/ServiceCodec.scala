@@ -7,25 +7,32 @@ import io.circe.{Decoder, Encoder}
 import shapeless.tag
 import shapeless.tag.@@
 
-
 object ServiceCodec {
 
   implicit val instantEncoder: Encoder[Instant] =
-    Encoder.encodeString.contramap[Instant](_.toString)
+    stringEncoder(_.toString)
 
   implicit val instantDecoder: Decoder[Instant] =
-    Decoder.decodeString emap {
-      str => Either.catchNonFatal(Instant.parse(str)) leftMap (_ => s"Cannot parse $str to DateTime")
-    }
+    stringDecoder(Instant.parse)
 
   implicit def taggedStringEncoder[T]: Encoder[String @@ T] =
-    Encoder.encodeString.contramap[String @@ T](identity)
+    stringEncoder(identity)
 
   implicit def taggedBigDecimalEncoder[T]: Encoder[BigDecimal @@ T] =
-    Encoder.encodeString.contramap[BigDecimal @@ T](_.toString)
+    stringEncoder(_.toString)
 
   implicit def taggedLongDecoder[T]: Decoder[Long @@ T] =
+    stringDecoderMap(_.toLong)(tag[T].apply)
+
+
+  private def stringEncoder[A](f: A => String): Encoder[A] =
+    Encoder.encodeString.contramap[A](f)
+
+  private def stringDecoderMap[A, B](f: String => A)(g: A => B): Decoder[B] =
     Decoder.decodeString emap {
-      str => Either.catchNonFatal(str.toLong) leftMap (_ => s"Cannot parse $str to Long") map tag[T].apply
+      str => Either.catchNonFatal(f(str)) leftMap (_ => s"Cannot parse $str to Long") map g
     }
+
+  private def stringDecoder[A, B](f: String => A): Decoder[A] =
+    stringDecoderMap(f)(identity)
 }

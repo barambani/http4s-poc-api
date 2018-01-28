@@ -10,11 +10,11 @@ object Dependencies {
   private val catsEffectVersion = "0.8"
   private val monixVersion      = "3.0.0-M3"
   private val scalazVersion     = "7.2.18"
-  private val http4sVersion     = "0.18.0-M8"
+  private val http4sVersion     = "0.18.0-M9"
   private val circeVersion      = "0.9.0"
   private val scalaCheckVersion = "1.13.5"
 
-  private val http4sExtendVersion = "0.0.5"
+  private val http4sExtendVersion = "0.0.8"
 
   /*
    * Transitive dependencies to exclude
