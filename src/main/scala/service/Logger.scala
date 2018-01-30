@@ -5,7 +5,7 @@ import cats.effect.IO
 import external.LoggingApiImpl
 import errors.ApiError
 
-sealed trait Logger[F[_]] {
+trait Logger[F[_]] {
   def error: String => F[Unit]
   def warning: String => F[Unit]
   def info: String => F[Unit]

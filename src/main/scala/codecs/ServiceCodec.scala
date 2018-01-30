@@ -21,6 +21,9 @@ object ServiceCodec {
   implicit def taggedBigDecimalEncoder[T]: Encoder[BigDecimal @@ T] =
     encoderFor(_.toString)
 
+  implicit def taggedLongEncoder[T]: Encoder[Long @@ T] =
+    encoderFor(_.toString)
+
   /**
     * Decoders
     */
@@ -29,4 +32,10 @@ object ServiceCodec {
 
   implicit def taggedLongDecoder[T]: Decoder[Long @@ T] =
     decoderMapFor(_.toLong)(tag[T].apply)
+
+  implicit def taggedBigDecimalDecoder[T]: Decoder[BigDecimal @@ T] =
+    decoderMapFor(BigDecimal.apply)(tag[T].apply)
+
+  implicit def taggedStringDecoder[T]: Decoder[String @@ T] =
+    decoderMapFor(identity)(tag[T].apply)
 }

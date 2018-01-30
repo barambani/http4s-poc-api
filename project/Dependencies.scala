@@ -6,15 +6,16 @@ object Dependencies {
   /*
    * Versions
    */
-  private val catsVersion       = "1.0.1"
-  private val catsEffectVersion = "0.8"
-  private val monixVersion      = "3.0.0-M3"
-  private val scalazVersion     = "7.2.18"
-  private val http4sVersion     = "0.18.0-M9"
-  private val circeVersion      = "0.9.0"
-  private val scalaCheckVersion = "1.13.5"
+  private val catsVersion         = "1.0.1"
+  private val catsEffectVersion   = "0.8"
+  private val monixVersion        = "3.0.0-M3"
+  private val scalazVersion       = "7.2.18"
+  private val http4sVersion       = "0.18.0-M9"
+  private val circeVersion        = "0.9.0"
+  private val http4sExtendVersion = "0.0.11"
 
-  private val http4sExtendVersion = "0.0.10"
+  private val scalaCheckVersion = "1.13.5"
+  private val scalaTestVersion  = "3.0.4"
 
   /*
    * Transitive dependencies to exclude
@@ -45,7 +46,8 @@ object Dependencies {
   )
 
   val testDependencies = Seq(
-    "org.scalacheck" %% "scalacheck" % scalaCheckVersion % "test" withSources()
+    "org.scalacheck"  %% "scalacheck" % scalaCheckVersion % "test" withSources(),
+    "org.scalatest"   %% "scalatest"  % scalaTestVersion  % "test" withSources()
   )
 
   val compilerPlugins: Seq[ModuleID] = Seq(
