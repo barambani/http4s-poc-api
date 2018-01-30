@@ -1,3 +1,5 @@
+import java.time.Instant
+
 import cats.instances.either._
 import cats.syntax.validated._
 import errors.ApiError
@@ -9,7 +11,7 @@ import instances.ErrorConversionInstances._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
-import model.DomainModel.{Price, PricesRequestPayload}
+import model.DomainModel._
 import model.DomainModelSyntax._
 import org.http4s.{HttpService, Status}
 import org.scalatest.{FlatSpec, Matchers}
@@ -25,10 +27,26 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   implicit def errorEncoder[A : Encoder] = eitherEntityEncoder[ApiError, A]
   implicit def errorDecoder[A : Decoder] = eitherEntityDecoder[ApiError, A]
 
+  val aUser       = User(111.asUserId, Nil)
+  val aProduct    = Product(123.asProductId, "some spec".asProductSpec, Nil)
+  val price       = Price(
+    amount          = BigDecimal(2.34).asMoneyAmount,
+    currency        = "EUR".asCurrency,
+    discount        = None,
+    priceTimeStamp  = Instant.now()
+  )
+  val preferences = UserPreferences(
+    destination = ShipmentDestination("address".asUserAddress, "Italy".asCountry),
+    currency    = "EUR".asCurrency
+  )
+
   it should "respond with Ok 200 and the correct number of prices" in {
 
     val pricing: PriceService[Either[ApiError, ?]] =
-      PriceService[Either[ApiError, ?]](testSucceedingDependencies, testLogger)
+      PriceService[Either[ApiError, ?]](
+        testSucceedingDependencies(aUser, preferences, aProduct, price),
+        testLogger
+      )
 
     val httpApi: HttpService[Either[ApiError, ?]] =
       PriceHttpApi[Either[ApiError, ?]].service(pricing)
@@ -50,32 +68,38 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     assertOn(verified)
   }
 
-//  it should "respond with Bad request 400 for Invalid params when the anonymous context in" in {
-//
-//    val dependencies: CommonsLibrary[Either[ApiError, ?]] =
-//      succeedingDependencies(testProducts, new LocalizationPreferenceImpl)
-//
-//    val pricing: PricingService[Either[ApiError, ?]] =
-//      PricingService(dependencies, testCache)
-//
-//    val httpApi: HttpService[Either[ApiError, ?]] =
-//      PricingHttpApi[Either[ApiError, ?]].service(pricing)
-//
-//    val reqPayload = PricingRequest(
-//      Seq[Long](123),
-//      AnonymousContext("aaaa", "ffff", "gggg")
-//    )
-//
-//    val request = POST(uri("/"), reqPayload.asJson)
-//
-//    httpApi.runForF(request).verifyResponseText(
-//      Status.BadRequest,
-//      msg => msg should be(
-//        "Service Error: InvalidParams, Unrecognised params passed to the api currency = aaaa, country = ffff, locale = gggg"
-//      )
-//    )
-//  }
-//
+  it should "respond with Status 500 for invalid shipping country" in {
+
+    val wrongPreferences = preferences.copy(
+      destination = preferences.destination.copy(
+        country = "NotItaly".asCountry
+      )
+    )
+
+    val pricing: PriceService[Either[ApiError, ?]] =
+      PriceService[Either[ApiError, ?]](
+        testSucceedingDependencies(aUser, wrongPreferences, aProduct, price),
+        testLogger
+      )
+
+    val httpApi: HttpService[Either[ApiError, ?]] =
+      PriceHttpApi[Either[ApiError, ?]].service(pricing)
+
+    val reqPayload = PricesRequestPayload(
+      17.asUserId,
+      Seq(123.asProductId, 456.asProductId)
+    )
+
+    val request = POST(uri("/"), reqPayload.asJson)
+
+    val verified = httpApi.runForF(request).verifyResponseText(
+      Status.InternalServerError,
+      "Service Error: InvalidShippingCountry: Cannot ship outside Italy"
+    )
+
+    assertOn(verified)
+  }
+
 //  it should "respond with Bad gateway 502 for dependent service failure" in {
 //
 //    val dependencies: CommonsLibrary[Either[ApiError, ?]] =
@@ -98,28 +122,4 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 //      )
 //    )
 //  }
-//
-//  it should "respond with Internal service error 500 for undefined context" in {
-//
-//    val dependencies: CommonsLibrary[Either[ApiError, ?]] =
-//      succeedingDependencies(testProducts, new LocalizationPreferenceImpl)
-//
-//    val pricing: PricingService[Either[ApiError, ?]] =
-//      PricingService(dependencies, testCache)
-//
-//    val httpApi: HttpService[Either[ApiError, ?]] =
-//      PricingHttpApi[Either[ApiError, ?]].service(pricing)
-//
-//    val reqPayload = PricingRequest(Seq[Long](123), PricingContextUndefinedType("undefined context"))
-//
-//    val request = POST(uri("/"), reqPayload.asJson)
-//
-//    httpApi.runForF(request).verifyResponseText(
-//      Status.InternalServerError,
-//      msg => msg should be(
-//        "Service Error: ServiceFailure, Unable to process context"
-//      )
-//    )
-//  }
-
 }
