@@ -20,10 +20,8 @@ val root = project.in(file("."))
     name                    :=  "http4s-poc-api",
     scalaOrganization       :=  typelevelOrganization,
     scalaVersion            :=  scala_typelevel_212,
-    libraryDependencies     ++= externalDependencies,
-    libraryDependencies     ++= compilerPlugins,
+    libraryDependencies     ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     scalacOptions           ++= generalOptions ++ typeLevelScalaOptions,
     scalacOptions in Test   ++= testOnlyOptions,
-    scalacOptions in (Compile, console) --= nonTestExceptions,
-    resolvers               +=  Resolver.sonatypeRepo("releases")
+    scalacOptions in (Compile, console) --= nonTestExceptions
   )

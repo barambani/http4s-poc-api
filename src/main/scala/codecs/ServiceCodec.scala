@@ -2,30 +2,40 @@ package codecs
 
 import java.time.Instant
 
-import cats.syntax.either._
+import http4s.extend.util.CirceModule._
 import io.circe.{Decoder, Encoder}
 import shapeless.tag
 import shapeless.tag.@@
 
-
 object ServiceCodec {
 
+  /**
+    * Encoders
+    */
   implicit val instantEncoder: Encoder[Instant] =
-    Encoder.encodeString.contramap[Instant](_.toString)
-
-  implicit val instantDecoder: Decoder[Instant] =
-    Decoder.decodeString emap {
-      str => Either.catchNonFatal(Instant.parse(str)) leftMap (_ => s"Cannot parse $str to DateTime")
-    }
+    encoderFor(_.toString)
 
   implicit def taggedStringEncoder[T]: Encoder[String @@ T] =
-    Encoder.encodeString.contramap[String @@ T](identity)
+    encoderFor(identity)
 
   implicit def taggedBigDecimalEncoder[T]: Encoder[BigDecimal @@ T] =
-    Encoder.encodeString.contramap[BigDecimal @@ T](_.toString)
+    encoderFor(_.toString)
+
+  implicit def taggedLongEncoder[T]: Encoder[Long @@ T] =
+    encoderFor(_.toString)
+
+  /**
+    * Decoders
+    */
+  implicit val instantDecoder: Decoder[Instant] =
+    decoderFor(Instant.parse)
 
   implicit def taggedLongDecoder[T]: Decoder[Long @@ T] =
-    Decoder.decodeString emap {
-      str => Either.catchNonFatal(str.toLong) leftMap (_ => s"Cannot parse $str to Long") map tag[T].apply
-    }
+    decoderMapFor(_.toLong)(tag[T].apply)
+
+  implicit def taggedBigDecimalDecoder[T]: Decoder[BigDecimal @@ T] =
+    decoderMapFor(BigDecimal.apply)(tag[T].apply)
+
+  implicit def taggedStringDecoder[T]: Decoder[String @@ T] =
+    decoderMapFor(identity)(tag[T].apply)
 }

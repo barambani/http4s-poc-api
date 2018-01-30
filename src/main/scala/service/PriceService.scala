@@ -20,11 +20,11 @@ final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependenci
     } yield productsPrices
 
   private lazy val preferenceFetcher: PreferenceFetcher[F] =
-    PreferenceFetcherImpl(dep, logger)
+    PreferenceFetcher(dep, logger)
 
   private lazy val productRepo: ProductRepo[F] =
-    ProductRepoImpl(dep, logger)
+    ProductRepo(dep, logger)
 
   private lazy val priceCalculator: PriceCalculator[F] =
-    PriceCalculatorImpl[F](dep, logger)
+    PriceCalculator[F](dep, logger)
 }

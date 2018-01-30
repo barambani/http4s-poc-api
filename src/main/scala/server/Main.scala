@@ -47,6 +47,6 @@ object Main extends StreamApp[IO] {
       .enableHttp2(true)
       .serve
 
-  private def priceService: PriceService[IO] =
+  private lazy val priceService: PriceService[IO] =
     PriceService(Dependencies[IO], Logger[IO])
 }
