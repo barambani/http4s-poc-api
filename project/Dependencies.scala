@@ -16,7 +16,7 @@ object Dependencies {
 
   private val scalaCheckVersion = "1.13.5"
   private val scalaTestVersion  = "3.0.4"
-
+  
   /*
    * Transitive dependencies to exclude
    */
