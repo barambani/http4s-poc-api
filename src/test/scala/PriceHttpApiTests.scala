@@ -100,26 +100,26 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     assertOn(verified)
   }
 
-//  it should "respond with Bad gateway 502 for dependent service failure" in {
-//
-//    val dependencies: CommonsLibrary[Either[ApiError, ?]] =
-//      failingDependencies
-//
-//    val pricing: PricingService[Either[ApiError, ?]] =
-//      PricingService(dependencies, testCache)
-//
-//    val httpApi: HttpService[Either[ApiError, ?]] =
-//      PricingHttpApi[Either[ApiError, ?]].service(pricing)
-//
-//    val reqPayload = PricingRequest(Seq[Long](123), UserRelatedContext(UUID.randomUUID()))
-//
-//    val request = POST(uri("/"), reqPayload.asJson)
-//
-//    httpApi.runForF(request).verifyResponseText(
-//      Status.BadGateway,
-//      msg => msg should be(
-//        "Service Error: DependentServiceFailure, Test failure for userPreference"
-//      )
-//    )
-//  }
+  it should "respond with Bad gateway 502 for dependent service failure" in {
+
+    val pricing: PriceService[Either[ApiError, ?]] =
+      PriceService[Either[ApiError, ?]](testFailingDependencies, testLogger)
+
+    val httpApi: HttpService[Either[ApiError, ?]] =
+      PriceHttpApi[Either[ApiError, ?]].service(pricing)
+
+    val reqPayload = PricesRequestPayload(
+      17.asUserId,
+      Seq(123.asProductId, 456.asProductId)
+    )
+
+    val request = POST(uri("/"), reqPayload.asJson)
+
+    val verified = httpApi.runForF(request).verifyResponseText(
+      Status.BadGateway,
+      "Service Error: DependencyFailure. The dependency def user: UserId => Either[ApiError, User] failed with message network failure"
+    )
+
+    assertOn(verified)
+  }
 }

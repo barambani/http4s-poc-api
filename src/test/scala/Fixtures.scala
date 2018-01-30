@@ -1,6 +1,6 @@
 import cats.MonadError
 import cats.syntax.either._
-import errors.ApiError
+import errors.{ApiError, DependencyFailure}
 import http4s.extend.syntax.Verified
 import model.DomainModel._
 import org.http4s.client.dsl.Http4sClientDsl
@@ -30,6 +30,27 @@ trait Fixtures extends Matchers {
       def cachedProduct       : ProductId => Either[ApiError, Option[Product]]        = _ => None.asRight
       def productPrice        : Product => UserPreferences => Either[ApiError, Price] = _ => _ => price.asRight
       def storeProductToCache : ProductId => Product => Either[ApiError, Unit]        = _ => _ => ().asRight
+    }
+
+  def testFailingDependencies(implicit err: MonadError[Either[ApiError, ?], ApiError]): Dependencies[Either[ApiError, ?]] =
+    new Dependencies[Either[ApiError, ?]] {
+      def user: UserId => Either[ApiError, User] =
+        _ => DependencyFailure("def user: UserId => Either[ApiError, User]", "network failure").asLeft
+
+      def usersPreferences: UserId => Either[ApiError, UserPreferences] =
+        _ => DependencyFailure("def usersPreferences: UserId => Either[ApiError, UserPreferences]", "timeout").asLeft
+
+      def product: ProductId => Either[ApiError, Product] =
+        _ => DependencyFailure("def product: ProductId => Either[ApiError, Product]]", "network failure").asLeft
+
+      def cachedProduct: ProductId => Either[ApiError, Option[Product]] =
+        _ => DependencyFailure("def cachedProduct: ProductId => Either[ApiError, Option[Product]]", "not responding").asLeft
+
+      def productPrice: Product => UserPreferences => Either[ApiError, Price] =
+        _ => _ => DependencyFailure("def productPrice: Product => UserPreferences => Either[ApiError, Price]", "timeout").asLeft
+
+      def storeProductToCache: ProductId => Product => Either[ApiError, Unit] =
+        _ => _ => DependencyFailure("def storeProductToCache: ProductId => Product => Either[ApiError, Unit]", "not responding").asLeft
     }
 
   def testLogger(implicit err: MonadError[Either[ApiError, ?], ApiError]): Logger[Either[ApiError, ?]] =
