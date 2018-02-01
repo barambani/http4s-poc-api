@@ -1,6 +1,8 @@
 package errors
 
 sealed trait ApiError extends Product with Serializable {
+  def message: String
+
   override def toString: String =
     this match {
       case InvalidParameters(m)       => s"Service Error: InvalidParameters: $m"
@@ -10,7 +12,7 @@ sealed trait ApiError extends Product with Serializable {
     }
 }
 
-final case class InvalidParameters(message: String)                                   extends ApiError
-final case class InvalidShippingCountry(message: String)                              extends ApiError
-final case class DependencyFailure(failingDependency: String, failureMessage: String) extends ApiError
-final case class UnknownFailure(message: String)                                      extends ApiError
+final case class InvalidParameters(message: String)                             extends ApiError
+final case class InvalidShippingCountry(message: String)                        extends ApiError
+final case class DependencyFailure(failingDependency: String, message: String)  extends ApiError
+final case class UnknownFailure(message: String)                                extends ApiError

@@ -12,10 +12,10 @@ object Dependencies {
   private val scalazVersion       = "7.2.18"
   private val http4sVersion       = "0.18.0-M9"
   private val circeVersion        = "0.9.0"
-  private val http4sExtendVersion = "0.0.12"
+  private val http4sExtendVersion = "0.0.13"
 
-  private val scalaCheckVersion = "1.13.5"
-  private val scalaTestVersion  = "3.0.4"
+  private val scalaCheckVersion   = "1.13.5"
+  private val scalaTestVersion    = "3.0.4"
 
   /*
    * Transitive dependencies to exclude
@@ -46,8 +46,9 @@ object Dependencies {
   )
 
   val testDependencies = Seq(
-    "org.scalacheck"  %% "scalacheck" % scalaCheckVersion % "test" withSources(),
-    "org.scalatest"   %% "scalatest"  % scalaTestVersion  % "test" withSources()
+    "org.scalacheck"  %% "scalacheck"   % scalaCheckVersion % "test" withSources(),
+    "org.scalatest"   %% "scalatest"    % scalaTestVersion  % "test" withSources(),
+    "org.typelevel"   %% "cats-testkit" % catsVersion       % "test" withSources()
   )
 
   val compilerPlugins: Seq[ModuleID] = Seq(

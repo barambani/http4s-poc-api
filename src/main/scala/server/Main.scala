@@ -4,7 +4,7 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import fs2.StreamApp
-import instances.ErrorConversionInstances._
+import instances.ErrorMapInstances._
 import instances.MonadErrorInstances._
 import io.circe.generic.auto._
 import model.DomainModel._

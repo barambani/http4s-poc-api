@@ -7,9 +7,9 @@ val typelevelOrganization = "org.typelevel"
 val scala_typelevel_212   = "2.12.4-bin-typelevel-4"
 
 val buildInfoSettings = Seq(
-    buildInfoPackage        :=  "server",
-    buildInfoKeys           :=  Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
-    buildInfoKeys           +=  BuildInfoKey.action("buildTime") { Instant.now }
+    buildInfoPackage    :=  "server",
+    buildInfoKeys       :=  Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
+    buildInfoKeys       +=  BuildInfoKey.action("buildTime") { Instant.now }
 )
 
 val root = project.in(file("."))
