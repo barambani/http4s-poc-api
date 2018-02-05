@@ -2,11 +2,11 @@ import cats.MonadError
 import cats.syntax.either._
 import errors.{ApiError, DependencyFailure}
 import http4s.extend.syntax.Verified
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
 import org.scalatest.{Matchers, Succeeded}
-import service.{Dependencies, Logger}
 
 trait Fixtures extends Matchers {
 

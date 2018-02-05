@@ -8,6 +8,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
 import errors.ApiError
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
 import scala.language.higherKinds

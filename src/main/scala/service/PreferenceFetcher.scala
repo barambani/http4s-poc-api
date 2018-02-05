@@ -6,6 +6,7 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import errors.{ApiError, InvalidShippingCountry}
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
 sealed trait PreferenceFetcher[F[_]] {
