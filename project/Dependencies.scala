@@ -9,8 +9,8 @@ object Dependencies {
   private val catsVersion         = "1.0.1"
   private val catsEffectVersion   = "0.8"
   private val monixVersion        = "3.0.0-M3"
-  private val scalazVersion       = "7.2.18"
-  private val http4sVersion       = "0.18.0-M9"
+  private val scalazVersion       = "7.2.19"
+  private val http4sVersion       = "0.18.0"
   private val circeVersion        = "0.9.0"
   private val http4sExtendVersion = "0.0.13"
 
@@ -46,9 +46,10 @@ object Dependencies {
   )
 
   val testDependencies = Seq(
-    "org.scalacheck"  %% "scalacheck"   % scalaCheckVersion % "test" withSources(),
-    "org.scalatest"   %% "scalatest"    % scalaTestVersion  % "test" withSources(),
-    "org.typelevel"   %% "cats-testkit" % catsVersion       % "test" withSources()
+    "org.scalacheck"  %% "scalacheck"       % scalaCheckVersion % "test" withSources(),
+    "org.scalatest"   %% "scalatest"        % scalaTestVersion  % "test" withSources(),
+    "org.typelevel"   %% "cats-testkit"     % catsVersion       % "test" withSources(),
+    "org.typelevel"   %% "cats-effect-laws" % catsEffectVersion % "test" withSources()
   )
 
   val compilerPlugins: Seq[ModuleID] = Seq(
