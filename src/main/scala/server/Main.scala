@@ -6,16 +6,17 @@ import cats.effect.IO
 import fs2.StreamApp
 import instances.ErrorMapInstances._
 import instances.MonadErrorInstances._
+import interpreters.{Dependencies, Logger}
 import io.circe.generic.auto._
 import model.DomainModel._
 import monix.execution.Scheduler
 import org.http4s.circe._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.{EntityDecoder, EntityEncoder}
-import service.{Dependencies, Logger, PriceService}
+import service.PriceService
+import codecs.ServiceCodec._
 
 import scala.concurrent.ExecutionContext
-import codecs.ServiceCodec._
 
 object Main extends StreamApp[IO] {
 

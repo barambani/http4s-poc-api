@@ -1,4 +1,4 @@
-package service
+package interpreters
 
 import cats.MonadError
 import cats.effect.IO

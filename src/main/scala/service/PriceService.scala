@@ -5,6 +5,7 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import errors.ApiError
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
 import scala.language.higherKinds

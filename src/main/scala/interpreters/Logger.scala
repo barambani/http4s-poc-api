@@ -1,9 +1,9 @@
-package service
+package interpreters
 
 import cats.MonadError
 import cats.effect.IO
-import external.LoggingApiImpl
 import errors.ApiError
+import external.LoggingApiImpl
 
 trait Logger[F[_]] {
   def error: String => F[Unit]
