@@ -31,7 +31,7 @@ object PreferenceFetcher {
       } yield valid
 
     private def validate(p: UserPreferences): F[UserPreferences] =
-      if(p.destination.country != "Italy") // No very meaningful but it's to show the pattern
+      if(p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
         F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy")) <* logger.error(s"InvalidShippingCountry Cannot ship outside Italy")
       else
         p.pure[F]
