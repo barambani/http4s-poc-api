@@ -3,6 +3,7 @@ import java.time.Instant
 import cats.instances.either._
 import cats.syntax.validated._
 import errors.ApiError
+import http4s.extend.instances.invariant._
 import http4s.extend.syntax.httpService._
 import http4s.extend.syntax.responseVerification._
 import http4s.extend.util.EntityDecoderModule.eitherEntityDecoder

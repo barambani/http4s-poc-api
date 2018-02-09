@@ -1,17 +1,14 @@
 package instances
 
+import cats.Invariant
 import errors.{ApiError, UnknownFailure}
+import http4s.extend.Algebra.ExceptionMessage
 import http4s.extend.ErrorInvariantMap
+import http4s.extend.instances.errorInvariantMap._
+import http4s.extend.syntax.invariant._
 
 object ErrorMapInstances {
 
-  implicit def throwableToApiError: ErrorInvariantMap[Throwable, ApiError] =
-    new ErrorInvariantMap[Throwable, ApiError] {
-
-      def direct: Throwable => ApiError =
-        e => UnknownFailure(e.getMessage)
-
-      def reverse: ApiError => Throwable =
-        e => new Throwable(e.message)
-    }
+  implicit def throwableToApiError(implicit ev: Invariant[ErrorInvariantMap[Throwable, ?]]): ErrorInvariantMap[Throwable, ApiError] =
+    ErrorInvariantMap[Throwable, ExceptionMessage].imap[ApiError](UnknownFailure)(ae => new ExceptionMessage(ae.message))
 }

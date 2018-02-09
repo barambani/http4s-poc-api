@@ -3,6 +3,8 @@ import cats.effect.laws.discipline.arbitrary._
 import cats.laws.discipline.MonadErrorTests
 import cats.tests.CatsSuite
 import errors.ApiError
+import http4s.extend.instances.eq._
+import http4s.extend.instances.invariant._
 import instances.ErrorMapInstances._
 import instances.MonadErrorInstances._
 import test.instances.{ArbitraryInstances, CogenInstances, EqInstances}

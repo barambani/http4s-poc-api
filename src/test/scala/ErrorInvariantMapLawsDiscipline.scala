@@ -1,5 +1,7 @@
 import cats.tests.CatsSuite
 import errors._
+import http4s.extend.instances.eq._
+import http4s.extend.instances.invariant._
 import instances.ErrorMapInstances._
 import laws.checks.ErrorInvariantMapLawsChecks
 import test.instances.{ArbitraryInstances, EqInstances}
