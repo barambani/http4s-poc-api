@@ -8,15 +8,13 @@ import errors.ApiError
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
-import scala.language.higherKinds
-
 final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependencies[F], logger: Logger[F]) {
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[Seq[Price]] =
     for {
       user            <- dep.user(userId)                           <* logger.info(s"User collected for $userId")
-      preferences     <- preferenceFetcher.userPreferences(userId)  <* logger.info(s"User preferences collected for $userId")
-      products        <- productRepo.storedProducts(productIds)     <* logger.info(s"Product details collected for $productIds")
+      preferences     <- preferenceFetcher.userPreferences(userId)  <* logger.info(s"User preferences look up for $userId completed")
+      products        <- productRepo.storedProducts(productIds)     <* logger.info(s"Product details collection for $productIds completed")
       productsPrices  <- priceCalculator.finalPrices(user, products, preferences)
     } yield productsPrices
 

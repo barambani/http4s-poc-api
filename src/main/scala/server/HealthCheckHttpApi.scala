@@ -6,8 +6,6 @@ import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityEncoder, HttpService, Method}
 
-import scala.language.higherKinds
-
 sealed abstract class HealthCheckHttpApi[F[_]](
   implicit
     ME: MonadError[F, ApiError],

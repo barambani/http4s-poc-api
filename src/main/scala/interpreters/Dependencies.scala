@@ -10,12 +10,11 @@ import model.DomainModel._
 import monix.execution.Scheduler
 
 import scala.concurrent.ExecutionContext
-import scala.language.higherKinds
 
 trait Dependencies[F[_]] {
   def user: UserId => F[User]
   def usersPreferences: UserId => F[UserPreferences]
-  def product: ProductId => F[Product]
+  def product: ProductId => F[Option[Product]]
   def cachedProduct: ProductId => F[Option[Product]]
   def productPrice: Product => UserPreferences => F[Price]
   def storeProductToCache: ProductId => Product => F[Unit]
@@ -42,7 +41,7 @@ object Dependencies {
           )
           .liftIntoMonadError
 
-      def product: ProductId => IO[Product] =
+      def product: ProductId => IO[Option[Product]] =
         ps => DummyTeamTwoHttpApi.product(ps)
           .attemptMapLeft[ApiError](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products for the ids $ps", s"${thr.getMessage}")
