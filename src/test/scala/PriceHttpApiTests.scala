@@ -30,7 +30,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   implicit def errorEncoder[A : Encoder] = eitherEntityEncoder[ApiError, A]
   implicit def errorDecoder[A : Decoder] = eitherEntityDecoder[ApiError, A]
 
-  val aUser           = User(111.asUserId, Nil)
+  val aUser = User(111.asUserId, Nil)
 
   val productsInStore = Map(
     456.asProductId -> Product(456.asProductId, "some other spec".asProductSpec, Nil)
