@@ -10,8 +10,6 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
 import service.PriceService
 
-import scala.language.higherKinds
-
 sealed abstract class PriceHttpApi[F[_]](
   implicit
     ME: MonadError[F, ApiError],

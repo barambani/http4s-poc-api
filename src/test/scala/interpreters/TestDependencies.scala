@@ -8,17 +8,18 @@ import model.DomainModel._
 object TestDependencies {
 
   def testSucceedingDependencies(
-    aUser       : User,
-    preferences : UserPreferences,
-    aProduct    : Product,
-    price       : Price)(
+    aUser           : User,
+    preferences     : UserPreferences,
+    productsInStore : Map[ProductId, Product],
+    productsInCache : Map[ProductId, Product],
+    price           : Price)(
       implicit
         err: MonadError[Either[ApiError, ?], ApiError]): Dependencies[Either[ApiError, ?]] =
     new Dependencies[Either[ApiError, ?]] {
       def user                : UserId => Either[ApiError, User]                      = _ => aUser.asRight
       def usersPreferences    : UserId => Either[ApiError, UserPreferences]           = _ => preferences.asRight
-      def product             : ProductId => Either[ApiError, Product]                = _ => aProduct.asRight
-      def cachedProduct       : ProductId => Either[ApiError, Option[Product]]        = _ => None.asRight
+      def product             : ProductId => Either[ApiError, Option[Product]]        = id => productsInStore.get(id).asRight
+      def cachedProduct       : ProductId => Either[ApiError, Option[Product]]        = id => productsInCache.get(id).asRight
       def productPrice        : Product => UserPreferences => Either[ApiError, Price] = _ => _ => price.asRight
       def storeProductToCache : ProductId => Product => Either[ApiError, Unit]        = _ => _ => ().asRight
     }
@@ -31,7 +32,7 @@ object TestDependencies {
       def usersPreferences: UserId => Either[ApiError, UserPreferences] =
         _ => DependencyFailure("def usersPreferences: UserId => Either[ApiError, UserPreferences]", "timeout").asLeft
 
-      def product: ProductId => Either[ApiError, Product] =
+      def product: ProductId => Either[ApiError, Option[Product]] =
         _ => DependencyFailure("def product: ProductId => Either[ApiError, Product]]", "network failure").asLeft
 
       def cachedProduct: ProductId => Either[ApiError, Option[Product]] =

@@ -30,14 +30,23 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   implicit def errorEncoder[A : Encoder] = eitherEntityEncoder[ApiError, A]
   implicit def errorDecoder[A : Decoder] = eitherEntityDecoder[ApiError, A]
 
-  val aUser       = User(111.asUserId, Nil)
-  val aProduct    = Product(123.asProductId, "some spec".asProductSpec, Nil)
+  val aUser           = User(111.asUserId, Nil)
+
+  val productsInStore = Map(
+    456.asProductId -> Product(456.asProductId, "some other spec".asProductSpec, Nil)
+  )
+
+  val productsInCache = Map(
+    123.asProductId -> Product(123.asProductId, "some spec".asProductSpec, Nil)
+  )
+
   val price       = Price(
     amount          = BigDecimal(2.34).asMoneyAmount,
     currency        = "EUR".asCurrency,
     discount        = None,
     priceTimeStamp  = Instant.now()
   )
+
   val preferences = UserPreferences(
     destination = ShipmentDestination("address".asUserAddress, "Italy".asCountry),
     currency    = "EUR".asCurrency
@@ -47,7 +56,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val pricing: PriceService[Either[ApiError, ?]] =
       PriceService[Either[ApiError, ?]](
-        testSucceedingDependencies(aUser, preferences, aProduct, price),
+        testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
         testLogger
       )
 
@@ -56,7 +65,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
-      Seq(123.asProductId, 456.asProductId)
+      Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
     val request = POST(uri("/"), reqPayload.asJson)
@@ -64,7 +73,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val verified = httpApi.runForF(request).verify[Seq[Price]](
       Status.Ok,
       ps =>
-        if(ps.lengthCompare(reqPayload.productIds.size) == 0) ps.validNel
+        if(ps.lengthCompare(2) == 0) ps.validNel
         else s"Wrong number of prices. Expected ${reqPayload.productIds.size} but was ${ps.size}".invalidNel
     )
 
@@ -81,7 +90,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val pricing: PriceService[Either[ApiError, ?]] =
       PriceService[Either[ApiError, ?]](
-        testSucceedingDependencies(aUser, wrongPreferences, aProduct, price),
+        testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
         testLogger
       )
 
@@ -89,8 +98,8 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       PriceHttpApi[Either[ApiError, ?]].service(pricing)
 
     val reqPayload = PricesRequestPayload(
-      17.asUserId,
-      Seq(123.asProductId, 456.asProductId)
+      18.asUserId,
+      Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
     val request = POST(uri("/"), reqPayload.asJson)
@@ -112,8 +121,8 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       PriceHttpApi[Either[ApiError, ?]].service(pricing)
 
     val reqPayload = PricesRequestPayload(
-      17.asUserId,
-      Seq(123.asProductId, 456.asProductId)
+      19.asUserId,
+      Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
     val request = POST(uri("/"), reqPayload.asJson)
