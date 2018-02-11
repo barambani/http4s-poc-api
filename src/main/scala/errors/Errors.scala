@@ -18,8 +18,8 @@ object ApiError {
   implicit def throwableToApiError(implicit ev: Invariant[ErrorInvariantMap[Throwable, ?]]): ErrorInvariantMap[Throwable, ApiError] =
     ErrorInvariantMap[Throwable, ExceptionMessage].imap[ApiError](UnknownFailure.apply)(ae => new ExceptionMessage(ae.message))
 
-  implicit def ioApiError(implicit ev: ErrorInvariantMap[Throwable, ApiError]): MonadError[IO, ApiError] =
-    MonadError[IO, Throwable].adaptErrorType[ApiError]
+  implicit def ioApiError[E](implicit ev: ErrorInvariantMap[Throwable, E]): MonadError[IO, E] =
+    MonadError[IO, Throwable].adaptErrorType[E]
 }
 
 final case class InvalidParameters(message: String) extends ApiError

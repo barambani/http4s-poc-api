@@ -11,12 +11,5 @@ trait ErrorResponse[F[_], E] extends Http4sDsl[F] {
 }
 
 object ErrorResponse {
-
   @inline def apply[F[_], E](implicit inst: ErrorResponse[F, E]): ErrorResponse[F, E] = inst
-
-  def defineFor[F[_], E : Show](f: String => F[Response[F]]): ErrorResponse[F, E] =
-    new ErrorResponse[F, E] {
-      val ev: Show[E] = Show[E]
-      def responseFor: E => F[Response[F]] = f compose ev.show
-    }
 }
