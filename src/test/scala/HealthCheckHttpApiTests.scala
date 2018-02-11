@@ -7,7 +7,6 @@ import http4s.extend.syntax.httpService._
 import http4s.extend.syntax.responseVerification._
 import http4s.extend.util.EntityDecoderModule.eitherEntityDecoder
 import http4s.extend.util.EntityEncoderModule.eitherEntityEncoder
-import instances.ErrorMapInstances._
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 import model.DomainModel.ServiceSignature

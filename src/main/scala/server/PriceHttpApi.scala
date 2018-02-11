@@ -1,10 +1,11 @@
 package server
 
-import cats.MonadError
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.{MonadError, Show}
 import errors._
+import instances.ErrorResponse
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
@@ -29,11 +30,14 @@ sealed abstract class PriceHttpApi[F[_]](
     } yield resp
 
   private def errorHandler: ApiError => F[Response[F]] = {
-    case e: InvalidParameters       => BadRequest(e.toString)
-    case e: DependencyFailure       => BadGateway(e.toString)
-    case e: InvalidShippingCountry  => InternalServerError(e.toString)
-    case e: UnknownFailure          => InternalServerError(e.toString)
+    case e: InvalidParameters       => responseFor(e)
+    case e: DependencyFailure       => responseFor(e)
+    case e: InvalidShippingCountry  => responseFor(e)
+    case e: UnknownFailure          => responseFor(e)
   }
+
+  private def responseFor[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =
+    ev.responseFor(e)
 }
 
 object PriceHttpApi {
