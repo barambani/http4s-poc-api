@@ -9,6 +9,7 @@ trait Logger[F[_]] {
   def error: String => F[Unit]
   def warning: String => F[Unit]
   def info: String => F[Unit]
+  def debug: String => F[Unit]
 }
 
 object Logger {
@@ -25,5 +26,8 @@ object Logger {
 
       def info: String => IO[Unit] =
         LoggingApiImpl.info
+
+      def debug: String => IO[Unit] =
+        LoggingApiImpl.debug
     }
 }

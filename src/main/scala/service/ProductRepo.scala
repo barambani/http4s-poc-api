@@ -37,7 +37,7 @@ object ProductRepo {
       id => cacheResult =>
         for {
           mayBeCached <- cacheResult
-          mayBeStored <- mayBeCached.fold(httpFetch(id)){ _.some.pure[F] <* logger.info(s"Product $id found in cache") }
+          mayBeStored <- mayBeCached.fold(httpFetch(id)){ _.some.pure[F] <* logger.debug(s"Product $id found in cache") }
         } yield mayBeStored
 
     private def httpFetch(id: ProductId): F[Option[Product]] =
@@ -48,8 +48,8 @@ object ProductRepo {
 
     private def storeInCache: Product => F[Unit] =
       prod =>
-        logger.info(s"Product ${ prod.id } not in cache, fetched from the repo") *>
+        logger.debug(s"Product ${ prod.id } not in cache, fetched from the repo") *>
         dep.storeProductToCache(prod.id)(prod) <*
-        logger.info(s"Product ${ prod.id } stored into the cache")
+        logger.debug(s"Product ${ prod.id } stored into the cache")
   }
 }

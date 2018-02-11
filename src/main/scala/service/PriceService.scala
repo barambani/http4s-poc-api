@@ -12,9 +12,12 @@ final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependenci
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[Seq[Price]] =
     for {
-      user            <- dep.user(userId)                           <* logger.info(s"User collected for $userId")
-      preferences     <- preferenceFetcher.userPreferences(userId)  <* logger.info(s"User preferences look up for $userId completed")
-      products        <- productRepo.storedProducts(productIds)     <* logger.info(s"Product details collection for $productIds completed")
+      user            <- logger.debug(s"Collecting user details for id $userId") *> dep.user(userId)
+      _               <- logger.debug(s"User details collected for id $userId")
+      preferences     <- logger.debug(s"Looking up user preferences for user $userId") *> preferenceFetcher.userPreferences(userId)
+      _               <- logger.debug(s"User preferences look up for $userId completed")
+      products        <- logger.debug(s"Collecting product details for products $productIds") *> productRepo.storedProducts(productIds)
+      _               <- logger.debug(s"Product details collection for $productIds completed")
       productsPrices  <- priceCalculator.finalPrices(user, products, preferences)
     } yield productsPrices
 

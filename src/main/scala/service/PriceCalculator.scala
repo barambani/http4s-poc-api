@@ -2,7 +2,6 @@ package service
 
 import cats.MonadError
 import cats.instances.list._
-import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
@@ -27,9 +26,10 @@ object PriceCalculator {
 
     private def userPrice: UserPreferences => User => Product => F[Price] =
       prefs => user => product => for {
-        catalogPrice  <- dep.productPrice(product)(prefs) <* logger.info(s"Catalog price of ${ product.id } collected")
+        catalogPrice  <- dep.productPrice(product)(prefs)
+        _             <- logger.debug(s"Catalog price of ${ product.id } collected")
         userPrice     =  veryVeryComplexPureCalculation(catalogPrice)(user.userPurchaseHistory)
-        _             <- logger.info(s"Price calculation for product ${ product.id } completed")
+        _             <- logger.debug(s"Price calculation for product ${ product.id } completed")
       } yield userPrice
 
 
