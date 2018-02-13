@@ -2,11 +2,10 @@ package errors
 
 import cats.effect.IO
 import cats.{Invariant, Monad, MonadError, Show}
-import http4s.extend.Algebra.ExceptionMessage
-import http4s.extend.ErrorInvariantMap
 import http4s.extend.instances.errorInvariantMap._
 import http4s.extend.syntax.invariant._
 import http4s.extend.syntax.monadError._
+import http4s.extend.{ErrorInvariantMap, ExceptionDisplay}
 import instances.ErrorResponse
 import org.http4s.Response
 
@@ -16,7 +15,7 @@ sealed trait ApiError extends Product with Serializable {
 object ApiError {
 
   implicit def throwableToApiError(implicit ev: Invariant[ErrorInvariantMap[Throwable, ?]]): ErrorInvariantMap[Throwable, ApiError] =
-    ErrorInvariantMap[Throwable, ExceptionMessage].imap[ApiError](UnknownFailure.apply)(ae => new ExceptionMessage(ae.message))
+    ErrorInvariantMap[Throwable, ExceptionDisplay].imap[ApiError](UnknownFailure.apply)(ae => ExceptionDisplay(ae.message))
 
   implicit def ioApiError[E](implicit ev: ErrorInvariantMap[Throwable, E]): MonadError[IO, E] =
     MonadError[IO, Throwable].adaptErrorType[E]
@@ -74,8 +73,8 @@ object DependencyFailure {
 }
 
 
-final case class UnknownFailure(em: ExceptionMessage) extends ApiError {
-  val message = em.message
+final case class UnknownFailure(em: ExceptionDisplay) extends ApiError {
+  val message = ExceptionDisplay.unwrap(em)
 }
 object UnknownFailure {
 
