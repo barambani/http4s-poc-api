@@ -24,14 +24,13 @@ object ProductRepo {
 
   private final class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
 
-    // TODO: Run in parallel in F
     /**
       * Tries to retrieve the products by ProductId from the cache, if results in miss it tries on the http store.
       * It returns only the products existing so the result might contain less elements than the input list.
       * If a product is not in the cache but is found in the http store it will be added to the cache
       */
     def storedProducts: Seq[ProductId] => F[List[Product]] =
-      _.toList.map { id => (cacheMissFetch(id) compose dep.cachedProduct)(id) }.sequence map (_.flatten)
+      _.par.map { id => (cacheMissFetch(id) compose dep.cachedProduct)(id) }.toList.sequence map (_.flatten)
 
     private def cacheMissFetch: ProductId => F[Option[Product]] => F[Option[Product]] =
       id => cacheResult =>
