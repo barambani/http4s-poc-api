@@ -1,7 +1,7 @@
 package model
 
 import model.DomainModel._
-import DomainAnyValSyntax._
+import DomainModelValSyntax._
 import shapeless.tag.@@
 import shapeless.tag
 
@@ -11,7 +11,7 @@ object DomainModelSyntax {
   implicit def domainModelBigDecimalOpsSyntax(x: BigDecimal) = new BigDecimalOps(x)
 }
 
-object DomainAnyValSyntax {
+object DomainModelValSyntax {
   implicit def domainModelValSyntax[A](a: A) = new DomainModelValOps[A](a)
 }
 

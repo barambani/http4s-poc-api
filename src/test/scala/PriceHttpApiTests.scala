@@ -19,7 +19,7 @@ import org.http4s.{HttpService, Status}
 import org.scalatest.{FlatSpec, Matchers}
 import server.PriceHttpApi
 import service.PriceService
-import codecs.ServiceCodec._
+import model.DomainModelCodecs._
 
 final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
