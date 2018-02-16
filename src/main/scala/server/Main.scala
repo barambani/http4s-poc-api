@@ -13,7 +13,7 @@ import org.http4s.circe._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.{EntityDecoder, EntityEncoder}
 import service.PriceService
-import codecs.ServiceCodec._
+import model.DomainModelCodecs._
 
 import scala.concurrent.ExecutionContext
 

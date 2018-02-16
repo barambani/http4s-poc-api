@@ -1,4 +1,4 @@
-package codecs
+package model
 
 import java.time.Instant
 
@@ -7,7 +7,7 @@ import io.circe.{Decoder, Encoder}
 import shapeless.tag
 import shapeless.tag.@@
 
-object ServiceCodec {
+object DomainModelCodecs {
 
   /**
     * Encoders
