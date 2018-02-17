@@ -127,8 +127,10 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val request = POST(uri("/"), reqPayload.asJson)
 
     val verified = httpApi.runForF(request).verifyResponseText(
-      Status.BadGateway,
-      "Service Error: DependencyFailure. The dependency def user: UserId => Either[ApiError, User] failed with message network failure"
+      Status.InternalServerError,
+      """Service Error: ComposedFailure with messages:
+        |Service Error: DependencyFailure. The dependency def user: UserId => Either[ApiError, User] failed with message network failure
+        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => Either[ApiError, Option[Product]] failed with message not responding""".stripMargin
     )
 
     assertOn(verified)

@@ -1,7 +1,7 @@
 package errors
 
 import cats.effect.IO
-import cats.{Invariant, Monad, MonadError, Show}
+import cats.{Invariant, Monad, MonadError, Semigroup, Show}
 import http4s.extend.instances.errorInvariantMap._
 import http4s.extend.syntax.invariant._
 import http4s.extend.syntax.monadError._
@@ -18,6 +18,30 @@ object ApiError {
 
   implicit def ioApiError[E](implicit ev: ErrorInvariantMap[Throwable, E]): MonadError[IO, E] =
     MonadError[IO, Throwable].adaptErrorType[E]
+
+  implicit def apiErrorShow: Show[ApiError] =
+    new Show[ApiError] {
+
+      def show(t: ApiError): String =
+        apiErrorDecomposition(t)
+
+      private def apiErrorDecomposition: ApiError => String = {
+        case e: InvalidParameters       => showOf(e)
+        case e: DependencyFailure       => showOf(e)
+        case e: InvalidShippingCountry  => showOf(e)
+        case e: UnknownFailure          => showOf(e)
+        case e: ComposedFailure         => showOf(e)
+      }
+
+      private def showOf[E <: ApiError](e: E)(implicit ev: Show[E]): String =
+        ev.show(e)
+    }
+
+  implicit def apiErrorSemigroup: Semigroup[ApiError] =
+    new Semigroup[ApiError] {
+      def combine(x: ApiError, y: ApiError): ApiError =
+        ComposedFailure(List(x, y))
+    }
 }
 
 final case class InvalidParameters(message: String) extends ApiError
@@ -87,6 +111,31 @@ object UnknownFailure {
     new ErrorResponse[F, UnknownFailure] {
       val ev = Show[UnknownFailure]
       def responseFor: UnknownFailure => F[Response[F]] =
+        e => InternalServerError(ev.show(e))
+    }
+}
+
+final case class ComposedFailure(errors: List[ApiError]) extends ApiError {
+
+  private val ev = Show[ApiError]
+  val message = (errors map {
+    m =>
+      s"""
+         |${ev.show(m)}"""
+    } mkString "").stripMargin
+}
+object ComposedFailure {
+
+  implicit val composedFailureShow: Show[ComposedFailure] =
+    new Show[ComposedFailure] {
+      def show(t: ComposedFailure): String =
+        s"""Service Error: ComposedFailure with messages:${t.message}""".stripMargin
+    }
+
+  implicit def composedFailureResponse[F[_] : Monad]: ErrorResponse[F, ComposedFailure] =
+    new ErrorResponse[F, ComposedFailure] {
+      val ev = Show[ComposedFailure]
+      def responseFor: ComposedFailure => F[Response[F]] =
         e => InternalServerError(ev.show(e))
     }
 }
