@@ -5,7 +5,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.{MonadError, Show}
 import errors._
-import instances.ErrorResponse
+import http4s.extend.ErrorResponse
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}

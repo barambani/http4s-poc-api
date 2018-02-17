@@ -5,8 +5,7 @@ import cats.{Invariant, Monad, MonadError, Show}
 import http4s.extend.instances.errorInvariantMap._
 import http4s.extend.syntax.invariant._
 import http4s.extend.syntax.monadError._
-import http4s.extend.{ErrorInvariantMap, ExceptionDisplay}
-import instances.ErrorResponse
+import http4s.extend.{ErrorInvariantMap, ErrorResponse, ExceptionDisplay}
 import org.http4s.Response
 
 sealed trait ApiError extends Product with Serializable {
