@@ -34,6 +34,7 @@ sealed abstract class PriceHttpApi[F[_]](
     case e: DependencyFailure       => responseFor(e)
     case e: InvalidShippingCountry  => responseFor(e)
     case e: UnknownFailure          => responseFor(e)
+    case e: ComposedFailure         => responseFor(e)
   }
 
   private def responseFor[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =

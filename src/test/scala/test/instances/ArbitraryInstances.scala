@@ -14,6 +14,14 @@ trait ArbitraryInstances {
 
   private def arbitraryErrorInstance(implicit ev: Arbitrary[ExceptionDisplay]): String => Gen[ApiError] =
     m => ev.arbitrary.flatMap {
-      em => Gen.oneOf(InvalidParameters(m), InvalidShippingCountry(m), DependencyFailure("test", m), UnknownFailure(em))
+      em => Gen.oneOf(
+        InvalidParameters(m),
+        InvalidShippingCountry(m),
+        DependencyFailure("test", m),
+        UnknownFailure(em),
+        ComposedFailure(
+          List(InvalidParameters(m), DependencyFailure("test", m), UnknownFailure(em))
+        )
+      )
     }
 }
