@@ -130,7 +130,8 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       Status.InternalServerError,
       """Service Error: ComposedFailure with messages:
         |Service Error: DependencyFailure. The dependency def user: UserId => Either[ApiError, User] failed with message network failure
-        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => Either[ApiError, Option[Product]] failed with message not responding""".stripMargin
+        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => Either[ApiError, Option[Product]] failed with message not responding
+        |Service Error: DependencyFailure. The dependency def usersPreferences: UserId => Either[ApiError, UserPreferences] failed with message timeout""".stripMargin
     )
 
     assertOn(verified)

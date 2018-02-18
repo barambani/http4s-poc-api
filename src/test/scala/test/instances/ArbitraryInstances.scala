@@ -7,7 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 trait ArbitraryInstances {
 
   implicit def excMessageArb(implicit ev: Arbitrary[String]): Arbitrary[ExceptionDisplay] =
-    Arbitrary { ev.arbitrary flatMap (ExceptionDisplay(_)) }
+    Arbitrary { ev.arbitrary flatMap ExceptionDisplay.mk }
 
   implicit def apiErrorArb(implicit ev: Arbitrary[String]): Arbitrary[ApiError] =
     Arbitrary { ev.arbitrary flatMap arbitraryErrorInstance }
