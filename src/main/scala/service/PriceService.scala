@@ -5,15 +5,15 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import errors.ApiError
+import http4s.extend.ParEffectful
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
-import temp.Effectful1
 
-final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependencies[F], logger: Logger[F])(implicit ev: Effectful1[F]) {
+final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependencies[F], logger: Logger[F])(implicit ev: ParEffectful[F]) {
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[Seq[Price]] =
     for {
-      retrievalResult               <- ev.runPar3(userFor(userId), productsFor(productIds), preferencesFor(userId))
+      retrievalResult               <- ev.parTupled3(userFor(userId), productsFor(productIds), preferencesFor(userId))
       (user, products, preferences) =  retrievalResult
       productsPrices                <- priceCalculator.finalPrices(user, products, preferences)
     } yield productsPrices
