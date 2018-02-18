@@ -18,6 +18,7 @@ final case class PriceService[F[_] : MonadError[?[_], ApiError]](dep: Dependenci
       productsPrices                <- priceCalculator.finalPrices(user, products, preferences)
     } yield productsPrices
 
+
   private def userFor(userId: UserId): F[User] =
     for {
       user <- logger.debug(s"Collecting user details for id $userId") *> dep.user(userId)
