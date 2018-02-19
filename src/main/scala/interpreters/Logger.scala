@@ -1,8 +1,6 @@
 package interpreters
 
-import cats.MonadError
 import cats.effect.IO
-import errors.ApiError
 import external.LoggingApiImpl
 
 trait Logger[F[_]] {
@@ -16,7 +14,7 @@ object Logger {
 
   @inline def apply[F[_]](implicit F: Logger[F]): Logger[F] = F
 
-  implicit def ioLogger(implicit err: MonadError[IO, ApiError]): Logger[IO] =
+  implicit def ioLogger: Logger[IO] =
     new Logger[IO] {
       def error: String => IO[Unit] =
         LoggingApiImpl.error

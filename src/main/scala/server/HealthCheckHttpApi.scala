@@ -1,14 +1,13 @@
 package server
 
 import cats.MonadError
-import errors.ApiError
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityEncoder, HttpService, Method}
 
 sealed abstract class HealthCheckHttpApi[F[_]](
   implicit
-    ME: MonadError[F, ApiError],
+    ME: MonadError[F, Throwable],
     RE: EntityEncoder[F, ServiceSignature]) extends Http4sDsl[F] {
 
   def service(): HttpService[F] =
@@ -29,7 +28,7 @@ sealed abstract class HealthCheckHttpApi[F[_]](
 object HealthCheckHttpApi {
   def apply[F[_]](
     implicit
-      ME: MonadError[F, ApiError],
+      ME: MonadError[F, Throwable],
       RE: EntityEncoder[F, ServiceSignature]): HealthCheckHttpApi[F] =
     new HealthCheckHttpApi[F]{}
 }

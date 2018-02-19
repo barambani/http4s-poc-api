@@ -1,8 +1,7 @@
 package interpreters
 
-import cats.MonadError
-import cats.syntax.either._
-import errors.{ApiError, DependencyFailure}
+import cats.effect.IO
+import errors.DependencyFailure
 import model.DomainModel._
 
 object TestDependencies {
@@ -12,36 +11,34 @@ object TestDependencies {
     preferences     : UserPreferences,
     productsInStore : Map[ProductId, Product],
     productsInCache : Map[ProductId, Product],
-    price           : Price)(
-      implicit
-        err: MonadError[Either[ApiError, ?], ApiError]): Dependencies[Either[ApiError, ?]] =
-    new Dependencies[Either[ApiError, ?]] {
-      def user                : UserId => Either[ApiError, User]                      = _ => aUser.asRight
-      def usersPreferences    : UserId => Either[ApiError, UserPreferences]           = _ => preferences.asRight
-      def product             : ProductId => Either[ApiError, Option[Product]]        = id => productsInStore.get(id).asRight
-      def cachedProduct       : ProductId => Either[ApiError, Option[Product]]        = id => productsInCache.get(id).asRight
-      def productPrice        : Product => UserPreferences => Either[ApiError, Price] = _ => _ => price.asRight
-      def storeProductToCache : ProductId => Product => Either[ApiError, Unit]        = _ => _ => ().asRight
-    }
+    price           : Price): Dependencies[IO] =
+      new Dependencies[IO] {
+        def user                : UserId => IO[User]                      = _ => IO.pure(aUser)
+        def usersPreferences    : UserId => IO[UserPreferences]           = _ => IO.pure(preferences)
+        def product             : ProductId => IO[Option[Product]]        = id => IO.pure(productsInStore.get(id))
+        def cachedProduct       : ProductId => IO[Option[Product]]        = id => IO.pure(productsInCache.get(id))
+        def productPrice        : Product => UserPreferences => IO[Price] = _ => _ => IO.pure(price)
+        def storeProductToCache : ProductId => Product => IO[Unit]        = _ => _ => IO.unit
+      }
 
-  def testFailingDependencies(implicit err: MonadError[Either[ApiError, ?], ApiError]): Dependencies[Either[ApiError, ?]] =
-    new Dependencies[Either[ApiError, ?]] {
-      def user: UserId => Either[ApiError, User] =
-        _ => DependencyFailure("def user: UserId => Either[ApiError, User]", "network failure").asLeft
+  def testFailingDependencies: Dependencies[IO] =
+    new Dependencies[IO] {
+      def user: UserId => IO[User] =
+        _ => IO.raiseError(DependencyFailure("def user: UserId => IO[User]", "network failure"))
 
-      def usersPreferences: UserId => Either[ApiError, UserPreferences] =
-        _ => DependencyFailure("def usersPreferences: UserId => Either[ApiError, UserPreferences]", "timeout").asLeft
+      def usersPreferences: UserId => IO[UserPreferences] =
+        _ => IO.raiseError(DependencyFailure("def usersPreferences: UserId => IO[UserPreferences]", "timeout"))
 
-      def product: ProductId => Either[ApiError, Option[Product]] =
-        _ => DependencyFailure("def product: ProductId => Either[ApiError, Product]]", "network failure").asLeft
+      def product: ProductId => IO[Option[Product]] =
+        _ => IO.raiseError(DependencyFailure("def product: ProductId => IO[Product]]", "network failure"))
 
-      def cachedProduct: ProductId => Either[ApiError, Option[Product]] =
-        _ => DependencyFailure("def cachedProduct: ProductId => Either[ApiError, Option[Product]]", "not responding").asLeft
+      def cachedProduct: ProductId => IO[Option[Product]] =
+        _ => IO.raiseError(DependencyFailure("def cachedProduct: ProductId => IO[Option[Product]]", "not responding"))
 
-      def productPrice: Product => UserPreferences => Either[ApiError, Price] =
-        _ => _ => DependencyFailure("def productPrice: Product => UserPreferences => Either[ApiError, Price]", "timeout").asLeft
+      def productPrice: Product => UserPreferences => IO[Price] =
+        _ => _ => IO.raiseError(DependencyFailure("def productPrice: Product => UserPreferences => IO[Price]", "timeout"))
 
-      def storeProductToCache: ProductId => Product => Either[ApiError, Unit] =
-        _ => _ => DependencyFailure("def storeProductToCache: ProductId => Product => Either[ApiError, Unit]", "not responding").asLeft
+      def storeProductToCache: ProductId => Product => IO[Unit] =
+        _ => _ => IO.raiseError(DependencyFailure("def storeProductToCache: ProductId => Product => IO[Unit]", "not responding"))
     }
 }

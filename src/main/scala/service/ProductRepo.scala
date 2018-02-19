@@ -9,7 +9,6 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.traverse._
-import errors.ApiError
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
@@ -19,10 +18,10 @@ sealed trait ProductRepo[F[_]] {
 
 object ProductRepo {
 
-  @inline def apply[F[_] : MonadError[?[_], ApiError]](dependencies: Dependencies[F], logger: Logger[F]): ProductRepo[F] =
+  @inline def apply[F[_] : MonadError[?[_], Throwable]](dependencies: Dependencies[F], logger: Logger[F]): ProductRepo[F] =
     new ProductRepoImpl(dependencies, logger)
 
-  private final class ProductRepoImpl[F[_] : MonadError[?[_], ApiError]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
+  private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable]](dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
 
     /**
       * Tries to retrieve the products by ProductId from the cache, if results in miss it tries on the http store.

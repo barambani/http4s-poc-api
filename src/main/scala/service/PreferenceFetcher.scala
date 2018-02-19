@@ -5,7 +5,7 @@ import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import errors.{ApiError, InvalidShippingCountry}
+import errors.InvalidShippingCountry
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
@@ -15,14 +15,14 @@ sealed trait PreferenceFetcher[F[_]] {
 
 object PreferenceFetcher {
 
-  @inline def apply[F[_] : MonadError[?[_], ApiError]](dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
+  @inline def apply[F[_] : MonadError[?[_], Throwable]](dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
     new PreferenceFetcherImpl(dependencies, logger)
 
   private final class PreferenceFetcherImpl[F[_]](
     dependencies: Dependencies[F],
     logger      : Logger[F])(
       implicit
-        F: MonadError[F, ApiError]) extends PreferenceFetcher[F] {
+        F: MonadError[F, Throwable]) extends PreferenceFetcher[F] {
 
     def userPreferences: UserId => F[UserPreferences] =
       id => for {

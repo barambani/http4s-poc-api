@@ -1,8 +1,7 @@
 package interpreters
 
-import cats.MonadError
 import cats.effect.IO
-import errors.{ApiError, DependencyFailure}
+import errors.DependencyFailure
 import external.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
 import http4s.extend.ExceptionDisplay._
 import http4s.extend.syntax.byNameNt._
@@ -28,14 +27,13 @@ object Dependencies {
 
   implicit def ioDependencies(
     implicit
-      err: MonadError[IO, ApiError],
       ecc: ExecutionContext,
       sch: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
         id => DummyTeamTwoHttpApi.user(id)
-          .attemptMapLeft[ApiError](
+          .attemptMapLeft[Throwable](
             // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
             // or any relevant detail from the Throwable
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ (unMk _ compose fullDisplay)(thr) }")
@@ -44,21 +42,21 @@ object Dependencies {
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => DummyTeamOneHttpApi.usersPreferences(id)
-          .attemptMapLeft[ApiError](
+          .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences($id)", s"${ (unMk _ compose fullDisplay)(thr) }")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Option[Product]] =
         ps => DummyTeamTwoHttpApi.product(ps)
-          .attemptMapLeft[ApiError](
+          .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products($ps)", s"${ (unMk _ compose fullDisplay)(thr) }")
           )
           .liftIntoMonadError
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
-          .attemptMapLeft[ApiError](
+          .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice($p, $pref)", s"${ (unMk _ compose fullDisplay)(thr) }")
           )
           .liftIntoMonadError
