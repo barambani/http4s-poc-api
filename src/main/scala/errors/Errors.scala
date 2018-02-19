@@ -4,7 +4,7 @@ import cats.{Monad, Show}
 import http4s.extend._
 import org.http4s.Response
 
-sealed trait ApiError extends Product with Serializable {
+sealed trait ApiError extends Throwable with Product with Serializable {
   def message: String
 }
 object ApiError extends ApiErrorInstances

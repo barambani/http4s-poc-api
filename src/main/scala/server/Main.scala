@@ -4,7 +4,6 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import fs2.StreamApp
-import http4s.extend.instances.invariant._
 import interpreters.{Dependencies, Logger}
 import io.circe.generic.auto._
 import model.DomainModel._

@@ -1,13 +1,10 @@
 import java.time.Instant
+import java.util.concurrent.ForkJoinPool
 
-import cats.instances.either._
+import cats.effect.IO
 import cats.syntax.validated._
-import errors.ApiError
-import http4s.extend.instances.invariant._
+import http4s.extend.ParEffectful._
 import http4s.extend.syntax.httpService._
-import http4s.extend.syntax.responseVerification._
-import http4s.extend.util.EntityDecoderModule.eitherEntityDecoder
-import http4s.extend.util.EntityEncoderModule.eitherEntityEncoder
 import interpreters.TestDependencies._
 import interpreters.TestLogger._
 import io.circe.generic.auto._
@@ -15,19 +12,26 @@ import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
 import model.DomainModel._
 import model.DomainModelSyntax._
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.{HttpService, Status}
 import org.scalatest.{FlatSpec, Matchers}
 import server.PriceHttpApi
 import service.PriceService
 import model.DomainModelCodecs._
 
+import scala.concurrent.ExecutionContext
+
+
 final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   import EitherHtt4sClientDsl._
   import EitherHttp4sDsl._
 
-  implicit def errorEncoder[A : Encoder] = eitherEntityEncoder[ApiError, A]
-  implicit def errorDecoder[A : Decoder] = eitherEntityDecoder[ApiError, A]
+  implicit val testExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(new ForkJoinPool())
+
+  implicit def testEncoder[A : Encoder] = jsonEncoderOf[IO, A]
+  implicit def testDecoder[A : Decoder] = jsonOf[IO, A]
 
   val aUser = User(111.asUserId, Nil)
 
@@ -53,14 +57,14 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Ok 200 and the correct number of prices" in {
 
-    val pricing: PriceService[Either[ApiError, ?]] =
-      PriceService[Either[ApiError, ?]](
+    val pricing: PriceService[IO] =
+      PriceService[IO](
         testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
         testLogger
       )
 
-    val httpApi: HttpService[Either[ApiError, ?]] =
-      PriceHttpApi[Either[ApiError, ?]].service(pricing)
+    val httpApi: HttpService[IO] =
+      PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
@@ -87,14 +91,14 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       )
     )
 
-    val pricing: PriceService[Either[ApiError, ?]] =
-      PriceService[Either[ApiError, ?]](
+    val pricing: PriceService[IO] =
+      PriceService[IO](
         testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
         testLogger
       )
 
-    val httpApi: HttpService[Either[ApiError, ?]] =
-      PriceHttpApi[Either[ApiError, ?]].service(pricing)
+    val httpApi: HttpService[IO] =
+      PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       18.asUserId,
@@ -113,11 +117,11 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Bad gateway 502 for dependent service failure" in {
 
-    val pricing: PriceService[Either[ApiError, ?]] =
-      PriceService[Either[ApiError, ?]](testFailingDependencies, testLogger)
+    val pricing: PriceService[IO] =
+      PriceService[IO](testFailingDependencies, testLogger)
 
-    val httpApi: HttpService[Either[ApiError, ?]] =
-      PriceHttpApi[Either[ApiError, ?]].service(pricing)
+    val httpApi: HttpService[IO] =
+      PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       19.asUserId,
@@ -127,11 +131,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val request = POST(uri("/"), reqPayload.asJson)
 
     val verified = httpApi.runForF(request).verifyResponseText(
-      Status.InternalServerError,
-      """Service Error: ComposedFailure with messages:
-        |Service Error: DependencyFailure. The dependency def user: UserId => Either[ApiError, User] failed with message network failure
-        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => Either[ApiError, Option[Product]] failed with message not responding
-        |Service Error: DependencyFailure. The dependency def usersPreferences: UserId => Either[ApiError, UserPreferences] failed with message timeout""".stripMargin
+      Status.BadGateway,
+      "Service Error: DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure"
+//      """Service Error: ComposedFailure with messages:
+//        |Service Error: DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
+//        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
+//        |Service Error: DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
     )
 
     assertOn(verified)

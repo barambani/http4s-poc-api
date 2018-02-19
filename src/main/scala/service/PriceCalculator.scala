@@ -5,7 +5,6 @@ import cats.instances.list._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
-import errors.ApiError
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
@@ -15,10 +14,10 @@ sealed trait PriceCalculator[F[_]] {
 
 object PriceCalculator {
 
-  @inline def apply[F[_] : MonadError[?[_], ApiError]](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
+  @inline def apply[F[_] : MonadError[?[_], Throwable]](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
     new PriceCalculatorImpl(dependencies, logger)
 
-  private final class PriceCalculatorImpl[F[_] : MonadError[?[_], ApiError]](dep: Dependencies[F], logger: Logger[F]) extends PriceCalculator[F] {
+  private final class PriceCalculatorImpl[F[_] : MonadError[?[_], Throwable]](dep: Dependencies[F], logger: Logger[F]) extends PriceCalculator[F] {
 
     def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
       (prods.toList.par map userPrice(pref)(user)).toList.sequence
