@@ -1,12 +1,11 @@
 package interpreters
 
+import cats.Show
 import cats.effect.IO
 import errors.DependencyFailure
 import external.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
-import http4s.extend.ExceptionDisplay._
 import http4s.extend.syntax.byNameNt._
 import http4s.extend.syntax.errorAdapt._
-import http4s.extend.util.ThrowableModule._
 import model.DomainModel._
 import monix.execution.Scheduler
 
@@ -27,8 +26,9 @@ object Dependencies {
 
   implicit def ioDependencies(
     implicit
-      ecc: ExecutionContext,
-      sch: Scheduler): Dependencies[IO] =
+      ev: Show[Throwable],
+      ec: ExecutionContext,
+      sc: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
@@ -36,28 +36,28 @@ object Dependencies {
           .attemptMapLeft[Throwable](
             // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
             // or any relevant detail from the Throwable
-            thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ (unMk _ compose fullDisplay)(thr) }")
+            thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => DummyTeamOneHttpApi.usersPreferences(id)
           .attemptMapLeft[Throwable](
-            thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences($id)", s"${ (unMk _ compose fullDisplay)(thr) }")
+            thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences($id)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Option[Product]] =
         ps => DummyTeamTwoHttpApi.product(ps)
           .attemptMapLeft[Throwable](
-            thr => DependencyFailure(s"DummyTeamTwoHttpApi.products($ps)", s"${ (unMk _ compose fullDisplay)(thr) }")
+            thr => DependencyFailure(s"DummyTeamTwoHttpApi.products($ps)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
           .attemptMapLeft[Throwable](
-            thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice($p, $pref)", s"${ (unMk _ compose fullDisplay)(thr) }")
+            thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice($p, $pref)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 

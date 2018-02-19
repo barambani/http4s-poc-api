@@ -1,8 +1,10 @@
 package errors
 
-import cats.{Semigroup, Show}
+import cats.{Monad, Semigroup, Show}
+import http4s.extend.ErrorResponse
 import http4s.extend.ExceptionDisplay._
 import http4s.extend.util.ThrowableModule._
+import org.http4s.Response
 
 private [errors] trait ApiErrorInstances {
 
@@ -42,5 +44,12 @@ private [errors] trait ApiErrorInstances {
           case e: ApiError  => Show[ApiError].show(e)
           case e: Throwable => unMk(fullDisplay(e))
         }
+    }
+
+  implicit def throwableResponse[F[_] : Monad]: ErrorResponse[F, Throwable] =
+    new ErrorResponse[F, Throwable] {
+      val ev = Show[Throwable]
+      def responseFor: Throwable => F[Response[F]] =
+        e => InternalServerError(ev.show(e))
     }
 }
