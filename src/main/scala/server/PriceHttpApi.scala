@@ -4,10 +4,9 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.{MonadError, Show}
+import errors.ApiError._
 import errors._
 import http4s.extend.ErrorResponse
-import http4s.extend.ExceptionDisplay._
-import http4s.extend.util.ThrowableModule._
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
@@ -37,7 +36,7 @@ sealed abstract class PriceHttpApi[F[_]](
     case e: InvalidShippingCountry  => responseFor(e)
     case e: UnknownFailure          => responseFor(e)
     case e: ComposedFailure         => responseFor(e)
-    case e: Throwable               => InternalServerError((unMk _ compose fullDisplay)(e))
+    case e: Throwable               => responseFor(e)
   }
 
   private def responseFor[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =
