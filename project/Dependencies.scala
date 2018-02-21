@@ -12,7 +12,7 @@ object Dependencies {
   private val scalazVersion       = "7.2.19"
   private val http4sVersion       = "0.18.0"
   private val circeVersion        = "0.9.0"
-  private val http4sExtendVersion = "0.0.18"
+  private val http4sExtendVersion = "0.0.19"
 
   private val scalaCheckVersion   = "1.13.5"
   private val scalaTestVersion    = "3.0.4"

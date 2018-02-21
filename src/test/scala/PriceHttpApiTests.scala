@@ -5,6 +5,7 @@ import cats.effect.IO
 import cats.syntax.validated._
 import errors.ThrowableInstances._
 import http4s.extend.syntax.httpService._
+import http4s.extend.syntax.responseVerification._
 import interpreters.TestDependencies._
 import interpreters.TestLogger._
 import io.circe.generic.auto._
