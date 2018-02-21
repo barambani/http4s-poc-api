@@ -3,7 +3,7 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import cats.syntax.validated._
-import http4s.extend.ParEffectful._
+import errors.ThrowableInstances._
 import http4s.extend.syntax.httpService._
 import interpreters.TestDependencies._
 import interpreters.TestLogger._
@@ -109,13 +109,13 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val verified = httpApi.runForF(request).verifyResponseText(
       Status.InternalServerError,
-      "Service Error: InvalidShippingCountry: Cannot ship outside Italy"
+      "InvalidShippingCountry: Cannot ship outside Italy"
     )
 
     assertOn(verified)
   }
 
-  it should "respond with Bad gateway 502 for dependent service failure" in {
+  it should "respond with Status 500 for multiple dependency failures" in {
 
     val pricing: PriceService[IO] =
       PriceService[IO](testFailingDependencies, testLogger)
@@ -131,12 +131,10 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val request = POST(uri("/"), reqPayload.asJson)
 
     val verified = httpApi.runForF(request).verifyResponseText(
-      Status.BadGateway,
-      "Service Error: DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure"
-//      """Service Error: ComposedFailure with messages:
-//        |Service Error: DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
-//        |Service Error: DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
-//        |Service Error: DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
+      Status.InternalServerError,
+      """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
+        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
+        |DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
     )
 
     assertOn(verified)

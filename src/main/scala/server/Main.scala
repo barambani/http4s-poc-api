@@ -3,7 +3,7 @@ package server
 import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
-import errors.ApiError._
+import errors.ThrowableInstances._
 import fs2.StreamApp
 import interpreters.{Dependencies, Logger}
 import io.circe.generic.auto._

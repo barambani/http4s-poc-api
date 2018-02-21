@@ -4,7 +4,6 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.{MonadError, Show}
-import errors.ApiError._
 import errors._
 import http4s.extend.ErrorResponse
 import model.DomainModel._
@@ -16,7 +15,9 @@ sealed abstract class PriceHttpApi[F[_]](
   implicit
     ME: MonadError[F, Throwable],
     RD: EntityDecoder[F, PricesRequestPayload],
-    RE: EntityEncoder[F, Seq[Price]]) extends Http4sDsl[F] {
+    RE: EntityEncoder[F, Seq[Price]],
+    TS: Show[Throwable],
+    TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
   def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
@@ -34,8 +35,6 @@ sealed abstract class PriceHttpApi[F[_]](
     case e: InvalidParameters       => responseFor(e)
     case e: DependencyFailure       => responseFor(e)
     case e: InvalidShippingCountry  => responseFor(e)
-    case e: UnknownFailure          => responseFor(e)
-    case e: ComposedFailure         => responseFor(e)
     case e: Throwable               => responseFor(e)
   }
 
@@ -48,6 +47,8 @@ object PriceHttpApi {
     implicit
       ME: MonadError[F, Throwable],
       RD: EntityDecoder[F, PricesRequestPayload],
-      RE: EntityEncoder[F, Seq[Price]]): PriceHttpApi[F] =
+      RE: EntityEncoder[F, Seq[Price]],
+      TS: Show[Throwable],
+      TR: ErrorResponse[F, Throwable]): PriceHttpApi[F] =
     new PriceHttpApi[F]{}
 }
