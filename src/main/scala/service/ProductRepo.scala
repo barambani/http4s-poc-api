@@ -46,8 +46,6 @@ object ProductRepo {
 
     private def storeInCache: Product => F[Unit] =
       prod =>
-        logger.debug(s"Product ${ prod.id } not in cache, fetched from the repo") *>
-        dep.storeProductToCache(prod.id)(prod) <*
-        logger.debug(s"Product ${ prod.id } stored into the cache")
+        logger.debug(s"Product ${ prod.id } not in cache, fetched from the repo") *> dep.storeProductToCache(prod.id)(prod) <* logger.debug(s"Product ${ prod.id } stored into the cache")
   }
 }

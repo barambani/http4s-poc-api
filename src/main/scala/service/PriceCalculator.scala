@@ -7,6 +7,7 @@ import cats.syntax.functor._
 import cats.syntax.traverse._
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
+import cats.syntax.apply._
 
 sealed trait PriceCalculator[F[_]] {
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]]
@@ -24,8 +25,7 @@ object PriceCalculator {
 
     private def userPrice: UserPreferences => User => Product => F[Price] =
       prefs => user => product => for {
-        catalogPrice  <- dep.productPrice(product)(prefs)
-        _             <- logger.debug(s"Catalog price of ${ product.id } collected")
+        catalogPrice  <- dep.productPrice(product)(prefs) <* logger.debug(s"Catalog price of ${ product.id } collected")
         userPrice     =  veryVeryComplexPureCalculation(catalogPrice)(user.userPurchaseHistory)
         _             <- logger.debug(s"Price calculation for product ${ product.id } completed")
       } yield userPrice

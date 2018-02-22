@@ -26,15 +26,13 @@ object PreferenceFetcher {
 
     def userPreferences: UserId => F[UserPreferences] =
       id => for {
-        pres  <- logger.debug(s"Collecting user preferences for user $id") *> dependencies.usersPreferences(id)
-        _     <- logger.debug(s"User preferences for $id collected successfully")
-        valid <- logger.debug(s"Validating user preferences for user $id") *> validate(pres)
-        _     <- logger.debug(s"User preferences for $id collected successfully")
+        pres  <- dependencies.usersPreferences(id) <* logger.debug(s"User preferences for $id collected successfully")
+        valid <- logger.debug(s"Validating user preferences for user $id") *> validate(pres, id) <* logger.debug(s"User preferences for $id collected successfully")
       } yield valid
 
-    private def validate(p: UserPreferences): F[UserPreferences] =
+    private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =
       if(p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
-        F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy")) <* logger.error(s"InvalidShippingCountry: Cannot ship outside Italy")
+        logger.error(s"InvalidShippingCountry: Cannot ship $id outside Italy") *> F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy"))
       else
         p.pure[F]
   }
