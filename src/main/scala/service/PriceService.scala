@@ -19,22 +19,13 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable]](dep: Dependenc
 
 
   private def userFor(userId: UserId): F[User] =
-    for {
-      user <- logger.debug(s"Collecting user details for id $userId") *> dep.user(userId)
-      _    <- logger.debug(s"User details collected for id $userId")
-    } yield user
+    logger.debug(s"Collecting user details for id $userId") *> dep.user(userId) <* logger.debug(s"User details collected for id $userId")
 
   private def preferencesFor(userId: UserId): F[UserPreferences] =
-    for {
-      preferences <- logger.debug(s"Looking up user preferences for user $userId") *> preferenceFetcher.userPreferences(userId)
-      _           <- logger.debug(s"User preferences look up for $userId completed")
-    } yield preferences
+    logger.debug(s"Looking up user preferences for user $userId") *> preferenceFetcher.userPreferences(userId) <* logger.debug(s"User preferences look up for $userId completed")
 
   private def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
-    for {
-      products <- logger.debug(s"Collecting product details for products $productIds") *> productRepo.storedProducts(productIds)
-      _        <- logger.debug(s"Product details collection for $productIds completed")
-    } yield products
+    logger.debug(s"Collecting product details for products $productIds") *> productRepo.storedProducts(productIds) <* logger.debug(s"Product details collection for $productIds completed")
 
 
   private lazy val preferenceFetcher: PreferenceFetcher[F] =
