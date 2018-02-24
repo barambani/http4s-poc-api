@@ -15,7 +15,7 @@ object Dependencies {
   private val http4sExtendVersion = "0.0.19"
 
   private val scalaCheckVersion   = "1.13.5"
-  private val scalaTestVersion    = "3.0.4"
+  private val scalaTestVersion    = "3.0.5"
 
   /*
    * Transitive dependencies to exclude
@@ -53,6 +53,6 @@ object Dependencies {
   )
 
   val compilerPlugins: Seq[ModuleID] = Seq(
-    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
+    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
   )
 }
