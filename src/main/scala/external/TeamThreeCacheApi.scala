@@ -12,12 +12,11 @@ sealed trait TeamThreeCacheApi[K, V] {
 
 object TeamThreeCacheApi {
 
-  @inline def apply(): TeamThreeCacheApi[ProductId, Product] = new TeamThreeCacheApiImpl
+  @inline def apply(): TeamThreeCacheApi[ProductId, Product] =
+    new TeamThreeCacheApi[ProductId, Product] {
 
-  private final class TeamThreeCacheApiImpl extends TeamThreeCacheApi[ProductId, Product] {
+      def get: DomainModel.ProductId => Task[Option[DomainModel.Product]] = ???
 
-    def get: DomainModel.ProductId => Task[Option[DomainModel.Product]] = ???
-
-    def put: ProductId => Product => Task[Unit] = ???
-  }
+      def put: ProductId => Product => Task[Unit] = ???
+    }
 }
