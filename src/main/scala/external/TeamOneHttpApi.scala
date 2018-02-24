@@ -11,12 +11,11 @@ sealed trait TeamOneHttpApi {
 
 object TeamOneHttpApi {
 
-  @inline def apply(): TeamOneHttpApi = new DummyTeamOneHttpApi
+  @inline def apply(): TeamOneHttpApi =
+    new TeamOneHttpApi {
 
-  private final class DummyTeamOneHttpApi extends TeamOneHttpApi {
+      def usersPreferences: UserId => Future[UserPreferences] = ???
 
-    def usersPreferences: UserId => Future[UserPreferences] = ???
-
-    def productPrice: Product => UserPreferences => Future[Price] = ???
-  }
+      def productPrice: Product => UserPreferences => Future[Price] = ???
+    }
 }

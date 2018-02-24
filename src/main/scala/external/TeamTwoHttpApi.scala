@@ -10,12 +10,11 @@ sealed trait TeamTwoHttpApi {
 
 object TeamTwoHttpApi {
 
-  @inline def apply(): TeamTwoHttpApi = new DummyTeamTwoHttpApi
+  @inline def apply(): TeamTwoHttpApi =
+    new TeamTwoHttpApi {
 
-  private final class DummyTeamTwoHttpApi extends TeamTwoHttpApi {
+      def user: UserId => Task[User] = ???
 
-    def user: UserId => Task[User] = ???
-
-    def product: ProductId => Task[Option[Product]] = ???
-  }
+      def product: ProductId => Task[Option[Product]] = ???
+    }
 }
