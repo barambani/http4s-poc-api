@@ -3,7 +3,7 @@ package interpreters
 import cats.Show
 import cats.effect.IO
 import errors.DependencyFailure
-import external.{DummyTeamOneHttpApi, DummyTeamTwoHttpApi, TeamThreeCacheApi}
+import external._
 import http4s.extend.syntax.byNameNt._
 import http4s.extend.syntax.errorAdapt._
 import model.DomainModel._
@@ -32,7 +32,7 @@ object Dependencies {
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
-        id => DummyTeamTwoHttpApi.user(id)
+        id => TeamTwoHttpApi().user(id)
           .attemptMapLeft[Throwable](
             // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
             // or any relevant detail from the Throwable
@@ -41,30 +41,30 @@ object Dependencies {
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        id => DummyTeamOneHttpApi.usersPreferences(id)
+        id => TeamOneHttpApi().usersPreferences(id)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences($id)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Option[Product]] =
-        ps => DummyTeamTwoHttpApi.product(ps)
+        ps => TeamTwoHttpApi().product(ps)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products($ps)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        p => pref => DummyTeamOneHttpApi.productPrice(p)(pref)
+        p => pref => TeamOneHttpApi().productPrice(p)(pref)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice($p, $pref)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        pId => TeamThreeCacheApi.get(pId).lift
+        pId => TeamThreeCacheApi().get(pId).lift
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        pId => p => TeamThreeCacheApi.put(pId)(p).lift
+        pId => p => TeamThreeCacheApi().put(pId)(p).lift
     }
 }
