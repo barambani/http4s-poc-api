@@ -4,7 +4,6 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.{MonadError, Show}
-import errors._
 import http4s.extend.ErrorResponse
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
@@ -31,14 +30,7 @@ sealed abstract class PriceHttpApi[F[_]](
       resp    <- Ok(prices)
     } yield resp
 
-  private def errorHandler: Throwable => F[Response[F]] = {
-    case e: InvalidParameters       => responseFor(e)
-    case e: DependencyFailure       => responseFor(e)
-    case e: InvalidShippingCountry  => responseFor(e)
-    case e: Throwable               => responseFor(e)
-  }
-
-  private def responseFor[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =
+  private def errorHandler[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =
     ev.responseFor(e)
 }
 
