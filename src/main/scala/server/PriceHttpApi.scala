@@ -20,7 +20,7 @@ sealed abstract class PriceHttpApi[F[_]](
 
   def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
-      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith errorHandler
+      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
     }
 
   private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
@@ -29,9 +29,6 @@ sealed abstract class PriceHttpApi[F[_]](
       prices  <- priceService.prices(payload.userId, payload.productIds)
       resp    <- Ok(prices)
     } yield resp
-
-  private def errorHandler[E : Show](e: E)(implicit ev: ErrorResponse[F, E]): F[Response[F]] =
-    ev.responseFor(e)
 }
 
 object PriceHttpApi {
