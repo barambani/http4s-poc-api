@@ -1,7 +1,7 @@
 package interpreters
 
 import cats.effect.IO
-import external.LoggingApiImpl
+import external.LoggingApi
 
 trait Logger[F[_]] {
   def error: String => F[Unit]
@@ -17,15 +17,15 @@ object Logger {
   implicit def ioLogger: Logger[IO] =
     new Logger[IO] {
       def error: String => IO[Unit] =
-        LoggingApiImpl.error
+        LoggingApi().error
 
       def warning: String => IO[Unit] =
-        LoggingApiImpl.warning
+        LoggingApi().warning
 
       def info: String => IO[Unit] =
-        LoggingApiImpl.info
+        LoggingApi().info
 
       def debug: String => IO[Unit] =
-        LoggingApiImpl.debug
+        LoggingApi().debug
     }
 }
