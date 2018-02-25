@@ -10,7 +10,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
 import service.PriceService
 
-sealed abstract class PriceHttpApi[F[_]](
+sealed abstract class PriceHttpApi[F[_], G[_]](
   implicit
     ME: MonadError[F, Throwable],
     RD: EntityDecoder[F, PricesRequestPayload],
@@ -18,12 +18,12 @@ sealed abstract class PriceHttpApi[F[_]](
     TS: Show[Throwable],
     TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
-  def service(priceService: PriceService[F]): HttpService[F] =
+  def service(priceService: PriceService[F, G]): HttpService[F] =
     HttpService[F] {
       case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
     }
 
-  private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
+  private def postResponse(request: Request[F], priceService: PriceService[F, G]): F[Response[F]] =
     for {
       payload <- request.as[PricesRequestPayload]
       prices  <- priceService.prices(payload.userId, payload.productIds)
@@ -32,12 +32,12 @@ sealed abstract class PriceHttpApi[F[_]](
 }
 
 object PriceHttpApi {
-  def apply[F[_]](
+  def apply[F[_], G[_]](
     implicit
       ME: MonadError[F, Throwable],
       RD: EntityDecoder[F, PricesRequestPayload],
       RE: EntityEncoder[F, Seq[Price]],
       TS: Show[Throwable],
-      TR: ErrorResponse[F, Throwable]): PriceHttpApi[F] =
-    new PriceHttpApi[F]{}
+      TR: ErrorResponse[F, Throwable]): PriceHttpApi[F, G] =
+    new PriceHttpApi[F, G]{}
 }

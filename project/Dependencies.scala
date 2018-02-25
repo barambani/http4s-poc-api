@@ -7,7 +7,7 @@ object Dependencies {
    * Versions
    */
   private val catsVersion         = "1.0.1"
-  private val catsEffectVersion   = "0.8"
+  private val catsEffectVersion   = "0.9"
   private val monixVersion        = "3.0.0-M3"
   private val scalazVersion       = "7.2.19"
   private val http4sVersion       = "0.18.0"

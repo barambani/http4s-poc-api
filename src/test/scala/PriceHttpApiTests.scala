@@ -13,15 +13,14 @@ import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
 import model.DomainModel._
 import model.DomainModelSyntax._
+import org.http4s.Status
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import org.http4s.{HttpService, Status}
 import org.scalatest.{FlatSpec, Matchers}
 import server.PriceHttpApi
 import service.PriceService
 import model.DomainModelCodecs._
 
 import scala.concurrent.ExecutionContext
-
 
 final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
@@ -58,14 +57,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Ok 200 and the correct number of prices" in {
 
-    val pricing: PriceService[IO] =
-      PriceService[IO](
-        testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
-        testLogger
-      )
+    val pricing = PriceService[IO, IO.Par](
+      testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
+      testLogger
+    )
 
-    val httpApi: HttpService[IO] =
-      PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
@@ -92,14 +89,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       )
     )
 
-    val pricing: PriceService[IO] =
-      PriceService[IO](
-        testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
-        testLogger
-      )
+    val pricing = PriceService[IO, IO.Par](
+      testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
+      testLogger
+    )
 
-    val httpApi: HttpService[IO] =
-      PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       18.asUserId,
@@ -118,11 +113,9 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Status 500 for multiple dependency failures" in {
 
-    val pricing: PriceService[IO] =
-      PriceService[IO](testFailingDependencies, testLogger)
+    val pricing = PriceService[IO, IO.Par](testFailingDependencies, testLogger)
 
-    val httpApi: HttpService[IO] =
-      PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       19.asUserId,
