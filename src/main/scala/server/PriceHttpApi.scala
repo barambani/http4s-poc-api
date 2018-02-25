@@ -14,7 +14,7 @@ sealed abstract class PriceHttpApi[F[_], G[_]](
   implicit
     ME: MonadError[F, Throwable],
     RD: EntityDecoder[F, PricesRequestPayload],
-    RE: EntityEncoder[F, Seq[Price]],
+    RE: EntityEncoder[F, List[Price]],
     TS: Show[Throwable],
     TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
@@ -36,7 +36,7 @@ object PriceHttpApi {
     implicit
       ME: MonadError[F, Throwable],
       RD: EntityDecoder[F, PricesRequestPayload],
-      RE: EntityEncoder[F, Seq[Price]],
+      RE: EntityEncoder[F, List[Price]],
       TS: Show[Throwable],
       TR: ErrorResponse[F, Throwable]): PriceHttpApi[F, G] =
     new PriceHttpApi[F, G]{}
