@@ -11,9 +11,7 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable] : Parallel[?[_]
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
     (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(priceCalculator.finalPrices).flatten
-
-  def aaaaa[A, B, C](fa: F[A], fb: F[B], fc: F[C]): F[(A, B, C)] =
-    Parallel.parMap3(fa, fb, fc)(Tuple3.apply)
+  
 
   private def userFor(userId: UserId): F[User] =
     logger.debug(s"Collecting user details for id $userId") *> dep.user(userId) <* logger.debug(s"User details collected for id $userId")
