@@ -1,7 +1,7 @@
 package errors
 
+import cats.effect.util.CompositeException
 import cats.{Monad, Semigroup, Show}
-import fs2.CompositeFailure
 import http4s.extend.ErrorResponse
 import http4s.extend.ExceptionDisplay._
 import http4s.extend.util.ThrowableModule._
@@ -18,7 +18,7 @@ sealed trait ThrowableInstances {
         case e: InvalidParameters       => showOf(e)
         case e: DependencyFailure       => showOf(e)
         case e: InvalidShippingCountry  => showOf(e)
-        case e: CompositeFailure        => showOf(e)
+        case e: CompositeException      => showOf(e)
         case e: Throwable               => unMk(fullDisplay(e))
       }
 
@@ -26,9 +26,9 @@ sealed trait ThrowableInstances {
         ev.show(e)
     }
 
-  implicit def compositeFailureShow(implicit ev: Show[Throwable]): Show[CompositeFailure] =
-    new Show[CompositeFailure] {
-      def show(t: CompositeFailure): String =
+  implicit def compositeFailureShow(implicit ev: Show[Throwable]): Show[CompositeException] =
+    new Show[CompositeException] {
+      def show(t: CompositeException): String =
         (t.all map ev.show).toList mkString "\n"
     }
 
@@ -42,7 +42,7 @@ sealed trait ThrowableInstances {
   implicit def throwableSemigroup: Semigroup[Throwable] =
     new Semigroup[Throwable]{
       def combine(x: Throwable, y: Throwable): Throwable =
-        CompositeFailure(x, y, Nil)
+        CompositeException(x, y, Nil)
     }
 }
 

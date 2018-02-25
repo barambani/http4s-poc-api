@@ -43,10 +43,10 @@ object Main extends StreamApp[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .mountService(HealthCheckHttpApi[IO].service(), "/pricing-api/health-check")
-      .mountService(PriceHttpApi[IO].service(priceService), "/pricing-api/prices")
+      .mountService(PriceHttpApi[IO, IO.Par].service(priceService), "/pricing-api/prices")
       .enableHttp2(true)
       .serve
 
-  private lazy val priceService: PriceService[IO] =
+  private lazy val priceService: PriceService[IO, IO.Par] =
     PriceService(Dependencies[IO], Logger[IO])
 }

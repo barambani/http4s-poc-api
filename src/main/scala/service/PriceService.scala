@@ -1,18 +1,18 @@
 package service
 
-import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import http4s.extend.ParEffectful
+import cats.syntax.parallel._
+import cats.{MonadError, Parallel}
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
-final case class PriceService[F[_] : MonadError[?[_], Throwable]](dep: Dependencies[F], logger: Logger[F])(implicit ev: ParEffectful[F]) {
+final case class PriceService[F[_] : MonadError[?[_], Throwable] : Parallel[?[_], G], G[_]](dep: Dependencies[F], logger: Logger[F]) {
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[Seq[Price]] =
     for {
-      retrievalResult               <- ev.parTupled3(userFor(userId), productsFor(productIds), preferencesFor(userId))
+      retrievalResult               <- (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(Tuple3.apply)
       (user, products, preferences) =  retrievalResult
       productsPrices                <- priceCalculator.finalPrices(user, products, preferences)
     } yield productsPrices
