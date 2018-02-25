@@ -31,8 +31,8 @@ object Main extends StreamApp[IO] {
   implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
     jsonOf[IO, PricesRequestPayload]
 
-  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, Seq[Price]] =
-    jsonEncoderOf[IO, Seq[Price]]
+  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, List[Price]] =
+    jsonEncoderOf[IO, List[Price]]
 
   implicit val healthCheckResponsePayloadEncoder: EntityEncoder[IO, ServiceSignature] =
     jsonEncoderOf[IO, ServiceSignature]
