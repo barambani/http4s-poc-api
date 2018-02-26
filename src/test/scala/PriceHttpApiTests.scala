@@ -1,5 +1,4 @@
 import java.time.Instant
-import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import cats.syntax.validated._
@@ -20,15 +19,10 @@ import server.PriceHttpApi
 import service.PriceService
 import model.DomainModelCodecs._
 
-import scala.concurrent.ExecutionContext
-
 final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   import EitherHtt4sClientDsl._
   import EitherHttp4sDsl._
-
-  implicit val testExecutionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(new ForkJoinPool())
 
   implicit def testEncoder[A : Encoder] = jsonEncoderOf[IO, A]
   implicit def testDecoder[A : Decoder] = jsonOf[IO, A]
