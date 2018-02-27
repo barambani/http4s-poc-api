@@ -29,7 +29,7 @@ private final class PreferenceFetcherImpl[F[_]](
 
   def userPreferences: UserId => F[UserPreferences] =
     id => for {
-      pres  <- dependencies.usersPreferences(id) <* logger.debug(s"User preferences for $id collected successfully")
+      prefs <- dependencies.usersPreferences(id) <* logger.debug(s"User preferences for $id collected successfully")
       valid <- logger.debug(s"Validating user preferences for user $id") *> validate(pres, id) <* logger.debug(s"User preferences for $id collected successfully")
     } yield valid
     
