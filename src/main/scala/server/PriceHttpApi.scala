@@ -16,11 +16,11 @@ sealed abstract class PriceHttpApi[F[_], G[_]](
     RD: EntityDecoder[F, PricesRequestPayload],
     RE: EntityEncoder[F, List[Price]],
     TS: Show[Throwable],
-    TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
+    ER: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
   def service(priceService: PriceService[F, G]): HttpService[F] =
     HttpService[F] {
-      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
+      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith ER.responseFor
     }
 
   private def postResponse(request: Request[F], priceService: PriceService[F, G]): F[Response[F]] =

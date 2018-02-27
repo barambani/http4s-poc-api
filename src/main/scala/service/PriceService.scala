@@ -7,10 +7,13 @@ import cats.{MonadError, Parallel}
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : Parallel[?[_], G], G[_]](dep: Dependencies[F], logger: Logger[F]) {
+final case class PriceService[F[_] : MonadError[?[_], Throwable] : Parallel[?[_], G], G[_]](
+  dep: Dependencies[F], logger: Logger[F]) {
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(priceCalculator.finalPrices).flatten
+    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(
+      priceCalculator.finalPrices
+    ).flatten
   
 
   private def userFor(userId: UserId): F[User] =
