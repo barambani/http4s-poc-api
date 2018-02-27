@@ -3,15 +3,15 @@ package external
 import model.DomainModel._
 import monix.eval.Task
 
-sealed trait TeamTwoHttpApi {
+sealed trait TeamTwoDbApi {
   def user: UserId => Task[User]
   def product: ProductId => Task[Option[Product]]
 }
 
-object TeamTwoHttpApi {
+object TeamTwoDbApi {
 
-  @inline def apply(): TeamTwoHttpApi =
-    new TeamTwoHttpApi {
+  @inline def apply(): TeamTwoDbApi =
+    new TeamTwoDbApi {
 
       def user: UserId => Task[User] = ???
 

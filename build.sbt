@@ -16,7 +16,7 @@ val root = project.in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoSettings)
   .settings(
-    version                 :=  "0.0.1",
+    version                 :=  "0.0.1-M1",
     name                    :=  "http4s-poc-api",
     scalaOrganization       :=  typelevelOrganization,
     scalaVersion            :=  scala_typelevel_212,
