@@ -1,4 +1,5 @@
 import java.time.Instant
+import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import cats.syntax.validated._
@@ -19,10 +20,15 @@ import server.PriceHttpApi
 import service.PriceService
 import model.DomainModelCodecs._
 
+import scala.concurrent.ExecutionContext
+
 final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   import EitherHtt4sClientDsl._
   import EitherHttp4sDsl._
+
+  implicit val testExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(new ForkJoinPool())
 
   implicit def testEncoder[A : Encoder] = jsonEncoderOf[IO, A]
   implicit def testDecoder[A : Decoder] = jsonOf[IO, A]
@@ -51,12 +57,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Ok 200 and the correct number of prices" in {
 
-    val pricing = PriceService[IO, IO.Par](
+    val pricing = PriceService[IO](
       testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
       testLogger
     )
 
-    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
+    val httpApi = PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
@@ -83,12 +89,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       )
     )
 
-    val pricing = PriceService[IO, IO.Par](
+    val pricing = PriceService[IO](
       testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
       testLogger
     )
 
-    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
+    val httpApi = PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       18.asUserId,
@@ -107,9 +113,9 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Status 500 for multiple dependency failures" in {
 
-    val pricing = PriceService[IO, IO.Par](testFailingDependencies, testLogger)
+    val pricing = PriceService[IO](testFailingDependencies, testLogger)
 
-    val httpApi = PriceHttpApi[IO, IO.Par].service(pricing)
+    val httpApi = PriceHttpApi[IO].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       19.asUserId,
