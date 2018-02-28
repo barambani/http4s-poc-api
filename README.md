@@ -38,31 +38,31 @@ private final class PreferenceFetcherImpl[F[_]](
 ```
 even where the need of running some steps in parallel exists, it's possible to express the capability the same way (`Parallel`)
 ```scala
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : Parallel[?[_], G], G[_]](
+final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
   dep: Dependencies[F], logger: Logger[F]) {
-
+  
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(finalPrices).flatten
+    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMap(finalPrices).flatten
     
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] = [...]
 }
 ```
 The http api endpoint is implemented along the same idea and defines the capabilities of `F[_]` through type classes. In particular providing also implicit evidence for the `Decoder` of the payload and the `Encoder` for the response body makes clearly evident what are all the needs of the implementation, leaving very little to guessing
 ```scala
-sealed abstract class PriceHttpApi[F[_], G[_]](
+sealed abstract class PriceHttpApi[F[_]](
   implicit
     ME: MonadError[F, Throwable],
     RD: EntityDecoder[F, PricesRequestPayload],
     RE: EntityEncoder[F, List[Price]],
     TS: Show[Throwable],
-    ER: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
+    TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
-  def service(priceService: PriceService[F, G]): HttpService[F] =
+  def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
-      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith ER.responseFor
+      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
     }
 
-  private def postResponse(request: Request[F], priceService: PriceService[F, G]): F[Response[F]] =
+  private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
     for {
       payload <- request.as[PricesRequestPayload]
       prices  <- priceService.prices(payload.userId, payload.productIds)
@@ -98,11 +98,11 @@ object Main extends StreamApp[IO] {
   def stream(args: List[String], requestShutdown: IO[Unit]): fs2.Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .mountService(HealthCheckHttpApi[IO].service(), "/pricing-api/health-check")
-      .mountService(PriceHttpApi[IO, IO.Par].service(priceService), "/pricing-api/prices")
+      .mountService(PriceHttpApi[IO].service(priceService), "/pricing-api/prices")
       .enableHttp2(true)
       .serve
 
-  private lazy val priceService: PriceService[IO, IO.Par] =
+  private lazy val priceService: PriceService[IO] =
     PriceService(Dependencies[IO], Logger[IO])
 }
 ```
