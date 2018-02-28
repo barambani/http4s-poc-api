@@ -2,12 +2,12 @@ package service
 
 import cats.MonadError
 import cats.instances.list._
+import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.traverse._
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
-import cats.syntax.apply._
 
 sealed trait PriceCalculator[F[_]] {
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]]
