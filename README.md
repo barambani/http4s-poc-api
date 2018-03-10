@@ -47,7 +47,7 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful]
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] = [...]
 }
 ```
-The http api endpoint is implemented along the same idea and defines the capabilities of `F[_]` through type classes. In particular providing also implicit evidence for the `Decoder` of the payload and the `Encoder` for the response body makes clearly evident what are all the needs of the implementation, leaving very little to guessing
+The http api endpoint is implemented following the same style. The capabilities of `F[_]` are described through type classes. In particular, also evidences for the `Decoder` of the request payload and for the `Encoder` of the response body are provided here. This describes well everything the `F[_]` will have to provide to make the endpoint implementation work.
 ```scala
 sealed abstract class PriceHttpApi[F[_]](
   implicit
