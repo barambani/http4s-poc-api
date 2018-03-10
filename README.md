@@ -36,7 +36,7 @@ private final class PreferenceFetcherImpl[F[_]](
   private def validate(p: UserPreferences, id: UserId): F[UserPreferences] = [...]
 }
 ```
-even where the need of running some steps in parallel exists, it's possible to express the capability the same way (`Parallel`)
+Where the need of running steps in parallel exists, the same approach is used. In this case this capability is guaranteed by the `ParEffectful` evidence (the `IO` instance will use `fs2.async` under the hood).
 ```scala
 final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
   dep: Dependencies[F], logger: Logger[F]) {
