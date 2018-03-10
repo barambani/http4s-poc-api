@@ -70,7 +70,7 @@ sealed abstract class PriceHttpApi[F[_]](
     } yield resp
 }
 ```
-This approach allows to worry about the details of the runtime and of the decoding/encoding only in the `Main` server file, where we have to materialize all the instances required to satisfy the implicit evidences
+This approach decouples very well the details of the execution and the decoding/encoding from the domain logic formalization. With this style is possible to describe at a very high level of abstraction the expected behavior and the domain context at hand. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized.
 ```scala
 object Main extends StreamApp[IO] {
 
