@@ -6,6 +6,8 @@
 This repo contains a complete running example of a http api implemented with [http4s](http://http4s.org/) in tagless final Mtl style. It uses some helper tools from [Http4s Extend](https://github.com/barambani/http4s-extend).
 
 ### The Code
+
+#### Business Logic
 The logic is encoded into a tagless final DSL that abstracts over the concrete effectful computation.
 
 ```scala
@@ -36,17 +38,37 @@ private final class PreferenceFetcherImpl[F[_]](
   private def validate(p: UserPreferences, id: UserId): F[UserPreferences] = [...]
 }
 ```
-Where the need of running steps in parallel exists, the same approach is used. In this case this capability is guaranteed by the `ParEffectful` evidence (the `IO` instance will use `fs2.async` under the hood).
+
+#### Parallel Execution
+In case there's a need of running steps in parallel, the same approach is used. The capability is guaranteed by the evidence `P[_] : Parallel[F, ?[_]]` that enables the use of `parMapN`.
 ```scala
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
+final case class PriceService[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](
   dep: Dependencies[F], logger: Logger[F]) {
   
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMap(finalPrices).flatten
+    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(finalPrices).flatten
     
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] = [...]
 }
 ```
+Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known cohordinates. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect the products. As before, this computation can be described again at a high level of abstraction using `Parallel` and its `parTraverse` function.
+```scala
+private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](
+  dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
+  
+  /**
+    * Tries to retrieve the products by ProductId from the cache, if results in a miss it tries on the http store.
+    * It returns only the products existing so the result might contain less elements than the input list.
+    * If a product is not in the cache but is found in the http store it will be added to the cache
+    */
+  def storedProducts: Seq[ProductId] => F[List[Product]] =
+    _.toList.parTraverse(id => (cacheMissFetch(id) compose dep.cachedProduct)(id)) map (_.flatten)
+
+  private def cacheMissFetch: ProductId => F[Option[Product]] => F[Option[Product]] = [...]
+}
+```
+
+#### Http Endpoints
 The http api endpoint is implemented following the same style. The capabilities of `F[_]` are described through type classes. In particular, also evidences for the `Decoder` of the request payload and for the `Encoder` of the response body are provided here. This describes well everything the `F[_]` will have to provide to make the endpoint implementation work.
 ```scala
 sealed abstract class PriceHttpApi[F[_]](
@@ -70,6 +92,8 @@ sealed abstract class PriceHttpApi[F[_]](
     } yield resp
 }
 ```
+
+#### Main Server
 This approach decouples very well the details of the execution and the decoding/encoding from the domain logic formalization. With this style is possible to describe at a very high level of abstraction the expected behavior and the domain context at hand. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized.
 ```scala
 object Main extends StreamApp[IO] {
