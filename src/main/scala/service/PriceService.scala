@@ -1,17 +1,16 @@
 package service
 
-import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
-import http4s.extend.ParEffectful
-import http4s.extend.syntax.parEffectful._
+import cats.syntax.parallel._
+import cats.{MonadError, Parallel}
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](dep: Dependencies[F], logger: Logger[F]) {
+final case class PriceService[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](dep: Dependencies[F], logger: Logger[F]) {
 
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMap(priceCalculator.finalPrices).flatten
+    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(priceCalculator.finalPrices).flatten
   
 
   private def userFor(userId: UserId): F[User] =
@@ -31,5 +30,5 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful]
     ProductRepo(dep, logger)
 
   private lazy val priceCalculator: PriceCalculator[F] =
-    PriceCalculator[F](dep, logger)
+    PriceCalculator(dep, logger)
 }

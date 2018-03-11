@@ -57,7 +57,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Ok 200 and the correct number of prices" in {
 
-    val pricing = PriceService[IO](
+    val pricing = PriceService[IO, IO.Par](
       testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price)(testLogger),
       testLogger
     )
@@ -89,7 +89,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       )
     )
 
-    val pricing = PriceService[IO](
+    val pricing = PriceService[IO, IO.Par](
       testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price)(testLogger),
       testLogger
     )
@@ -113,7 +113,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
   it should "respond with Status 500 for multiple dependency failures" in {
 
-    val pricing = PriceService[IO](testFailingDependencies, testLogger)
+    val pricing = PriceService[IO, IO.Par](testFailingDependencies, testLogger)
 
     val httpApi = PriceHttpApi[IO].service(pricing)
 
@@ -127,6 +127,8 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val verified = httpApi.runForF(request).verifyResponseText(
       Status.InternalServerError,
       """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
+        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
+        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
     )

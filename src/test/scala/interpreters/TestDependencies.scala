@@ -1,9 +1,11 @@
 package interpreters
 
 import cats.effect.IO
+import cats.syntax.apply._
 import errors.DependencyFailure
 import model.DomainModel._
-import cats.syntax.apply._
+
+import scala.concurrent.ExecutionContext
 
 object TestDependencies {
 
@@ -13,25 +15,25 @@ object TestDependencies {
     productsInStore : Map[ProductId, Product],
     productsInCache : Map[ProductId, Product],
     price           : Price)
-  (testLogger: Logger[IO]): Dependencies[IO] =
+  (testLogger: Logger[IO])(implicit ec: ExecutionContext): Dependencies[IO] =
     new Dependencies[IO] {
       def user: UserId => IO[User] =
-        _ => testLogger.debug("DEP user -> Getting the user in test") *> IO(Thread.sleep(1000)) *> IO(aUser)
+        _ => IO.shift *> testLogger.debug("DEP user -> Getting the user in test") *> IO(Thread.sleep(1000)) *> IO(aUser)
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        _ => testLogger.debug("DEP usersPreferences -> Getting the preferences in test") *> IO(Thread.sleep(1000)) *> IO(preferences)
+        _ => IO.shift *> testLogger.debug("DEP usersPreferences -> Getting the preferences in test") *> IO(Thread.sleep(1000)) *> IO(preferences)
 
       def product: ProductId => IO[Option[Product]] =
-        id => testLogger.debug("DEP product -> Getting the product from the repo in test") *> IO(Thread.sleep(1000)) *> IO(productsInStore.get(id))
+        id => IO.shift *> testLogger.debug("DEP product -> Getting the product from the repo in test") *> IO(Thread.sleep(1000)) *> IO(productsInStore.get(id))
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        id => testLogger.debug("DEP cachedProduct -> Getting the product from the cache in test") *> IO(Thread.sleep(100)) *> IO(productsInCache.get(id))
+        id => IO.shift *> testLogger.debug("DEP cachedProduct -> Getting the product from the cache in test") *> IO(Thread.sleep(100)) *> IO(productsInCache.get(id))
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        _ => _ => testLogger.debug("DEP productPrice -> Getting the price in test") *> IO(Thread.sleep(1000)) *> IO(price)
+        _ => _ => IO.shift *> testLogger.debug("DEP productPrice -> Getting the price in test") *> IO(Thread.sleep(1000)) *> IO(price)
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        _ => _ => testLogger.debug("DEP storeProductToCache -> Storing the product to the repo in test") *> IO(Thread.sleep(1000)) *> IO.unit
+        _ => _ => IO.shift *> testLogger.debug("DEP storeProductToCache -> Storing the product to the repo in test") *> IO(Thread.sleep(1000)) *> IO.unit
     }
 
   def testFailingDependencies: Dependencies[IO] =

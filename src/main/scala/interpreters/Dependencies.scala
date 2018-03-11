@@ -2,6 +2,7 @@ package interpreters
 
 import cats.Show
 import cats.effect.IO
+import cats.syntax.apply._
 import errors.DependencyFailure
 import external._
 import http4s.extend.syntax.byNameNt._
@@ -32,39 +33,39 @@ object Dependencies {
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
-        id => TeamTwoHttpApi().user(id)
-          .attemptMapLeft[Throwable](
-            // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
-            // or any relevant detail from the Throwable
-            thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ ev.show(thr) }")
-          )
-          .liftIntoMonadError
+        id => IO.shift *> TeamTwoHttpApi().user(id)
+            .attemptMapLeft[Throwable](
+              // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
+              // or any relevant detail from the Throwable
+              thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ ev.show(thr) }")
+            )
+            .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        id => TeamOneHttpApi().usersPreferences(id)
+        id => IO.shift *> TeamOneHttpApi().usersPreferences(id)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.usersPreferences($id)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Option[Product]] =
-        ps => TeamTwoHttpApi().product(ps)
+        ps => IO.shift *> TeamTwoHttpApi().product(ps)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamTwoHttpApi.products($ps)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        p => pref => TeamOneHttpApi().productPrice(p)(pref)
+        p => pref => IO.shift *> TeamOneHttpApi().productPrice(p)(pref)
           .attemptMapLeft[Throwable](
             thr => DependencyFailure(s"DummyTeamOneHttpApi.productPrice($p, $pref)", s"${ ev.show(thr) }")
           )
           .liftIntoMonadError
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        pId => TeamThreeCacheApi().get(pId).lift
+        pId => IO.shift *> TeamThreeCacheApi().get(pId).lift
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        pId => p => TeamThreeCacheApi().put(pId)(p).lift
+        pId => p => IO.shift *> TeamThreeCacheApi().put(pId)(p).lift
     }
 }
