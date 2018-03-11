@@ -58,7 +58,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   it should "respond with Ok 200 and the correct number of prices" in {
 
     val pricing = PriceService[IO](
-      testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price),
+      testSucceedingDependencies(aUser, preferences, productsInStore, productsInCache, price)(testLogger),
       testLogger
     )
 
@@ -90,7 +90,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     )
 
     val pricing = PriceService[IO](
-      testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price),
+      testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price)(testLogger),
       testLogger
     )
 
