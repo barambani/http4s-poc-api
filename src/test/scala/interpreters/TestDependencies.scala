@@ -1,9 +1,10 @@
 package interpreters
 
-import cats.effect.IO
+import cats.effect.{IO, Timer}
 import cats.syntax.apply._
 import errors.DependencyFailure
 import model.DomainModel._
+import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext
 
@@ -18,22 +19,22 @@ object TestDependencies {
   (testLogger: Logger[IO])(implicit ec: ExecutionContext): Dependencies[IO] =
     new Dependencies[IO] {
       def user: UserId => IO[User] =
-        _ => IO.shift *> testLogger.debug("DEP user -> Getting the user in test") *> IO(Thread.sleep(1000)) *> IO(aUser)
+        _ => IO.shift *> testLogger.debug("DEP user -> Getting the user in test") *> Timer[IO].sleep(1.second) *> IO(aUser)
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        _ => IO.shift *> testLogger.debug("DEP usersPreferences -> Getting the preferences in test") *> IO(Thread.sleep(1000)) *> IO(preferences)
+        _ => IO.shift *> testLogger.debug("DEP usersPreferences -> Getting the preferences in test") *> Timer[IO].sleep(1.second) *> IO(preferences)
 
       def product: ProductId => IO[Option[Product]] =
-        id => IO.shift *> testLogger.debug("DEP product -> Getting the product from the repo in test") *> IO(Thread.sleep(1000)) *> IO(productsInStore.get(id))
-
-      def cachedProduct: ProductId => IO[Option[Product]] =
-        id => IO.shift *> testLogger.debug("DEP cachedProduct -> Getting the product from the cache in test") *> IO(Thread.sleep(100)) *> IO(productsInCache.get(id))
+        id => IO.shift *> testLogger.debug("DEP product -> Getting the product from the repo in test") *> Timer[IO].sleep(1.second) *> IO(productsInStore.get(id))
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        _ => _ => IO.shift *> testLogger.debug("DEP productPrice -> Getting the price in test") *> IO(Thread.sleep(1000)) *> IO(price)
+        _ => _ => IO.shift *> testLogger.debug("DEP productPrice -> Getting the price in test") *> Timer[IO].sleep(1.second) *> IO(price)
+
+      def cachedProduct: ProductId => IO[Option[Product]] =
+        id => IO.shift *> testLogger.debug("DEP cachedProduct -> Getting the product from the cache in test") *> Timer[IO].sleep(200.milliseconds) *> IO(productsInCache.get(id))
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        _ => _ => IO.shift *> testLogger.debug("DEP storeProductToCache -> Storing the product to the repo in test") *> IO(Thread.sleep(1000)) *> IO.unit
+        _ => _ => IO.shift *> testLogger.debug("DEP storeProductToCache -> Storing the product to the repo in test") *> Timer[IO].sleep(200.milliseconds) *> IO.unit
     }
 
   def testFailingDependencies: Dependencies[IO] =
