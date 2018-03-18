@@ -1,6 +1,6 @@
 package service
 
-import cats.{MonadError, Parallel}
+import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import http4s.extend.ParEffectful
@@ -8,7 +8,7 @@ import http4s.extend.syntax.parEffectful._
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful, P[_]: Parallel[F, ?[_]]](
+final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
   dep: Dependencies[F], logger: Logger[F]) {
 
   /**

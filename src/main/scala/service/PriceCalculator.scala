@@ -1,11 +1,12 @@
 package service
 
+import cats.MonadError
 import cats.instances.list._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import cats.syntax.parallel._
-import cats.{MonadError, Parallel}
+import http4s.extend.ParEffectful
+import http4s.extend.syntax.parEffectful._
 import interpreters.{Dependencies, Logger}
 import model.DomainModel._
 
@@ -15,10 +16,10 @@ sealed trait PriceCalculator[F[_]] {
 
 object PriceCalculator {
 
-  @inline def apply[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
+  @inline def apply[F[_] : MonadError[?[_], Throwable] : ParEffectful](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
     new PriceCalculatorImpl(dependencies, logger)
 
-  private final class PriceCalculatorImpl[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](dep: Dependencies[F], logger: Logger[F])
+  private final class PriceCalculatorImpl[F[_] : MonadError[?[_], Throwable] : ParEffectful](dep: Dependencies[F], logger: Logger[F])
     extends PriceCalculator[F] {
 
       def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
