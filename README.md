@@ -40,20 +40,20 @@ private final class PreferenceFetcherImpl[F[_]](
 ```
 
 #### Parallel Execution
-In case there's a need of running steps in parallel, the same approach is used. The capability is guaranteed by the evidence `P[_] : Parallel[F, ?[_]]` that enables the use of `parMapN`.
+In case there's the need of running steps in parallel, the same approach is used. The capability is guaranteed by the evidence `F[_] : ParEffectful` that enables the use of `parMap` ([see the lib here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala)).
 ```scala
-final case class PriceService[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](
+final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
   dep: Dependencies[F], logger: Logger[F]) {
   
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMapN(finalPrices).flatten
+    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMap(finalPrices).flatten
     
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] = [...]
 }
 ```
-Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known cohordinates. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect the products. As before, this computation can be described again at a high level of abstraction using `Parallel` and its `parTraverse` function.
+Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known cohordinates as a source. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect their details in case they exist. As before, this computation can be described again at a high level of abstraction using `ParEffectful` and its `parTraverse` function ([see the implementation here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala#L62)).
 ```scala
-private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable], P[_] : Parallel[F, ?[_]]](
+private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable] : ParEffectful](
   dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
   
   /**
@@ -94,7 +94,7 @@ sealed abstract class PriceHttpApi[F[_]](
 ```
 
 #### Main Server
-This approach decouples very well the details of the execution and the decoding/encoding from the domain logic formalization. With this style is possible to describe at a very high level of abstraction the expected behavior and the domain context at hand. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized.
+This approach decouples very well the details of the execution and the decoding/encoding from the domain logic's formalization. With this style is possible to describe at a very high level of abstraction the expected behavior and the domain context at hand. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized.
 ```scala
 object Main extends StreamApp[IO] {
 
