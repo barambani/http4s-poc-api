@@ -18,12 +18,12 @@ sealed abstract class PriceHttpApi[F[_]](
     TS: Show[Throwable],
     TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
 
-  def service[P[_]](priceService: PriceService[F, P]): HttpService[F] =
+  def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
       case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
     }
 
-  private def postResponse[P[_]](request: Request[F], priceService: PriceService[F, P]): F[Response[F]] =
+  private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
     for {
       payload <- request.as[PricesRequestPayload]
       prices  <- priceService.prices(payload.userId, payload.productIds)
