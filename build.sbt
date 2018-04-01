@@ -22,6 +22,6 @@ val root = project.in(file("."))
     scalaVersion            :=  scala_typelevel_212,
     libraryDependencies     ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     scalacOptions           ++= generalOptions ++ typeLevelScalaOptions,
-    scalacOptions in Test   ++= testOnlyOptions,
+    scalacOptions in Test   ++= testOnlyOptions ++ implicitDebug,
     scalacOptions in (Compile, console) --= nonTestExceptions
   )
