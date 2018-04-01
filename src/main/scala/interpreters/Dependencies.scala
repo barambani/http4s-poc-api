@@ -34,12 +34,12 @@ object Dependencies {
 
       def user: UserId => IO[User] =
         id => IO.shift *> TeamTwoHttpApi().user(id)
-            .attemptMapLeft[Throwable](
-              // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
-              // or any relevant detail from the Throwable
-              thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ ev.show(thr) }")
-            )
-            .liftIntoMonadError
+          .attemptMapLeft[Throwable](
+            // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
+            // or any relevant detail from the Throwable
+            thr => DependencyFailure(s"DummyTeamTwoHttpApi.user($id)", s"${ ev.show(thr) }")
+          )
+          .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => IO.shift *> TeamOneHttpApi().usersPreferences(id)
@@ -63,9 +63,9 @@ object Dependencies {
           .liftIntoMonadError
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        pId => IO.shift *> TeamThreeCacheApi().get(pId).lift
+        pId => IO.shift *> TeamThreeCacheApi[ProductId, Product].get(pId).transform
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        pId => p => IO.shift *> TeamThreeCacheApi().put(pId)(p).lift
+        pId => p => IO.shift *> TeamThreeCacheApi[ProductId, Product].put(pId)(p).transform
     }
 }

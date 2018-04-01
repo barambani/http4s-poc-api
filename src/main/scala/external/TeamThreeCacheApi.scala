@@ -1,8 +1,7 @@
 package external
 
-import model.DomainModel
+import cats.Functor
 import model.DomainModel.{Product, ProductId}
-
 import scalaz.concurrent.Task
 
 sealed trait TeamThreeCacheApi[K, V] {
@@ -12,11 +11,16 @@ sealed trait TeamThreeCacheApi[K, V] {
 
 object TeamThreeCacheApi {
 
-  @inline def apply(): TeamThreeCacheApi[ProductId, Product] =
+  @inline def apply[K, V](implicit INST: TeamThreeCacheApi[K, V]): TeamThreeCacheApi[K, V] = INST
+
+  implicit def productCache: TeamThreeCacheApi[ProductId, Product] =
     new TeamThreeCacheApi[ProductId, Product] {
-
-      def get: DomainModel.ProductId => Task[Option[DomainModel.Product]] = ???
-
+      def get: ProductId => Task[Option[Product]] = ???
       def put: ProductId => Product => Task[Unit] = ???
+    }
+
+  implicit val scalazTaskFunctor: Functor[Task] =
+    new Functor[Task] {
+      def map[A, B](fa: Task[A])(f: A => B): Task[B] = fa map f
     }
 }
