@@ -4,6 +4,7 @@ import cats.Show
 import cats.effect.IO
 import cats.syntax.apply._
 import errors.DependencyFailure
+import external.TeamThreeCacheApi._
 import external._
 import http4s.extend.syntax.byNameNt._
 import http4s.extend.syntax.errorAdapt._

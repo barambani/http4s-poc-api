@@ -60,11 +60,4 @@ object ScalacOptions {
   )
 
   val testOnlyOptions: Seq[String] = Seq("-Yrangepos")
-
-  val implicitDebug = Seq(
-    "-Xlog-implicits"
-//    "-P:splain:all",
-//    "-P:splain:implicits",
-//    "-P:splain:tree"
-  )
 }

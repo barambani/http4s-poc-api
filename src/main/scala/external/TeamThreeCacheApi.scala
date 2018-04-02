@@ -9,7 +9,7 @@ sealed trait TeamThreeCacheApi[K, V] {
   def put: K => V => Task[Unit]
 }
 
-object TeamThreeCacheApi {
+object TeamThreeCacheApi extends TeamThreeCacheApiInstances {
 
   @inline def apply[K, V](implicit INST: TeamThreeCacheApi[K, V]): TeamThreeCacheApi[K, V] = INST
 
@@ -18,6 +18,9 @@ object TeamThreeCacheApi {
       def get: ProductId => Task[Option[Product]] = ???
       def put: ProductId => Product => Task[Unit] = ???
     }
+}
+
+private[external] sealed trait TeamThreeCacheApiInstances {
 
   implicit val scalazTaskFunctor: Functor[Task] =
     new Functor[Task] {
