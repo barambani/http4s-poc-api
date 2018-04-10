@@ -40,21 +40,21 @@ object TestDependencies {
   def testFailingDependencies(implicit ec: ExecutionContext): Dependencies[IO] =
     new Dependencies[IO] {
       def user: UserId => IO[User] =
-        _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def user: UserId => IO[User]", "network failure"))
+        _ => Timer[IO].sleep(200.milliseconds) *> IO(throw DependencyFailure("def user: UserId => IO[User]", "network failure"))
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def usersPreferences: UserId => IO[UserPreferences]", "timeout"))
+        _ => Timer[IO].sleep(100.milliseconds) *> IO(throw DependencyFailure("def usersPreferences: UserId => IO[UserPreferences]", "timeout"))
 
       def product: ProductId => IO[Option[Product]] =
-        _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def product: ProductId => IO[Product]]", "network failure"))
+        _ => Timer[IO].sleep(400.milliseconds) *> IO(throw DependencyFailure("def product: ProductId => IO[Product]]", "network failure"))
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def cachedProduct: ProductId => IO[Option[Product]]", "not responding"))
+        _ => Timer[IO].sleep(300.milliseconds) *> IO(throw DependencyFailure("def cachedProduct: ProductId => IO[Option[Product]]", "not responding"))
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        _ => _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def productPrice: Product => UserPreferences => IO[Price]", "timeout"))
+        _ => _ => Timer[IO].sleep(600.milliseconds) *> IO(throw DependencyFailure("def productPrice: Product => UserPreferences => IO[Price]", "timeout"))
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        _ => _ => Timer[IO].sleep(500.milliseconds) *> IO(throw DependencyFailure("def storeProductToCache: ProductId => Product => IO[Unit]", "not responding"))
+        _ => _ => Timer[IO].sleep(150.milliseconds) *> IO(throw DependencyFailure("def storeProductToCache: ProductId => Product => IO[Unit]", "not responding"))
     }
 }

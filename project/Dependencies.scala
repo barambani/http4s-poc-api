@@ -10,13 +10,15 @@ object Dependencies {
     val cats         = "1.1.0"
     val catsEffect   = "0.10"
     val monix        = "3.0.0-RC1"
-    val scalaz       = "7.2.20"
-    val http4s       = "0.18.4"
+    val scalaz       = "7.2.21"
+    val http4s       = "0.18.7"
     val circe        = "0.9.2"
-    val http4sExtend = "0.0.25"
+    val http4sExtend = "0.0.26"
 
     val scalaCheck   = "1.13.5"
     val scalaTest    = "3.0.5"
+
+    val kindProjector = "0.9.6"
   }
 
   /*
@@ -55,6 +57,6 @@ object Dependencies {
   )
 
   val compilerPlugins: Seq[ModuleID] = Seq(
-    compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
+    compilerPlugin("org.spire-math" %% "kind-projector" % versionOf.kindProjector)
   )
 }
