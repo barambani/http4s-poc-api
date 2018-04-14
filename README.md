@@ -5,7 +5,7 @@
 
 This repo contains a complete running example of a http api implemented with [http4s](http://http4s.org/) in tagless final Mtl style. It uses some helper tools from [Http4s Extend](https://github.com/barambani/http4s-extend).
 
-### The Code
+### Service Structure
 
 #### Business Logic
 The logic is encoded into a tagless final DSL that abstracts over the concrete effectful computation.
