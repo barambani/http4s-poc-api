@@ -15,14 +15,14 @@ sealed trait PreferenceFetcher[F[_]] {
 
 object PreferenceFetcher {
 
-  @inline def apply[F[_] : MonadError[?[_], Throwable]](dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
+  @inline def apply[F[_] : MonadError[?[_], InvalidShippingCountry]](dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
     new PreferenceFetcherImpl(dependencies, logger)
 
   private final class PreferenceFetcherImpl[F[_]](
     dependencies: Dependencies[F],
     logger      : Logger[F])(
       implicit
-        F: MonadError[F, Throwable]) extends PreferenceFetcher[F] {
+        F: MonadError[F, InvalidShippingCountry]) extends PreferenceFetcher[F] {
 
     def userPreferences: UserId => F[UserPreferences] =
       id => for {
@@ -32,7 +32,8 @@ object PreferenceFetcher {
 
     private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =
       if(p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
-        logger.error(s"InvalidShippingCountry: Cannot ship $id outside Italy") *> F.raiseError[UserPreferences](InvalidShippingCountry("Cannot ship outside Italy"))
+        logger.error(s"InvalidShippingCountry: Cannot ship $id outside Italy")*>
+          F.raiseError[UserPreferences](InvalidShippingCountry(new Throwable("InvalidShippingCountry: Cannot ship outside Italy")))
       else
         p.pure[F]
   }

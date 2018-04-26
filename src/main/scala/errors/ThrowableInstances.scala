@@ -14,9 +14,6 @@ sealed trait ThrowableInstances {
         apiErrorDecomposition(t)
 
       private def apiErrorDecomposition: Throwable => String = {
-        case e: InvalidParameters       => showOf(e)
-        case e: DependencyFailure       => showOf(e)
-        case e: InvalidShippingCountry  => showOf(e)
         case e: CompositeException      => showOf(e)
         case e: Throwable               => unMk(fullDisplay(e))
       }

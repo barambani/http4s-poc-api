@@ -2,7 +2,6 @@ package interpreters
 
 import cats.effect.{IO, Timer}
 import cats.syntax.apply._
-import errors.DependencyFailure
 import model.DomainModel._
 
 import scala.concurrent.ExecutionContext
@@ -40,21 +39,27 @@ object TestDependencies {
   def testFailingDependencies(implicit ec: ExecutionContext): Dependencies[IO] =
     new Dependencies[IO] {
       def user: UserId => IO[User] =
-        _ => Timer[IO].sleep(200.milliseconds) *> IO(throw DependencyFailure("def user: UserId => IO[User]", "network failure"))
+        _ => Timer[IO].sleep(200.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure"))
 
       def usersPreferences: UserId => IO[UserPreferences] =
-        _ => Timer[IO].sleep(100.milliseconds) *> IO(throw DependencyFailure("def usersPreferences: UserId => IO[UserPreferences]", "timeout"))
+        _ => Timer[IO].sleep(100.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout"))
 
       def product: ProductId => IO[Option[Product]] =
-        _ => Timer[IO].sleep(400.milliseconds) *> IO(throw DependencyFailure("def product: ProductId => IO[Product]]", "network failure"))
+        _ => Timer[IO].sleep(400.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def product: ProductId => IO[Option[Product]] failed with message network failure"))
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        _ => Timer[IO].sleep(300.milliseconds) *> IO(throw DependencyFailure("def cachedProduct: ProductId => IO[Option[Product]]", "not responding"))
+        _ => Timer[IO].sleep(300.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding"))
 
       def productPrice: Product => UserPreferences => IO[Price] =
-        _ => _ => Timer[IO].sleep(600.milliseconds) *> IO(throw DependencyFailure("def productPrice: Product => UserPreferences => IO[Price]", "timeout"))
+        _ => _ => Timer[IO].sleep(600.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def productPrice: Product => UserPreferences => IO[Price] failed with message timeout"))
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        _ => _ => Timer[IO].sleep(150.milliseconds) *> IO(throw DependencyFailure("def storeProductToCache: ProductId => Product => IO[Unit]", "not responding"))
+        _ => _ => Timer[IO].sleep(150.milliseconds) *>
+          IO(throw new Throwable("DependencyFailure. The dependency def storeProductToCache: ProductId => Product => IO[Unit] failed with message not responding"))
     }
 }
