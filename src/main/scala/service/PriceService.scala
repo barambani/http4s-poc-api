@@ -25,13 +25,19 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful]
   
 
   private def userFor(userId: UserId): F[User] =
-    logger.debug(s"Collecting user details for id $userId") *> dep.user(userId) <* logger.debug(s"User details collected for id $userId")
+    logger.debug(s"Collecting user details for id $userId") *>
+    dep.user(userId) <*
+    logger.debug(s"User details collected for id $userId")
 
   private def preferencesFor(userId: UserId): F[UserPreferences] =
-    logger.debug(s"Looking up user preferences for user $userId") *> preferenceFetcher.userPreferences(userId) <* logger.debug(s"User preferences look up for $userId completed")
+    logger.debug(s"Looking up user preferences for user $userId") *>
+    preferenceFetcher.userPreferences(userId) <*
+    logger.debug(s"User preferences look up for $userId completed")
 
   private def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
-    logger.debug(s"Collecting product details for products $productIds") *> productRepo.storedProducts(productIds) <* logger.debug(s"Product details collection for $productIds completed")
+    logger.debug(s"Collecting product details for products $productIds") *>
+    productRepo.storedProducts(productIds) <*
+    logger.debug(s"Product details collection for $productIds completed")
 
 
   private lazy val preferenceFetcher: PreferenceFetcher[F] =

@@ -1,8 +1,8 @@
 package interpreters
 
-import cats.Show
 import cats.effect.IO
 import cats.syntax.apply._
+import cats.{MonadError, Show}
 import errors.DependencyFailure
 import external.TeamThreeCacheApi._
 import external._
@@ -17,8 +17,8 @@ trait Dependencies[F[_]] {
   def user: UserId => F[User]
   def usersPreferences: UserId => F[UserPreferences]
   def product: ProductId => F[Option[Product]]
-  def cachedProduct: ProductId => F[Option[Product]]
   def productPrice: Product => UserPreferences => F[Price]
+  def cachedProduct: ProductId => F[Option[Product]]
   def storeProductToCache: ProductId => Product => F[Unit]
 }
 
@@ -28,7 +28,8 @@ object Dependencies {
 
   implicit def ioDependencies(
     implicit
-      ev: Show[Throwable],
+      ev1: MonadError[IO, DependencyFailure],
+      ev2: Show[Throwable],
       ec: ExecutionContext,
       sc: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {

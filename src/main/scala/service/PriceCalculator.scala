@@ -1,6 +1,6 @@
 package service
 
-import cats.MonadError
+import cats.Monad
 import cats.instances.list._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
@@ -16,10 +16,10 @@ sealed trait PriceCalculator[F[_]] {
 
 object PriceCalculator {
 
-  @inline def apply[F[_] : MonadError[?[_], Throwable] : ParEffectful](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
+  @inline def apply[F[_] : Monad : ParEffectful](dependencies: Dependencies[F], logger: Logger[F]): PriceCalculator[F] =
     new PriceCalculatorImpl(dependencies, logger)
 
-  private final class PriceCalculatorImpl[F[_] : MonadError[?[_], Throwable] : ParEffectful](dep: Dependencies[F], logger: Logger[F])
+  private final class PriceCalculatorImpl[F[_] : Monad : ParEffectful](dep: Dependencies[F], logger: Logger[F])
     extends PriceCalculator[F] {
 
       def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
@@ -31,7 +31,6 @@ object PriceCalculator {
           userPrice     =  veryVeryComplexPureCalculation(catalogPrice)(user.userPurchaseHistory)
           _             <- logger.debug(s"Price calculation for product ${ product.id } completed")
         } yield userPrice
-
 
       private def veryVeryComplexPureCalculation: Price => Seq[UserPurchase] => Price =
         price => _ => price
