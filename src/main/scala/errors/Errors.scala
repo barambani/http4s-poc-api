@@ -1,33 +1,27 @@
 package errors
 
-import cats.{Monad, Show}
+import cats.{Monad, MonadError, Show}
 import http4s.extend._
 import org.http4s.Response
 
-final case class InvalidParameters(message: String) extends Throwable(message)
-object InvalidParameters {
-
-  implicit val invalidParamsShow: Show[InvalidParameters] =
-    new Show[InvalidParameters] {
-      def show(t: InvalidParameters): String =
-        s"InvalidParameters: ${t.message}"
-    }
-
-  implicit def invalidParamsResponse[F[_] : Monad]: ErrorResponse[F, InvalidParameters] =
-    new ErrorResponse[F, InvalidParameters] {
-      val ev = Show[InvalidParameters]
-      def responseFor: InvalidParameters => F[Response[F]] =
-        e => BadRequest(ev.show(e))
-    }
+private[errors] sealed class MkThrowable extends NewType {
+  def apply(b: Throwable): T = b.asInstanceOf[T]
+  def mkF[F[_]](fs: F[Throwable]): F[T] = fs.asInstanceOf[F[T]]
+}
+private[errors] object MkThrowable {
+  implicit final class MkThrowableOps(val `this`: MkThrowable#T) extends AnyVal {
+    def unMk: Throwable = `this`.asInstanceOf[Throwable]
+  }
 }
 
-final case class InvalidShippingCountry(message: String) extends Throwable(message)
-object InvalidShippingCountry {
+object MkInvalidShippingCountry extends MkThrowable with InvalidShippingCountryInstances
+
+private[errors] sealed trait InvalidShippingCountryInstances {
 
   implicit val invalidShippingShow: Show[InvalidShippingCountry] =
     new Show[InvalidShippingCountry] {
       def show(t: InvalidShippingCountry): String =
-        s"InvalidShippingCountry: ${t.message}"
+        s"InvalidShippingCountry: ${t.unMk.getMessage}"
     }
 
   implicit def invalidShippingCountryResponse[F[_] : Monad]: ErrorResponse[F, InvalidShippingCountry] =
@@ -36,16 +30,34 @@ object InvalidShippingCountry {
       def responseFor: InvalidShippingCountry => F[Response[F]] =
         e => InternalServerError(ev.show(e))
     }
+
+  implicit def invalidShippingCountryMonadError[F[_]](implicit F: MonadError[F, Throwable]): MonadError[F, InvalidShippingCountry] =
+    new MonadError[F, InvalidShippingCountry] {
+      def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
+        F.flatMap(fa)(f)
+
+      def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] =
+        F.tailRecM(a)(f)
+
+      def raiseError[A](e: InvalidShippingCountry): F[A] =
+        F.raiseError(e.unMk)
+
+      def handleErrorWith[A](fa: F[A])(f: InvalidShippingCountry => F[A]): F[A] =
+        F.handleErrorWith(fa)(f compose InvalidShippingCountry.apply)
+
+      def pure[A](x: A): F[A] =
+        F.pure(x)
+    }
 }
 
-final case class DependencyFailure(failingDependency: String, message: String)
-  extends Throwable(s"Failed dependency: $failingDependency. Message: $message")
-object DependencyFailure {
+object MkDependencyFailure extends MkThrowable with DependencyFailureInstances
+
+private[errors] sealed trait DependencyFailureInstances {
 
   implicit val dependencyFailureShow: Show[DependencyFailure] =
     new Show[DependencyFailure] {
       def show(t: DependencyFailure): String =
-        s"DependencyFailure. The dependency ${t.failingDependency} failed with message ${t.message}"
+        s"DependencyFailure: ${t.unMk.getMessage}"
     }
 
   implicit def dependencyFailureResponse[F[_] : Monad]: ErrorResponse[F, DependencyFailure] =
@@ -53,5 +65,23 @@ object DependencyFailure {
       val ev = Show[DependencyFailure]
       def responseFor: DependencyFailure => F[Response[F]] =
         e => BadGateway(ev.show(e))
+    }
+
+  implicit def dependencyFailureMonadError[F[_]](implicit F: MonadError[F, Throwable]): MonadError[F, DependencyFailure] =
+    new MonadError[F, DependencyFailure] {
+      def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
+        F.flatMap(fa)(f)
+
+      def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B] =
+        F.tailRecM(a)(f)
+
+      def raiseError[A](e: DependencyFailure): F[A] =
+        F.raiseError(e.unMk)
+
+      def handleErrorWith[A](fa: F[A])(f: DependencyFailure => F[A]): F[A] =
+        F.handleErrorWith(fa)(f compose DependencyFailure.apply)
+
+      def pure[A](x: A): F[A] =
+        F.pure(x)
     }
 }
