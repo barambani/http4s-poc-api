@@ -1,6 +1,6 @@
 package service
 
-import cats.MonadError
+import cats.Monad
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.applicative._
@@ -20,10 +20,10 @@ sealed trait ProductRepo[F[_]] {
 
 object ProductRepo {
 
-  @inline def apply[F[_] : MonadError[?[_], Throwable] : ParEffectful](dependencies: Dependencies[F], logger: Logger[F]): ProductRepo[F] =
+  @inline def apply[F[_] : Monad : ParEffectful](dependencies: Dependencies[F], logger: Logger[F]): ProductRepo[F] =
     new ProductRepoImpl(dependencies, logger)
 
-  private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable] : ParEffectful](dep : Dependencies[F], logger: Logger[F])
+  private final class ProductRepoImpl[F[_] : Monad : ParEffectful](dep : Dependencies[F], logger: Logger[F])
     extends ProductRepo[F] {
 
       /**
@@ -49,6 +49,8 @@ object ProductRepo {
 
       private def storeInCache: Product => F[Unit] =
         prod =>
-          logger.debug(s"Product ${ prod.id } not in cache, fetched from the repo") *> dep.storeProductToCache(prod.id)(prod) <* logger.debug(s"Product ${ prod.id } stored into the cache")
+          logger.debug(s"Product ${ prod.id } not in cache, fetched from the repo") *>
+          dep.storeProductToCache(prod.id)(prod) <*
+          logger.debug(s"Product ${ prod.id } stored into the cache")
   }
 }
