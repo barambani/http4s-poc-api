@@ -4,7 +4,6 @@ import cats.effect.util.CompositeException
 import cats.{Monad, Semigroup, Show}
 import http4s.extend.ErrorResponse
 import http4s.extend.ExceptionDisplay._
-import http4s.extend.util.ThrowableModule._
 import org.http4s.Response
 
 sealed trait ThrowableInstances {

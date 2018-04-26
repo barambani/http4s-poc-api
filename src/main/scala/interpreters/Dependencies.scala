@@ -64,9 +64,9 @@ object Dependencies {
           .liftIntoMonadError
 
       def cachedProduct: ProductId => IO[Option[Product]] =
-        pId => IO.shift *> TeamThreeCacheApi[ProductId, Product].get(pId).transform
+        pId => IO.shift *> TeamThreeCacheApi[ProductId, Product].get(pId).transformTo[IO]
 
       def storeProductToCache: ProductId => Product => IO[Unit] =
-        pId => p => IO.shift *> TeamThreeCacheApi[ProductId, Product].put(pId)(p).transform
+        pId => p => IO.shift *> TeamThreeCacheApi[ProductId, Product].put(pId)(p).transformTo[IO]
     }
 }
