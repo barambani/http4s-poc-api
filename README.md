@@ -54,7 +54,7 @@ final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful]
 ```
 Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known cohordinates as source. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect their details in case they exist. As before, this computation can be described again at a high level of abstraction using `ParEffectful` and its `parTraverse` function ([see the implementation here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala#L62)).
 ```scala
-private final class ProductRepoImpl[F[_] : MonadError[?[_], Throwable] : ParEffectful](
+private final class ProductRepoImpl[F[_] : Monad : ParEffectful](
   dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
   
   /**
