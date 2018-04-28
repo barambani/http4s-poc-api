@@ -15,7 +15,7 @@ sealed trait ThrowableInstances {
 
       private def apiErrorDecomposition: Throwable => String = {
         case e: CompositeException      => showOf(e)
-        case e: Throwable               => unMk(fullDisplay(e))
+        case e: Throwable               => fullDisplay(e).unMk
       }
 
       private def showOf[E <: Throwable](e: E)(implicit ev: Show[E]): String =

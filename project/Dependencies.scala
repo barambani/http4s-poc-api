@@ -13,7 +13,7 @@ object Dependencies {
     val scalaz        = "7.2.21"
     val http4s        = "0.18.7"
     val circe         = "0.9.2"
-    val http4sExtend  = "0.0.29"
+    val http4sExtend  = "0.0.30"
 
     val scalaCheck    = "1.13.5"
     val scalaTest     = "3.0.5"
