@@ -3,28 +3,33 @@ package errors
 import cats.{Monad, MonadError, Show}
 import http4s.extend._
 import org.http4s.Response
+import cats.syntax.either._
 
 private[errors] sealed class MkThrowable extends NewType {
   def apply(b: Throwable): T = b.asInstanceOf[T]
   def mkF[F[_]](fs: F[Throwable]): F[T] = fs.asInstanceOf[F[T]]
 }
 private[errors] object MkThrowable {
-  implicit final class MkThrowableOps(val `this`: MkThrowable#T) extends AnyVal {
+  implicit final class MkThrowableSyntax(val `this`: MkThrowable#T) extends AnyVal {
     def unMk: Throwable = `this`.asInstanceOf[Throwable]
   }
 }
 
-object MkInvalidShippingCountry extends MkThrowable with InvalidShippingCountryInstances
+object MkInvalidShippingCountry extends MkThrowable with InvalidShippingCountryInstances {
+
+  implicit final class InvalidShippingCountryOps(val `this`: InvalidShippingCountry) extends AnyVal {
+    def asServiceError: ServiceError = `this`.asLeft.asRight
+  }
+}
 
 private[errors] sealed trait InvalidShippingCountryInstances {
 
-  implicit val invalidShippingShow: Show[InvalidShippingCountry] =
+  implicit def invalidShippingShow(implicit ev: Show[Throwable]): Show[InvalidShippingCountry] =
     new Show[InvalidShippingCountry] {
-      def show(t: InvalidShippingCountry): String =
-        s"InvalidShippingCountry: ${t.unMk.getMessage}"
+      def show(t: InvalidShippingCountry): String = ev.show(t.unMk)
     }
 
-  implicit def invalidShippingCountryResponse[F[_] : Monad]: ErrorResponse[F, InvalidShippingCountry] =
+  implicit def invalidShippingCountryResponse[F[_] : Monad](implicit sh: Show[Throwable]): ErrorResponse[F, InvalidShippingCountry] =
     new ErrorResponse[F, InvalidShippingCountry] {
       val ev = Show[InvalidShippingCountry]
       def responseFor: InvalidShippingCountry => F[Response[F]] =
@@ -50,17 +55,21 @@ private[errors] sealed trait InvalidShippingCountryInstances {
     }
 }
 
-object MkDependencyFailure extends MkThrowable with DependencyFailureInstances
+object MkDependencyFailure extends MkThrowable with DependencyFailureInstances {
+
+  implicit final class InvalidShippingCountryOps(val `this`: DependencyFailure) extends AnyVal {
+    def asServiceError: ServiceError = `this`.asRight.asRight
+  }
+}
 
 private[errors] sealed trait DependencyFailureInstances {
 
-  implicit val dependencyFailureShow: Show[DependencyFailure] =
+  implicit def dependencyFailureShow(implicit ev: Show[Throwable]): Show[DependencyFailure] =
     new Show[DependencyFailure] {
-      def show(t: DependencyFailure): String =
-        s"DependencyFailure: ${t.unMk.getMessage}"
+      def show(t: DependencyFailure): String = ev.show(t.unMk)
     }
 
-  implicit def dependencyFailureResponse[F[_] : Monad]: ErrorResponse[F, DependencyFailure] =
+  implicit def dependencyFailureResponse[F[_] : Monad](implicit sh: Show[Throwable]): ErrorResponse[F, DependencyFailure] =
     new ErrorResponse[F, DependencyFailure] {
       val ev = Show[DependencyFailure]
       def responseFor: DependencyFailure => F[Response[F]] =

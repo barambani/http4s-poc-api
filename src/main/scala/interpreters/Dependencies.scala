@@ -3,7 +3,7 @@ package interpreters
 import cats.effect.IO
 import cats.syntax.apply._
 import cats.{MonadError, Show}
-import errors.DependencyFailure
+import errors.{DependencyFailure, ServiceError}
 import external.TeamThreeCacheApi._
 import external._
 import http4s.extend.syntax.byNameNt._
@@ -28,39 +28,39 @@ object Dependencies {
 
   implicit def ioDependencies(
     implicit
-      ev1: MonadError[IO, DependencyFailure],
-      ev2: Show[Throwable],
+      ev1: MonadError[IO, ServiceError],
+      ev2: Show[ServiceError],
       ec: ExecutionContext,
       sc: Scheduler): Dependencies[IO] =
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =
         id => IO.shift *> TeamTwoHttpApi().user(id)
-          .attemptMapLeft[DependencyFailure](
+          .attemptMapLeft[ServiceError](
             // Translates the Throwable to the internal error system of the service. It could contain also the stack trace
             // or any relevant detail from the Throwable
-            thr => DependencyFailure(thr)
+            thr => DependencyFailure(thr).asServiceError
           )
           .liftIntoMonadError
 
       def usersPreferences: UserId => IO[UserPreferences] =
         id => IO.shift *> TeamOneHttpApi().usersPreferences(id)
-          .attemptMapLeft[DependencyFailure](
-            thr => DependencyFailure(thr)
+          .attemptMapLeft[ServiceError](
+            thr => DependencyFailure(thr).asServiceError
           )
           .liftIntoMonadError
 
       def product: ProductId => IO[Option[Product]] =
         ps => IO.shift *> TeamTwoHttpApi().product(ps)
-          .attemptMapLeft[DependencyFailure](
-            thr => DependencyFailure(thr)
+          .attemptMapLeft[ServiceError](
+            thr => DependencyFailure(thr).asServiceError
           )
           .liftIntoMonadError
 
       def productPrice: Product => UserPreferences => IO[Price] =
         p => pref => IO.shift *> TeamOneHttpApi().productPrice(p)(pref)
-          .attemptMapLeft[DependencyFailure](
-            thr => DependencyFailure(thr)
+          .attemptMapLeft[ServiceError](
+            thr => DependencyFailure(thr).asServiceError
           )
           .liftIntoMonadError
 
