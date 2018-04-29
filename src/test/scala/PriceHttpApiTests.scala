@@ -3,6 +3,7 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import cats.syntax.validated._
+import errors.ServiceError._
 import errors.ThrowableInstances._
 import http4s.extend.syntax.httpService._
 import http4s.extend.syntax.responseVerification._
@@ -111,7 +112,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     assertOn(verified)
   }
 
-  it should "respond with Status 500 for multiple dependency failures" in {
+  it should "respond with Status 502 for multiple dependency failures" in {
 
     val pricing = PriceService[IO](testFailingDependencies, testLogger)
 
@@ -125,7 +126,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     val request = POST(uri("/"), reqPayload.asJson)
 
     val verified = httpApi.runForF(request).verifyResponseText(
-      Status.InternalServerError,
+      Status.BadGateway,
       """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
