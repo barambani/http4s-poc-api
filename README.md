@@ -43,7 +43,7 @@ private final class PreferenceFetcherImpl[F[_]](
 #### Parallel Execution
 When there's the need of running computations in parallel, the same approach is used. This capability is guaranteed by the evidence `F[_] : ParEffectful` that enables the usage of `parMap` ([see the lib here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala)).
 ```scala
-final case class PriceService[F[_] : MonadError[?[_], Throwable] : ParEffectful](
+final case class PriceService[F[_] : MonadError[?[_], ServiceError] : ParEffectful](
   dep: Dependencies[F], logger: Logger[F]) {
   
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
