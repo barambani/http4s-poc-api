@@ -74,15 +74,14 @@ The http api endpoint is implemented following the same style. The capabilities 
 ```scala
 sealed abstract class PriceHttpApi[F[_]](
   implicit
-    ME: MonadError[F, Throwable],
+    ME: MonadError[F, ServiceError],
     RD: EntityDecoder[F, PricesRequestPayload],
     RE: EntityEncoder[F, List[Price]],
-    TS: Show[Throwable],
-    TR: ErrorResponse[F, Throwable]) extends Http4sDsl[F] {
+    ER: ErrorResponse[F, ServiceError]) extends Http4sDsl[F] {
 
   def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
-      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith TR.responseFor
+      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith ER.responseFor
     }
 
   private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
