@@ -20,7 +20,7 @@ sealed trait PreferenceFetcher[F[_]] {
 ```
 where the capabilities of `F[_]` are provided trhough implicit evidences
 ```scala
-@inline def apply[F[_] : MonadError[?[_], InvalidShippingCountry]](
+@inline def apply[F[_] : MonadError[?[_], ServiceError]](
   dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
     new PreferenceFetcherImpl(dependencies, logger)
 
@@ -28,14 +28,14 @@ private final class PreferenceFetcherImpl[F[_]](
   dependencies: Dependencies[F],
   logger      : Logger[F])(
     implicit
-      F: MonadError[F, InvalidShippingCountry]) extends PreferenceFetcher[F] {
-      
+      F: MonadError[F, ServiceError]) extends PreferenceFetcher[F] {
+
   def userPreferences: UserId => F[UserPreferences] =
     id => for {
       pres  <- dependencies.usersPreferences(id) <* logger.debug(s"User preferences for $id collected successfully")
       valid <- logger.debug(s"Validating user preferences for user $id") *> validate(pres, id) <* logger.debug(s"User preferences for $id validated")
     } yield valid
-      
+
   private def validate(p: UserPreferences, id: UserId): F[UserPreferences] = [...]
 }
 ```
