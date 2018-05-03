@@ -6,6 +6,6 @@ package object errors {
   type DependencyFailure = DependencyFailure.T
   val DependencyFailure = MkDependencyFailure
 
-  type ServiceError = MkServiceError.T
+  type ServiceError = ServiceError.T
   val ServiceError = MkServiceError
 }
