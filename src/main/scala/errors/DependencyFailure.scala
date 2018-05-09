@@ -9,7 +9,7 @@ import org.http4s.Response
 object MkDependencyFailure extends MkThrowable with DependencyFailureInstances {
 
   implicit final class InvalidShippingCountryOps(val `this`: DependencyFailure) extends AnyVal {
-    def asServiceError: ServiceError = ServiceError(`this`.asRight.asRight)
+    def asServiceError: ServiceError = ServiceError(`this`.asRight.asLeft)
   }
 }
 

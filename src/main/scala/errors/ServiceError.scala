@@ -7,8 +7,9 @@ import org.http4s.Response
 
 object MkServiceError extends NewType with ServiceErrorInstances {
 
+  private type |[A, B] = Either[A, B]
   private type ServiceErrorInternal =
-    Throwable Either (InvalidShippingCountry Either DependencyFailure)
+    InvalidShippingCountry | DependencyFailure | Throwable
 
   def apply(b: ServiceErrorInternal): T = b.asInstanceOf[T]
   def mkF[F[_]](fs: F[ServiceErrorInternal]): F[T] = fs.asInstanceOf[F[T]]
@@ -30,8 +31,8 @@ private[errors] sealed trait ServiceErrorInstances {
     new Show[ServiceError] {
       def show(t: ServiceError): String =
         t.unMk match {
-          case Left(e)  => ev3.show(e)
-          case Right(e) => e match {
+          case Right(e)  => ev3.show(e)
+          case Left(e) => e match {
             case Left(ee)  => ev1.show(ee)
             case Right(ee) => ev2.show(ee)
           }
@@ -47,8 +48,8 @@ private[errors] sealed trait ServiceErrorInstances {
       val ev: Show[ServiceError] = Show[ServiceError]
       def responseFor: ServiceError => F[Response[F]] =
        se => se.unMk match {
-          case Left(e)  => ev3.responseFor(e)
-          case Right(e) => e match {
+          case Right(e)  => ev3.responseFor(e)
+          case Left(e) => e match {
             case Left(ee)  => ev1.responseFor(ee)
             case Right(ee) => ev2.responseFor(ee)
           }
@@ -72,8 +73,8 @@ private[errors] sealed trait ServiceErrorInstances {
       def raiseError[A](e: ServiceError): F[A] =
         F.raiseError (
           e.unMk match {
-            case Left(ee)  => ee
-            case Right(ee) => ee match {
+            case Right(ee)  => ee
+            case Left(ee) => ee match {
               case Left(ie)  => ie.unMk
               case Right(ie) => ie.unMk
             }
@@ -85,7 +86,7 @@ private[errors] sealed trait ServiceErrorInstances {
           thr => f(
             if (ev3.show(thr).startsWith("InvalidShippingCountry")) InvalidShippingCountry.apply(thr).asServiceError
             else if (ev3.show(thr).startsWith("DependencyFailure")) DependencyFailure.apply(thr).asServiceError
-            else ServiceError(thr.asLeft)
+            else ServiceError(thr.asRight)
           )
         )
 
