@@ -2,12 +2,11 @@ package errors
 
 import cats.syntax.either._
 import cats.{Monad, MonadError, Show}
-import http4s.extend.{ErrorResponse, NewType}
+import http4s.extend.{ErrorResponse, NewType, |}
 import org.http4s.Response
 
 object MkServiceError extends NewType with ServiceErrorInstances {
 
-  private type |[A, B] = Either[A, B]
   private type ServiceErrorInternal =
     InvalidShippingCountry | DependencyFailure | Throwable
 
