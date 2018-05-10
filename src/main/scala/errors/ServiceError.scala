@@ -1,7 +1,9 @@
 package errors
 
 import cats.syntax.either._
+import cats.syntax.show._
 import cats.{Monad, MonadError, Show}
+import http4s.extend.syntax.errorResponse._
 import http4s.extend.{ErrorResponse, NewType, |}
 import org.http4s.Response
 
@@ -22,45 +24,32 @@ private[errors] sealed trait ServiceErrorInstances {
 
   import ThrowableInstances._
 
-  implicit def serviceErrorShow(
-    implicit
-      ev1: Show[InvalidShippingCountry],
-      ev2: Show[DependencyFailure],
-      ev3: Show[Throwable]): Show[ServiceError] =
+  implicit val serviceErrorShow: Show[ServiceError] =
     new Show[ServiceError] {
-      def show(t: ServiceError): String =
-        t.unMk match {
-          case Right(e)  => ev3.show(e)
+      def show(x: ServiceError): String =
+        x.unMk match {
+          case Right(e) => e.show
           case Left(e) => e match {
-            case Left(ee)  => ev1.show(ee)
-            case Right(ee) => ev2.show(ee)
+            case Left(ee)  => ee.show
+            case Right(ee) => ee.show
           }
         }
     }
 
-  implicit def serviceErrorResponse[F[_] : Monad](
-    implicit
-      ev1: ErrorResponse[F, InvalidShippingCountry],
-      ev2: ErrorResponse[F, DependencyFailure],
-      ev3: ErrorResponse[F, Throwable]): ErrorResponse[F, ServiceError] =
+  implicit def serviceErrorResponse[F[_] : Monad]: ErrorResponse[F, ServiceError] =
     new ErrorResponse[F, ServiceError] {
       val ev: Show[ServiceError] = Show[ServiceError]
       def responseFor: ServiceError => F[Response[F]] =
        se => se.unMk match {
-          case Right(e)  => ev3.responseFor(e)
+          case Right(e)  => e.responseFor
           case Left(e) => e match {
-            case Left(ee)  => ev1.responseFor(ee)
-            case Right(ee) => ev2.responseFor(ee)
+            case Left(ee)  => ee.responseFor
+            case Right(ee) => ee.responseFor
           }
        }
     }
 
-  implicit def serviceErrorMonadError[F[_]](
-    implicit
-      F: MonadError[F, Throwable],
-      ev1: MonadError[F, InvalidShippingCountry],
-      ev2: MonadError[F, DependencyFailure],
-      ev3: Show[Throwable]): MonadError[F, ServiceError] =
+  implicit def serviceErrorMonadError[F[_]](implicit F: MonadError[F, Throwable]): MonadError[F, ServiceError] =
     new MonadError[F, ServiceError] {
 
       def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
@@ -83,8 +72,8 @@ private[errors] sealed trait ServiceErrorInstances {
       def handleErrorWith[A](fa: F[A])(f: ServiceError => F[A]): F[A] =
         F.handleErrorWith(fa)(
           thr => f(
-            if (ev3.show(thr).startsWith("InvalidShippingCountry")) InvalidShippingCountry.apply(thr).asServiceError
-            else if (ev3.show(thr).startsWith("DependencyFailure")) DependencyFailure.apply(thr).asServiceError
+            if (thr.show.startsWith("InvalidShippingCountry")) InvalidShippingCountry.apply(thr).asServiceError
+            else if (thr.show.startsWith("DependencyFailure")) DependencyFailure.apply(thr).asServiceError
             else ServiceError(thr.asRight)
           )
         )
