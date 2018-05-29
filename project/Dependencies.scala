@@ -10,15 +10,15 @@ object Dependencies {
     val cats          = "1.1.0"
     val catsEffect    = "1.0.0-RC"
     val monix         = "3.0.0-RC1"
-    val scalaz        = "7.2.22"
-    val http4s        = "0.18.11"
+    val scalaz        = "7.2.23"
+    val http4s        = "0.18.12"
     val circe         = "0.10.0-M1"
-    val http4sExtend  = "0.0.34"
+    val http4sExtend  = "0.0.38"
 
     val scalaCheck    = "1.13.5"
     val scalaTest     = "3.0.5"
 
-    val kindProjector = "0.9.6"
+    val kindProjector = "0.9.7"
   }
 
   /*
