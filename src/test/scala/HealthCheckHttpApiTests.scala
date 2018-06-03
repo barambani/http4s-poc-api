@@ -31,8 +31,8 @@ final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures
       sign =>
         (sign.name              isSameAs    "http4s-poc-api",
         sign.version            isNotSameAs "",
-        sign.scalaVersion       isSameAs    "2.12.4-bin-typelevel-4",
-        sign.scalaOrganization  isSameAs    "org.typelevel").mapN((_, _, _, _) => sign)
+        sign.scalaVersion       isSameAs    "2.12.6",
+        sign.scalaOrganization  isSameAs    "org.scala-lang").mapN((_, _, _, _) => sign)
     )
 
     assertOn(verified)

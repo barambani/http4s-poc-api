@@ -46,14 +46,6 @@ object ScalacOptions {
     "-Ywarn-extra-implicit"              // Warn when more than one implicit parameter section is defined.
   )
 
-  val typeLevelScalaOptions: Seq[String] = Seq(
-    "-Yinduction-heuristics",       // speeds up the compilation of inductive implicit resolution
-    "-Ykind-polymorphism",          // type and method definitions with type parameters of arbitrary kinds
-    "-Yliteral-types",              // literals can appear in type position
-    "-Xstrict-patmat-analysis",     // more accurate reporting of failures of match exhaustivity
-    "-Xlint:strict-unsealed-patmat" // warn on inexhaustive matches against unsealed traits
-  )
-
   val nonTestExceptions: Seq[String] = Seq (
     "-Ywarn-unused:imports",
     "-Xfatal-warnings"
