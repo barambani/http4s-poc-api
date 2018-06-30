@@ -44,7 +44,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     123.asProductId -> Product(123.asProductId, "some spec".asProductSpec, Nil)
   )
 
-  val price       = Price(
+  val price = Price(
     amount          = BigDecimal(2.34).asMoneyAmount,
     currency        = "EUR".asCurrency,
     discount        = None,
