@@ -2,11 +2,10 @@ package errors
 
 import cats.syntax.either._
 import cats.{Monad, MonadError, Show}
-import http4s.extend.ErrorResponse
-import http4s.extend.types.MkThrowable
+import http4s.extend.{ErrorResponse, newtype}
 import org.http4s.Response
 
-object MkInvalidShippingCountry extends MkThrowable with InvalidShippingCountryInstances {
+object MkInvalidShippingCountry extends newtype[Throwable] with InvalidShippingCountryInstances {
 
   implicit final class InvalidShippingCountryOps(val `this`: InvalidShippingCountry) extends AnyVal {
     def asServiceError: ServiceError = ServiceError(`this`.asLeft.asLeft)

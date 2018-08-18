@@ -1,4 +1,9 @@
+import http4s.extend.|
+
 package object errors {
+
+  type ServiceErrorValue =
+    InvalidShippingCountry | DependencyFailure | Throwable
 
   type InvalidShippingCountry = InvalidShippingCountry.T
   val InvalidShippingCountry = MkInvalidShippingCountry

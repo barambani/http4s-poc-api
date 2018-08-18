@@ -4,21 +4,10 @@ import cats.syntax.either._
 import cats.syntax.show._
 import cats.{Monad, MonadError, Show}
 import http4s.extend.syntax.errorResponse._
-import http4s.extend.{ErrorResponse, NewType, |}
+import http4s.extend.{ErrorResponse, newtype}
 import org.http4s.Response
 
-object MkServiceError extends NewType with ServiceErrorInstances {
-
-  private type ServiceErrorInternal =
-    InvalidShippingCountry | DependencyFailure | Throwable
-
-  def apply(b: ServiceErrorInternal): T = b.asInstanceOf[T]
-  def mkF[F[_]](fs: F[ServiceErrorInternal]): F[T] = fs.asInstanceOf[F[T]]
-
-  implicit final class MkServiceErrorSyntax(val t: T) extends AnyVal {
-    def unMk: ServiceErrorInternal = t.asInstanceOf[ServiceErrorInternal]
-  }
-}
+object MkServiceError extends newtype[ServiceErrorValue] with ServiceErrorInstances
 
 private[errors] sealed trait ServiceErrorInstances {
 
