@@ -7,12 +7,12 @@ object Dependencies {
    * Versions
    */
   private object versionOf {
-    val cats          = "1.2.0"
+    val cats          = "1.4.0"
     val catsEffect    = "1.0.0-RC"
-    val monix         = "3.0.0-RC1"
+    val monix         = "3.0.0-fbcb270"
     val scalaz        = "7.3.0-M23"
-    val http4s        = "0.18.16"
-    val circe         = "0.10.0-M1"
+    val http4s        = "0.18.18"
+    val circe         = "0.10.0-M2"
     val http4sExtend  = "0.0.42"
 
     val scalaCheck    = "1.14.0"

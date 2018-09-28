@@ -1,4 +1,5 @@
 # Http4s Poc Api
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/117ccce325c04aada3d56a657aab170c)](https://app.codacy.com/app/barambani/http4s-poc-api?utm_source=github.com&utm_medium=referral&utm_content=barambani/http4s-poc-api&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/barambani/http4s-poc-api.svg?branch=master)](https://travis-ci.org/barambani/http4s-poc-api)
 [![codecov](https://codecov.io/gh/barambani/http4s-poc-api/branch/master/graph/badge.svg)](https://codecov.io/gh/barambani/http4s-poc-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/barambani/http4s-poc-api/blob/master/LICENSE)
