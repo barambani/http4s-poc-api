@@ -15,7 +15,7 @@ val root = project.in(file("."))
   .settings(
     version                 :=  "0.0.1",
     name                    :=  "http4s-poc-api",
-    scalaVersion            :=  "2.12.6",
+    scalaVersion            :=  "2.12.7",
     libraryDependencies     ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     scalacOptions           ++= generalOptions,
     scalacOptions in Test   ++= testOnlyOptions,
