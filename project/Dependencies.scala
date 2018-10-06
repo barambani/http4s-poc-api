@@ -12,7 +12,7 @@ object Dependencies {
     val monix         = "3.0.0-fbcb270"
     val scalaz        = "7.3.0-M23"
     val http4s        = "0.18.18"
-    val circe         = "0.10.0-M2"
+    val circe         = "0.10.0"
     val http4sExtend  = "0.0.42"
 
     val scalaCheck    = "1.14.0"
