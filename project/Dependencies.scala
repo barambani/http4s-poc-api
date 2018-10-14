@@ -7,8 +7,9 @@ object Dependencies {
    * Versions
    */
   private object versionOf {
+
     val cats          = "1.4.0"
-    val catsEffect    = "1.0.0-RC"
+    val catsEffect    = "1.0.0"
     val monix         = "3.0.0-fbcb270"
     val scalaz        = "7.3.0-M23"
     val http4s        = "0.18.19"
