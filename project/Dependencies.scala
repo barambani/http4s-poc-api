@@ -16,7 +16,7 @@ object Dependencies {
     val http4sExtend  = "0.0.43"
 
     val scalaCheck    = "1.14.0"
-    val scalaTest     = "3.0.5"
+    val scalaTest     = "3.0.6"
 
     val kindProjector = "0.9.9"
   }
