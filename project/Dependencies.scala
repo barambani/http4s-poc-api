@@ -11,7 +11,7 @@ object Dependencies {
     val catsEffect    = "1.0.0-RC"
     val monix         = "3.0.0-fbcb270"
     val scalaz        = "7.3.0-M27"
-    val http4s        = "0.18.22"
+    val http4s        = "0.18.23"
     val circe         = "0.11.1"
     val http4sExtend  = "0.0.43"
 
