@@ -19,7 +19,7 @@ sealed trait PreferenceFetcher[F[_]] {
   def userPreferences: UserId => F[UserPreferences]
 }
 ```
-where the capabilities of `F[_]` are provided trhough implicit evidences
+where the capabilities of `F[_]` are provided through implicit evidences
 ```scala
 @inline def apply[F[_] : MonadError[?[_], ServiceError]](
   dependencies: Dependencies[F], logger: Logger[F]): PreferenceFetcher[F] =
@@ -53,7 +53,7 @@ final case class PriceService[F[_] : MonadError[?[_], ServiceError] : ParEffectf
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] = [...]
 }
 ```
-Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known cohordinates as source. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect their details in case they exist. As before, this computation can be described again at a high level of abstraction using `ParEffectful` and its `parTraverse` function ([see the implementation here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala#L60)).
+Sometimes is also usefull to fire some external dependencies in parallel when there is a collection of known coordinates as source. In this repo for instance, this is the case when the service needs to check the cache for a list of `ProductId` and collect their details in case they exist. As before, this computation can be described again at a high level of abstraction using `ParEffectful` and its `parTraverse` function ([see the implementation here](https://github.com/barambani/http4s-extend/blob/master/src/main/scala/http4s/extend/ParEffectful.scala#L60)).
 ```scala
 private final class ProductRepoImpl[F[_] : Monad : ParEffectful](
   dep : Dependencies[F], logger: Logger[F]) extends ProductRepo[F] {
@@ -95,7 +95,7 @@ sealed abstract class PriceHttpApi[F[_]](
 ```
 
 #### Main Server
-This approach decouples very well the details of the execution and the decoding/encoding from the domain logic's formalization. With this style is possible to describe at a very high level of abstraction the expected behavior of the system and the domain context at hand, tuning the power of the structures needed by any implementation in a particurarly fine way. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized (notice all the occurrencies of IO below that don't appear in the interanls of the service).
+This approach decouples very well the details of the execution and the decoding/encoding from the domain logic's formalization. With this style is possible to describe at a very high level of abstraction the expected behavior of the system and the domain context at hand, tuning the power of the structures needed by any implementation in a particurarly fine way. The sole place where the actual runtime becomes relevant is in the `Main` server file where all the instances are materialized (notice all the occurrencies of IO below that don't appear in the internals of the service).
 ```scala
 object Main extends StreamApp[IO] {
 
