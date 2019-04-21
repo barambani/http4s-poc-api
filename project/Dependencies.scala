@@ -14,6 +14,7 @@ object Dependencies {
     val http4s        = "0.18.23"
     val circe         = "0.11.1"
     val http4sExtend  = "0.0.43"
+    val logback       = "1.2.3"
 
     val scalaCheck    = "1.14.0"
     val scalaTest     = "3.0.7"
@@ -46,7 +47,8 @@ object Dependencies {
     "org.http4s"            %% "http4s-circe"         % versionOf.http4s        withSources(),
     "io.circe"              %% "circe-generic"        % versionOf.circe         withSources(),
     "io.circe"              %% "circe-literal"        % versionOf.circe         withSources(),
-    "com.github.barambani"  %% "http4s-extend"        % versionOf.http4sExtend  excludeAll(transitiveDependencies:_*) withSources()
+    "com.github.barambani"  %% "http4s-extend"        % versionOf.http4sExtend  excludeAll(transitiveDependencies:_*) withSources(),
+    "ch.qos.logback"        %  "logback-classic"      % versionOf.logback       withSources()
   )
 
   val testDependencies = Seq(
