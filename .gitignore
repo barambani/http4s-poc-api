@@ -25,3 +25,6 @@ project/plugins/project/
 
 # Vim .swp
 *.swp
+
+# IntelliJ
+.idea
