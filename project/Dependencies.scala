@@ -11,7 +11,7 @@ object Dependencies {
     val catsEffect    = "1.0.0-RC"
     val circe         = "0.11.1"
     val fs2           = "0.10.6"
-    val http4s        = "0.18.23"
+    val http4s        = "0.20.1"
     val http4sExtend  = "0.0.43"
     val kindProjector = "0.9.10"
     val `log-effect`  = "0.7.0"
