@@ -1,8 +1,8 @@
 package interpreters
 
+import cats.MonadError
 import cats.effect.IO
 import cats.syntax.apply._
-import cats.{MonadError, Show}
 import errors.{DependencyFailure, ServiceError}
 import external.TeamThreeCacheApi._
 import external._
@@ -10,8 +10,6 @@ import http4s.extend.syntax.byNameNt._
 import http4s.extend.syntax.errorAdapt._
 import model.DomainModel._
 import monix.execution.Scheduler
-
-import scala.concurrent.ExecutionContext
 
 trait Dependencies[F[_]] {
   def user: UserId => F[User]
@@ -29,9 +27,8 @@ object Dependencies {
   implicit def ioDependencies(
     implicit
       ev1: MonadError[IO, ServiceError],
-      ev2: Show[ServiceError],
-      ec: ExecutionContext,
-      sc: Scheduler): Dependencies[IO] =
+      sc: Scheduler
+  ): Dependencies[IO] =
     new Dependencies[IO] {
 
       def user: UserId => IO[User] =

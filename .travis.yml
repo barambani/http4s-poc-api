@@ -3,13 +3,13 @@ sudo: false
 
 language: scala
 scala:
-  - 2.12.7
+  - 2.12.8
 
 jdk:
   - oraclejdk8
 
 script:
-   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport && sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+   - sbt ++$TRAVIS_SCALA_VERSION fullCiBuild
 
 after_success:
    - bash <(curl -s https://codecov.io/bash)

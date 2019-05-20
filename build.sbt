@@ -15,9 +15,22 @@ val root = project.in(file("."))
   .settings(
     version                 :=  "0.0.1",
     name                    :=  "http4s-poc-api",
-    scalaVersion            :=  "2.12.7",
+    scalaVersion            :=  "2.12.8",
     libraryDependencies     ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     scalacOptions           ++= generalOptions,
     scalacOptions in Test   ++= testOnlyOptions,
-    scalacOptions in (Compile, console) --= nonTestExceptions
+      scalacOptions in (Compile, console) --= nonTestExceptions,
+      addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
+      addCommandAlias(
+          "checkFormat",
+          ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck"
+        ),
+    addCommandAlias(
+        "fullBuild",
+        ";checkFormat;unusedCompileDependenciesTest;undeclaredCompileDependenciesTest;clean;coverage;test;coverageReport;coverageAggregate"
+    ),
+    addCommandAlias(
+      "fullCiBuild",
+      ";set scalacOptions in ThisBuild ++= Seq(\"-opt:l:inline\", \"-opt-inline-from:**\");fullBuild"
+    )
   )

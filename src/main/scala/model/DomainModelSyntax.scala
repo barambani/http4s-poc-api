@@ -5,6 +5,8 @@ import DomainModelValSyntax._
 import shapeless.tag.@@
 import shapeless.tag
 
+import scala.language.implicitConversions
+
 object DomainModelSyntax {
   implicit def domainModelLongSyntax(x: Long) = new LongOps(x)
   implicit def domainModelStringSyntax(x: String) = new StringOps(x)
