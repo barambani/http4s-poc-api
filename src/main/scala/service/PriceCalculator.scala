@@ -5,10 +5,12 @@ import cats.instances.list._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import http4s.extend.ParEffectful
-import http4s.extend.syntax.parEffectful._
+import external.library.ParallelEffect
+import external.library.syntax.parallelEffect._
 import interpreters.{ Dependencies, Logger }
 import model.DomainModel._
+
+import scala.concurrent.duration.FiniteDuration
 
 sealed trait PriceCalculator[F[_]] {
   def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]]
@@ -16,17 +18,21 @@ sealed trait PriceCalculator[F[_]] {
 
 object PriceCalculator {
 
-  @inline def apply[F[_]: Monad: ParEffectful](
+  @inline def apply[F[_]: Monad: ParallelEffect](
     dependencies: Dependencies[F],
-    logger: Logger[F]
+    logger: Logger[F],
+    priceFetchTimeout: FiniteDuration
   ): PriceCalculator[F] =
-    new PriceCalculatorImpl(dependencies, logger)
+    new PriceCalculatorImpl(dependencies, logger, priceFetchTimeout)
 
-  final private class PriceCalculatorImpl[F[_]: Monad: ParEffectful](dep: Dependencies[F], logger: Logger[F])
-      extends PriceCalculator[F] {
+  final private class PriceCalculatorImpl[F[_]: Monad: ParallelEffect](
+    dep: Dependencies[F],
+    logger: Logger[F],
+    priceFetchTimeout: FiniteDuration
+  ) extends PriceCalculator[F] {
 
     def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
-      prods.toList parTraverse userPrice(pref)(user)
+      prods.toList.parallelTraverse(userPrice(pref)(user), priceFetchTimeout)
 
     private def userPrice: UserPreferences => User => Product => F[Price] =
       prefs =>

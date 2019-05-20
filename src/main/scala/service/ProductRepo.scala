@@ -9,8 +9,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.traverse._
-import http4s.extend.ParEffectful
-import http4s.extend.syntax.parEffectful._
+import external.library.ParallelEffect
 import interpreters.{ Dependencies, Logger }
 import model.DomainModel._
 
@@ -20,19 +19,21 @@ sealed trait ProductRepo[F[_]] {
 
 object ProductRepo {
 
-  @inline def apply[F[_]: Monad: ParEffectful](
+  @inline def apply[F[_]: Monad: ParallelEffect](
     dependencies: Dependencies[F],
     logger: Logger[F]
   ): ProductRepo[F] =
     new ProductRepoImpl(dependencies, logger)
 
-  final private class ProductRepoImpl[F[_]: Monad: ParEffectful](dep: Dependencies[F], logger: Logger[F])
+  final private class ProductRepoImpl[F[_]: Monad: ParallelEffect](dep: Dependencies[F], logger: Logger[F])
       extends ProductRepo[F] {
 
     /**
-      * Tries to retrieve the products by ProductId from the cache, if results in a miss it tries on the http store.
-      * It returns only the products existing so the result might contain less elements than the input list.
-      * If a product is not in the cache but is found in the http store it will be added to the cache
+      * Tries to retrieve the products by ProductId from the cache, if results
+      * in a miss it tries on the http product store.
+      * It returns only the products existing so the result might contain less
+      * elements than the input list. If a product is not in the cache but is
+      * found in the http store it will be added to the cache.
       */
     def storedProducts: Seq[ProductId] => F[List[Product]] =
       _.toList parTraverse (id => (cacheMissFetch(id) compose dep.cachedProduct)(id)) map (_.flatten)

@@ -3,8 +3,7 @@ package errors
 import cats.syntax.either._
 import cats.syntax.show._
 import cats.{ Monad, MonadError, Show }
-import http4s.extend.syntax.errorResponse._
-import http4s.extend.{ newtype, ErrorResponse }
+import external.library.newtype
 import org.http4s.Response
 
 object MkServiceError extends newtype[ServiceErrorValue] with ServiceErrorInstances

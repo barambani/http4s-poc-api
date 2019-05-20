@@ -2,7 +2,7 @@ package errors
 
 import cats.syntax.either._
 import cats.{ Monad, MonadError, Show }
-import http4s.extend.{ newtype, ErrorResponse }
+import external.library.newtype
 import org.http4s.Response
 
 object MkInvalidShippingCountry extends newtype[Throwable] with InvalidShippingCountryInstances {

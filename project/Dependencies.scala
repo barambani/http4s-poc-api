@@ -12,7 +12,6 @@ object Dependencies {
     val circe         = "0.11.1"
     val fs2           = "0.10.7"
     val http4s        = "0.18.23"
-    val http4sExtend  = "0.0.43"
     val kindProjector = "0.9.10"
     val `log-effect`  = "0.7.0"
     val monix         = "3.0.0-RC1"
@@ -37,22 +36,21 @@ object Dependencies {
    * Dependencies and compiler plugins
    */
   val externalDependencies = Seq(
-    "org.typelevel"        %% "cats-core"           % versionOf.cats,
-    "org.typelevel"        %% "cats-kernel"         % versionOf.cats,
-    "org.typelevel"        %% "cats-effect"         % versionOf.catsEffect,
-    "co.fs2"               %% "fs2-core"            % versionOf.fs2,
-    "io.monix"             %% "monix-eval"          % versionOf.monix,
-    "io.monix"             %% "monix-execution"     % versionOf.monix,
-    "org.scalaz"           %% "scalaz-concurrent"   % versionOf.scalaz,
-    "org.http4s"           %% "http4s-core"         % versionOf.http4s,
-    "org.http4s"           %% "http4s-server"       % versionOf.http4s,
-    "org.http4s"           %% "http4s-dsl"          % versionOf.http4s excludeAll (transitiveDependencies: _*),
-    "org.http4s"           %% "http4s-blaze-server" % versionOf.http4s,
-    "org.http4s"           %% "http4s-circe"        % versionOf.http4s,
-    "io.circe"             %% "circe-core"          % versionOf.circe,
-    "io.circe"             %% "circe-generic"       % versionOf.circe,
-    "com.github.barambani" %% "http4s-extend"       % versionOf.http4sExtend excludeAll (transitiveDependencies: _*),
-    "com.chuusai"          %% "shapeless"           % versionOf.shapeless,
+    "org.typelevel" %% "cats-core"           % versionOf.cats,
+    "org.typelevel" %% "cats-kernel"         % versionOf.cats,
+    "org.typelevel" %% "cats-effect"         % versionOf.catsEffect,
+    "co.fs2"        %% "fs2-core"            % versionOf.fs2,
+    "io.monix"      %% "monix-eval"          % versionOf.monix,
+    "io.monix"      %% "monix-execution"     % versionOf.monix,
+    "org.scalaz"    %% "scalaz-concurrent"   % versionOf.scalaz,
+    "org.http4s"    %% "http4s-core"         % versionOf.http4s,
+    "org.http4s"    %% "http4s-server"       % versionOf.http4s,
+    "org.http4s"    %% "http4s-dsl"          % versionOf.http4s excludeAll (transitiveDependencies: _*),
+    "org.http4s"    %% "http4s-blaze-server" % versionOf.http4s,
+    "org.http4s"    %% "http4s-circe"        % versionOf.http4s,
+    "io.circe"      %% "circe-core"          % versionOf.circe,
+    "io.circe"      %% "circe-generic"       % versionOf.circe,
+    "com.chuusai"   %% "shapeless"           % versionOf.shapeless,
 //    "io.laserdisc"         %% "log-effect-core"     % versionOf.`log-effect`,
 //    "io.laserdisc"         %% "log-effect-fs2"      % versionOf.`log-effect`
   ) map (_.withSources)

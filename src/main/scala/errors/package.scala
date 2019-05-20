@@ -1,4 +1,4 @@
-import http4s.extend.|
+import external.library.|
 
 package object errors {
 
