@@ -14,6 +14,7 @@ object Dependencies {
     val http4s        = "0.18.23"
     val http4sExtend  = "0.0.43"
     val kindProjector = "0.9.10"
+    val `log-effect`  = "0.7.0"
     val monix         = "3.0.0-RC1"
     val scalaCheck    = "1.14.0"
     val scalaTest     = "3.0.7"
@@ -52,6 +53,8 @@ object Dependencies {
     "io.circe"             %% "circe-generic"       % versionOf.circe,
     "com.github.barambani" %% "http4s-extend"       % versionOf.http4sExtend excludeAll (transitiveDependencies: _*),
     "com.chuusai"          %% "shapeless"           % versionOf.shapeless,
+//    "io.laserdisc"         %% "log-effect-core"     % versionOf.`log-effect`,
+//    "io.laserdisc"         %% "log-effect-fs2"      % versionOf.`log-effect`
   ) map (_.withSources)
 
   val testDependencies = Seq(

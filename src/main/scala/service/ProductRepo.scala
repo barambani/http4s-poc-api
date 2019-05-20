@@ -35,19 +35,21 @@ object ProductRepo {
       * If a product is not in the cache but is found in the http store it will be added to the cache
       */
     def storedProducts: Seq[ProductId] => F[List[Product]] =
-      _.toList.parTraverse(id => (cacheMissFetch(id) compose dep.cachedProduct)(id)) map (_.flatten)
+      _.toList parTraverse (id => (cacheMissFetch(id) compose dep.cachedProduct)(id)) map (_.flatten)
 
     private def cacheMissFetch: ProductId => F[Option[Product]] => F[Option[Product]] =
       id =>
         cacheResult =>
           for {
             mayBeCached <- cacheResult
-            mayBeStored <- mayBeCached.fold(httpFetch(id)) {
-                            _.some.pure[F] <* logger.debug(s"Product $id found in cache")
-                          }
+            mayBeStored <- mayBeCached.fold(
+                            productStoreFetch(id) <* logger.debug(
+                              s"Product $id not found in cache, fetched from the product store repo"
+                            )
+                          )(_.some.pure[F] <* logger.debug(s"Product $id found in cache"))
           } yield mayBeStored
 
-    private def httpFetch(id: ProductId): F[Option[Product]] =
+    private def productStoreFetch(id: ProductId): F[Option[Product]] =
       for {
         mayBeProd <- dep.product(id)
         _         <- (mayBeProd map storeInCache).sequence
@@ -55,7 +57,7 @@ object ProductRepo {
 
     private def storeInCache: Product => F[Unit] =
       prod =>
-        logger.debug(s"Product ${prod.id} not in cache, fetched from the repo") *>
+        logger.debug(s"Storing the product ${prod.id} to cache") *>
           dep.storeProductToCache(prod.id)(prod) <*
           logger.debug(s"Product ${prod.id} stored into the cache")
   }
