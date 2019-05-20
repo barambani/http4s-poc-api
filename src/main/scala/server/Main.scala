@@ -6,13 +6,13 @@ import cats.effect.IO
 import errors.ServiceError._
 import errors.ThrowableInstances._
 import fs2.StreamApp
-import interpreters.{Dependencies, Logger}
+import interpreters.{ Dependencies, Logger }
 import io.circe.generic.auto._
 import model.DomainModel._
 import monix.execution.Scheduler
 import org.http4s.circe._
 import org.http4s.server.blaze.BlazeBuilder
-import org.http4s.{EntityDecoder, EntityEncoder}
+import org.http4s.{ EntityDecoder, EntityEncoder }
 import service.PriceService
 import model.DomainModelCodecs._
 

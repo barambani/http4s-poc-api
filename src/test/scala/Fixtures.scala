@@ -2,7 +2,7 @@ import cats.effect.IO
 import http4s.extend.syntax.Verified
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.scalatest.{Matchers, Succeeded}
+import org.scalatest.{ Matchers, Succeeded }
 
 trait Fixtures extends Matchers {
 

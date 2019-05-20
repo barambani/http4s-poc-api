@@ -8,8 +8,8 @@ import shapeless.tag
 import scala.language.implicitConversions
 
 object DomainModelSyntax {
-  implicit def domainModelLongSyntax(x: Long) = new LongOps(x)
-  implicit def domainModelStringSyntax(x: String) = new StringOps(x)
+  implicit def domainModelLongSyntax(x: Long)                = new LongOps(x)
+  implicit def domainModelStringSyntax(x: String)            = new StringOps(x)
   implicit def domainModelBigDecimalOpsSyntax(x: BigDecimal) = new BigDecimalOps(x)
 }
 
@@ -18,14 +18,14 @@ object DomainModelValSyntax {
 }
 
 final class LongOps(x: Long) {
-  def asUserId: UserId = x.refined[UserIdT]
+  def asUserId: UserId       = x.refined[UserIdT]
   def asProductId: ProductId = x.refined[ProductIdT]
 }
 
 final class StringOps(x: String) {
-  def asCountry: Country = x.refined[CountryT]
+  def asCountry: Country         = x.refined[CountryT]
   def asUserAddress: UserAddress = x.refined[UserAddressT]
-  def asCurrency: Currency = x.refined[CurrencyT]
+  def asCurrency: Currency       = x.refined[CurrencyT]
   def asProductSpec: ProductSpec = x.refined[ProductSpecT]
 }
 

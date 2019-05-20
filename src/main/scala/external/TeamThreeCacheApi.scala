@@ -1,7 +1,7 @@
 package external
 
 import cats.Functor
-import model.DomainModel.{Product, ProductId}
+import model.DomainModel.{ Product, ProductId }
 import scalaz.concurrent.Task
 
 sealed trait TeamThreeCacheApi[K, V] {
@@ -20,7 +20,7 @@ object TeamThreeCacheApi extends TeamThreeCacheApiInstances {
     }
 }
 
-private[external] sealed trait TeamThreeCacheApiInstances {
+sealed private[external] trait TeamThreeCacheApiInstances {
 
   implicit val scalazTaskFunctor: Functor[Task] =
     new Functor[Task] {

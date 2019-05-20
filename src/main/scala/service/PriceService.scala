@@ -6,11 +6,13 @@ import cats.syntax.flatMap._
 import errors.ServiceError
 import http4s.extend.ParEffectful
 import http4s.extend.syntax.parEffectful._
-import interpreters.{Dependencies, Logger}
+import interpreters.{ Dependencies, Logger }
 import model.DomainModel._
 
-final case class PriceService[F[_] : MonadError[?[_], ServiceError] : ParEffectful](
-  dep: Dependencies[F], logger: Logger[F]) {
+final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParEffectful](
+  dep: Dependencies[F],
+  logger: Logger[F]
+) {
 
   /**
     * Going back to ParEffectful and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
@@ -22,24 +24,24 @@ final case class PriceService[F[_] : MonadError[?[_], ServiceError] : ParEffectf
     * While waiting for a different solution with cats.Parallel, this suits the purpose better
     */
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
-    (userFor(userId), productsFor(productIds), preferencesFor(userId)).parMap(priceCalculator.finalPrices).flatten
-  
+    (userFor(userId), productsFor(productIds), preferencesFor(userId))
+      .parMap(priceCalculator.finalPrices)
+      .flatten
 
   private def userFor(userId: UserId): F[User] =
     logger.debug(s"Collecting user details for id $userId") *>
-    dep.user(userId) <*
-    logger.debug(s"User details collected for id $userId")
+      dep.user(userId) <*
+      logger.debug(s"User details collected for id $userId")
 
   private def preferencesFor(userId: UserId): F[UserPreferences] =
     logger.debug(s"Looking up user preferences for user $userId") *>
-    preferenceFetcher.userPreferences(userId) <*
-    logger.debug(s"User preferences look up for $userId completed")
+      preferenceFetcher.userPreferences(userId) <*
+      logger.debug(s"User preferences look up for $userId completed")
 
   private def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
     logger.debug(s"Collecting product details for products $productIds") *>
-    productRepo.storedProducts(productIds) <*
-    logger.debug(s"Product details collection for $productIds completed")
-
+      productRepo.storedProducts(productIds) <*
+      logger.debug(s"Product details collection for $productIds completed")
 
   private lazy val preferenceFetcher: PreferenceFetcher[F] =
     PreferenceFetcher(dep, logger)

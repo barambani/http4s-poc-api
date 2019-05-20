@@ -11,12 +11,12 @@ import interpreters.TestDependencies._
 import interpreters.TestLogger._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder}
+import io.circe.{ Decoder, Encoder }
 import model.DomainModel._
 import model.DomainModelSyntax._
 import org.http4s.Status
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import org.scalatest.{FlatSpec, Matchers}
+import org.http4s.circe.{ jsonEncoderOf, jsonOf }
+import org.scalatest.{ FlatSpec, Matchers }
 import server.PriceHttpApi
 import service.PriceService
 import model.DomainModelCodecs._
@@ -31,8 +31,8 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   implicit val testExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
 
-  implicit def testEncoder[A : Encoder] = jsonEncoderOf[IO, A]
-  implicit def testDecoder[A : Decoder] = jsonOf[IO, A]
+  implicit def testEncoder[A: Encoder] = jsonEncoderOf[IO, A]
+  implicit def testDecoder[A: Decoder] = jsonOf[IO, A]
 
   val aUser = User(111.asUserId, Nil)
 
@@ -45,15 +45,15 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
   )
 
   val price = Price(
-    amount          = BigDecimal(2.34).asMoneyAmount,
-    currency        = "EUR".asCurrency,
-    discount        = None,
-    priceTimeStamp  = Instant.now()
+    amount = BigDecimal(2.34).asMoneyAmount,
+    currency = "EUR".asCurrency,
+    discount = None,
+    priceTimeStamp = Instant.now()
   )
 
   val preferences = UserPreferences(
     destination = ShipmentDestination("address".asUserAddress, "Italy".asCountry),
-    currency    = "EUR".asCurrency
+    currency = "EUR".asCurrency
   )
 
   it should "respond with Ok 200 and the correct number of prices" in {
@@ -72,12 +72,14 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val request = POST(uri("/"), reqPayload.asJson)
 
-    val verified = httpApi.runForF(request).verify[Seq[Price]](
-      Status.Ok,
-      ps =>
-        if(ps.lengthCompare(2) == 0) ps.validNel
-        else s"Wrong number of prices. Expected ${reqPayload.productIds.size} but was ${ps.size}".invalidNel
-    )
+    val verified = httpApi
+      .runForF(request)
+      .verify[Seq[Price]](
+        Status.Ok,
+        ps =>
+          if (ps.lengthCompare(2) == 0) ps.validNel
+          else s"Wrong number of prices. Expected ${reqPayload.productIds.size} but was ${ps.size}".invalidNel
+      )
 
     assertOn(verified)
   }
@@ -91,7 +93,9 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
     )
 
     val pricing = PriceService[IO](
-      testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price)(testLogger),
+      testSucceedingDependencies(aUser, wrongPreferences, productsInStore, productsInCache, price)(
+        testLogger
+      ),
       testLogger
     )
 
@@ -104,10 +108,12 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val request = POST(uri("/"), reqPayload.asJson)
 
-    val verified = httpApi.runForF(request).verifyResponseText(
-      Status.InternalServerError,
-      "InvalidShippingCountry: Cannot ship outside Italy"
-    )
+    val verified = httpApi
+      .runForF(request)
+      .verifyResponseText(
+        Status.InternalServerError,
+        "InvalidShippingCountry: Cannot ship outside Italy"
+      )
 
     assertOn(verified)
   }
@@ -125,14 +131,16 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
     val request = POST(uri("/"), reqPayload.asJson)
 
-    val verified = httpApi.runForF(request).verifyResponseText(
-      Status.BadGateway,
-      """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
+    val verified = httpApi
+      .runForF(request)
+      .verifyResponseText(
+        Status.BadGateway,
+        """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
         |DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
-    )
+      )
 
     assertOn(verified)
   }

@@ -8,15 +8,16 @@ import errors.ServiceError
 import http4s.extend.ErrorResponse
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
+import org.http4s.{ EntityDecoder, EntityEncoder, HttpService, Method, Request, Response }
 import service.PriceService
 
 sealed abstract class PriceHttpApi[F[_]](
   implicit
-    ME: MonadError[F, ServiceError],
-    RD: EntityDecoder[F, PricesRequestPayload],
-    RE: EntityEncoder[F, List[Price]],
-    ER: ErrorResponse[F, ServiceError]) extends Http4sDsl[F] {
+  ME: MonadError[F, ServiceError],
+  RD: EntityDecoder[F, PricesRequestPayload],
+  RE: EntityEncoder[F, List[Price]],
+  ER: ErrorResponse[F, ServiceError]
+) extends Http4sDsl[F] {
 
   def service(priceService: PriceService[F]): HttpService[F] =
     HttpService[F] {
@@ -34,9 +35,10 @@ sealed abstract class PriceHttpApi[F[_]](
 object PriceHttpApi {
   def apply[F[_]](
     implicit
-      ME: MonadError[F, ServiceError],
-      RD: EntityDecoder[F, PricesRequestPayload],
-      RE: EntityEncoder[F, List[Price]],
-      ER: ErrorResponse[F, ServiceError]): PriceHttpApi[F] =
-    new PriceHttpApi[F]{}
+    ME: MonadError[F, ServiceError],
+    RD: EntityDecoder[F, PricesRequestPayload],
+    RE: EntityEncoder[F, List[Price]],
+    ER: ErrorResponse[F, ServiceError]
+  ): PriceHttpApi[F] =
+    new PriceHttpApi[F] {}
 }

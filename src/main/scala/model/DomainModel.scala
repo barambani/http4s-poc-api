@@ -23,9 +23,9 @@ object DomainModel extends DomainModelInstances {
   sealed trait DiscountAmountT
   sealed trait DiscountReasonT
 
-  type UserId       = Long @@ UserIdT
-  type UserAddress  = String @@ UserAddressT
-  type Country      = String @@ CountryT
+  type UserId      = Long @@ UserIdT
+  type UserAddress = String @@ UserAddressT
+  type Country     = String @@ CountryT
 
   type UserPurchaseTime = Instant @@ UserPurchaseTimeT
 
@@ -40,7 +40,12 @@ object DomainModel extends DomainModelInstances {
   type DiscountReason = String @@ DiscountReasonT
 
   final case class Discount(discount: DiscountAmount, discountReason: DiscountReason)
-  final case class Price(amount: MoneyAmount, currency: Currency, discount: Option[Discount], priceTimeStamp: Instant)
+  final case class Price(
+    amount: MoneyAmount,
+    currency: Currency,
+    discount: Option[Discount],
+    priceTimeStamp: Instant
+  )
   final case class ShipmentDestination(address: UserAddress, country: Country)
   final case class UserPreferences(destination: ShipmentDestination, currency: Currency)
   final case class ProductSale(starts: ProductSaleStart, ends: ProductSaleEnd)
@@ -50,10 +55,16 @@ object DomainModel extends DomainModelInstances {
 
   final case class PricesRequestPayload(userId: UserId, productIds: Seq[ProductId])
 
-  final case class ServiceSignature(name: String, version: String, scalaVersion: String, scalaOrganization: String, buildTime: String)
+  final case class ServiceSignature(
+    name: String,
+    version: String,
+    scalaVersion: String,
+    scalaOrganization: String,
+    buildTime: String
+  )
 }
 
-private[model] sealed trait DomainModelInstances {
+sealed private[model] trait DomainModelInstances {
 
   implicit val instantShow: Show[Instant] =
     new Show[Instant] {

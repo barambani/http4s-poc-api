@@ -5,7 +5,7 @@ import java.time.Instant
 import cats.instances.long._
 import cats.instances.string._
 import http4s.extend.util.CirceModule._
-import io.circe.{Decoder, Encoder}
+import io.circe.{ Decoder, Encoder }
 import model.DomainModel._
 import shapeless.tag
 import shapeless.tag.@@
