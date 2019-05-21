@@ -1,5 +1,6 @@
 import java.time.Instant
 
+import BoilerplateGeneration.{ ArityFunctionsGenerator, ArityTestsGenerator }
 import Dependencies._
 import ScalacOptions._
 
@@ -14,7 +15,11 @@ val root = project
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoSettings)
   .settings(
-    version             := "0.0.1",
+    sourceGenerators in Compile += ((sourceManaged in Compile) map ArityFunctionsGenerator.run(22)).taskValue,
+    sourceGenerators in Test    += ((sourceManaged in Test) map ArityTestsGenerator.run(8)).taskValue
+  )
+  .settings(
+    version             := "0.1.0",
     name                := "http4s-poc-api",
     scalaVersion        := "2.12.8",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,

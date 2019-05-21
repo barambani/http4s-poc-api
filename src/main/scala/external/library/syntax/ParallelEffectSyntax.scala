@@ -53,11 +53,11 @@ private[syntax] class ParallelEffectOps[F[_], A](private val fa: F[A]) extends A
 
 private[syntax] class ParallelEffectTraverseOps[T[_], A](private val traverse: T[A]) extends AnyVal {
 
-  def parallelTraverse[F[_]: ParallelEffect: Applicative, B](f: A => F[B], t: FiniteDuration)(
+  def parallelTraverse[F[_]: ParallelEffect: Applicative, B](f: A => F[B])(t: FiniteDuration)(
     implicit
     ev1: Monoid[T[B]],
     ev2: Traverse[T],
     ev3: Applicative[T]
   ): F[T[B]] =
-    ParallelEffect.parallelTraverse(traverse)(f, t)
+    ParallelEffect.parallelTraverse(traverse)(f)(t)
 }

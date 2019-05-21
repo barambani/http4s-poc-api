@@ -3,11 +3,11 @@ package interpreters
 import cats.MonadError
 import cats.effect.IO
 import cats.syntax.apply._
-import errors.{ DependencyFailure, ServiceError }
+import errors.{DependencyFailure, ServiceError}
 import external.TeamThreeCacheApi._
 import external._
-import http4s.extend.syntax.byNameNt._
-import http4s.extend.syntax.errorAdapt._
+import external.library.syntax.errorAdapt._
+import external.library.syntax.ioAdapt._
 import model.DomainModel._
 import monix.execution.Scheduler
 

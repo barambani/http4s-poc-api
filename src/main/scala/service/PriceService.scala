@@ -4,18 +4,23 @@ import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import errors.ServiceError
-import http4s.extend.ParEffectful
-import http4s.extend.syntax.parEffectful._
-import interpreters.{ Dependencies, Logger }
+import external.library.ParallelEffect
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
+import external.library.syntax.parallelEffect._
 
-final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParEffectful](
+import scala.concurrent.duration._
+
+final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParallelEffect](
   dep: Dependencies[F],
-  logger: Logger[F]
+  logger: Logger[F],
+  productTimeout: FiniteDuration,
+  preferenceTimeout: FiniteDuration,
+  priceTimeout: FiniteDuration
 ) {
 
   /**
-    * Going back to ParEffectful and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
+    * Going back to ParallelEffect and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
     * of parMapN because of the cancellation. It is not able anymore to collect multiple errors in the resulting
     * MonadError as explained in this gitter conversation
     *
@@ -25,21 +30,21 @@ final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParEffectful
     */
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
     (userFor(userId), productsFor(productIds), preferencesFor(userId))
-      .parMap(priceCalculator.finalPrices)
+      .parallelMap(6.seconds)(priceCalculator.finalPrices)
       .flatten
 
   private def userFor(userId: UserId): F[User] =
-    logger.debug(s"Collecting user details for id $userId") *>
+    logger.debug(s"Collecting user details for id $userId") >>
       dep.user(userId) <*
       logger.debug(s"User details collected for id $userId")
 
   private def preferencesFor(userId: UserId): F[UserPreferences] =
-    logger.debug(s"Looking up user preferences for user $userId") *>
+    logger.debug(s"Looking up user preferences for user $userId") >>
       preferenceFetcher.userPreferences(userId) <*
       logger.debug(s"User preferences look up for $userId completed")
 
   private def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
-    logger.debug(s"Collecting product details for products $productIds") *>
+    logger.debug(s"Collecting product details for products $productIds") >>
       productRepo.storedProducts(productIds) <*
       logger.debug(s"Product details collection for $productIds completed")
 
@@ -47,8 +52,8 @@ final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParEffectful
     PreferenceFetcher(dep, logger)
 
   private lazy val productRepo: ProductRepo[F] =
-    ProductRepo(dep, logger)
+    ProductRepo(dep, logger, productTimeout)
 
   private lazy val priceCalculator: PriceCalculator[F] =
-    PriceCalculator(dep, logger)
+    PriceCalculator(dep, logger, priceTimeout)
 }

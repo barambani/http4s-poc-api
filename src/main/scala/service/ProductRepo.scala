@@ -10,8 +10,11 @@ import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.traverse._
 import external.library.ParallelEffect
-import interpreters.{ Dependencies, Logger }
+import interpreters.{Dependencies, Logger}
 import model.DomainModel._
+import external.library.syntax.parallelEffect._
+
+import scala.concurrent.duration.FiniteDuration
 
 sealed trait ProductRepo[F[_]] {
   def storedProducts: Seq[ProductId] => F[List[Product]]
@@ -21,11 +24,16 @@ object ProductRepo {
 
   @inline def apply[F[_]: Monad: ParallelEffect](
     dependencies: Dependencies[F],
-    logger: Logger[F]
+    logger: Logger[F],
+    timeout: FiniteDuration
   ): ProductRepo[F] =
-    new ProductRepoImpl(dependencies, logger)
+    new ProductRepoImpl(dependencies, logger, timeout)
 
-  final private class ProductRepoImpl[F[_]: Monad: ParallelEffect](dep: Dependencies[F], logger: Logger[F])
+  final private class ProductRepoImpl[F[_]: Monad: ParallelEffect](
+    dep: Dependencies[F],
+    logger: Logger[F],
+    timeout: FiniteDuration
+  )
       extends ProductRepo[F] {
 
     /**
@@ -36,7 +44,7 @@ object ProductRepo {
       * found in the http store it will be added to the cache.
       */
     def storedProducts: Seq[ProductId] => F[List[Product]] =
-      _.toList parTraverse (id => (cacheMissFetch(id) compose dep.cachedProduct)(id)) map (_.flatten)
+      _.toList.parallelTraverse(id => (cacheMissFetch(id) compose dep.cachedProduct)(id))(timeout) map (_.flatten)
 
     private def cacheMissFetch: ProductId => F[Option[Product]] => F[Option[Product]] =
       id =>

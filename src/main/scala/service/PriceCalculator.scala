@@ -32,7 +32,7 @@ object PriceCalculator {
   ) extends PriceCalculator[F] {
 
     def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
-      prods.toList.parallelTraverse(userPrice(pref)(user), priceFetchTimeout)
+      prods.toList.parallelTraverse(userPrice(pref)(user))(priceFetchTimeout)
 
     private def userPrice: UserPreferences => User => Product => F[Price] =
       prefs =>

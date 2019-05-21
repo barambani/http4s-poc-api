@@ -1,8 +1,8 @@
 package errors
 
 import cats.syntax.either._
-import cats.{ Monad, MonadError, Show }
-import external.library.newtype
+import cats.{Monad, MonadError, Show}
+import external.library.{ErrorResponse, newtype}
 import org.http4s.Response
 
 object MkDependencyFailure extends newtype[Throwable] with DependencyFailureInstances {

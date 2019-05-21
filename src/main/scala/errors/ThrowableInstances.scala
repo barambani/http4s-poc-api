@@ -1,9 +1,8 @@
 package errors
 
 import cats.effect.util.CompositeException
-import cats.{ Monad, Semigroup, Show }
-import http4s.extend.ErrorResponse
-import http4s.extend.ExceptionDisplay._
+import cats.{Monad, Semigroup, Show}
+import external.library.ErrorResponse
 import org.http4s.Response
 
 sealed trait ThrowableInstances {
@@ -15,7 +14,7 @@ sealed trait ThrowableInstances {
 
       private def apiErrorDecomposition: Throwable => String = {
         case e: CompositeException => showOf(e)
-        case e: Throwable          => fullDisplay(e).unMk
+        case e: Throwable          => e.toString
       }
 
       private def showOf[E <: Throwable](e: E)(implicit ev: Show[E]): String =

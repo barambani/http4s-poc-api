@@ -13,7 +13,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ ExecutionContext, TimeoutException }
 
 /**
-  * The semantic of this typeclass is slightly different from the Parallel
+  * The semantic of this type-class is slightly different from the Parallel
   * implementation for IO. The main difference is that in case of failure
   * the other actions will not be cancelled. This is the expected behaviour for
   *
@@ -32,7 +32,7 @@ trait ParallelEffect[F[_]] {
     parallelMap2(fa, fb)(t)(Tuple2.apply)
 }
 
-object ParallelEffect extends ParallelEffectInstances with ParallelEffectFunctions {
+object ParallelEffect extends ParallelEffectInstances with ParallelEffectFunctions with ParallelEffectArityFunctions {
   @inline def apply[F[_]](implicit F: ParallelEffect[F]): ParallelEffect[F] = implicitly
 }
 
@@ -81,7 +81,7 @@ sealed private[library] trait ParallelEffectFunctions {
     * computations to complete up tp a timeout and will aggregate all the
     * eventual errors through the `Semigroup[Throwable]` provided.
     */
-  def parallelTraverse[A, B, T[_], F[_]](ta: T[A])(f: A => F[B], t: FiniteDuration)(
+  def parallelTraverse[A, B, T[_], F[_]](ta: T[A])(f: A => F[B])(t: FiniteDuration)(
     implicit
     TR: Traverse[T],
     TM: Monoid[T[B]],

@@ -4,7 +4,6 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import errors.ServiceError._
-import errors.ThrowableInstances._
 import fs2.StreamApp
 import interpreters.{ Dependencies, Logger }
 import io.circe.generic.auto._
@@ -15,6 +14,7 @@ import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.{ EntityDecoder, EntityEncoder }
 import service.PriceService
 import model.DomainModelCodecs._
+import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext
 
@@ -49,5 +49,11 @@ object Main extends StreamApp[IO] {
       .serve
 
   private lazy val priceService: PriceService[IO] =
-    PriceService(Dependencies[IO], Logger[IO])
+    PriceService(
+      Dependencies[IO],
+      Logger[IO],
+      productTimeout = 10.seconds,
+      preferenceTimeout = 10.seconds,
+      priceTimeout = 10.seconds
+    )
 }
