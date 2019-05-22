@@ -8,7 +8,7 @@ import errors.ServiceError
 import external.library.ErrorResponse
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{EntityDecoder, EntityEncoder, HttpService, Method, Request, Response}
+import org.http4s.{ EntityDecoder, EntityEncoder, HttpService, Method, Request, Response }
 import service.PriceService
 
 sealed abstract class PriceHttpApi[F[_]](

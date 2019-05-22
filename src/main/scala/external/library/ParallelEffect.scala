@@ -7,6 +7,7 @@ import cats.instances.parallel._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.parallel._
+import scalaz.concurrent.{ Task => ScalazTask }
 import cats.{ Applicative, Id, Monoid, Semigroup, Traverse }
 
 import scala.concurrent.duration.FiniteDuration
@@ -22,6 +23,7 @@ import scala.concurrent.{ ExecutionContext, TimeoutException }
   * - fa succeeds, fb fails     <-> IO.raiseError(fb failure)                         [and vice versa]
   * - fa succeeds, fb timeouts  <-> IO.raiseError(fb TimeoutException)                [and vice versa]
   * - fa fails, fb timeouts     <-> IO.raiseError((fa failure, fb TimeoutException))  [and vice versa]
+  * - fa fails, fb fails     <-> IO.raiseError((fa failure, fb failure))
   * - fa succeeds, fb succeeds  <-> IO[R]
   */
 trait ParallelEffect[F[_]] {
@@ -32,7 +34,10 @@ trait ParallelEffect[F[_]] {
     parallelMap2(fa, fb)(t)(Tuple2.apply)
 }
 
-object ParallelEffect extends ParallelEffectInstances with ParallelEffectFunctions with ParallelEffectArityFunctions {
+object ParallelEffect
+    extends ParallelEffectInstances
+    with ParallelEffectFunctions
+    with ParallelEffectArityFunctions {
   @inline def apply[F[_]](implicit F: ParallelEffect[F]): ParallelEffect[F] = implicitly
 }
 
@@ -69,6 +74,17 @@ sealed private[library] trait ParallelEffectInstances {
           case Left(a)  => F.pure(a)
           case Right(_) => fallback
         }
+    }
+
+  implicit def scalazTaskEffectfulOp(implicit ev: ParallelEffect[IO]): ParallelEffect[ScalazTask] =
+    new ParallelEffect[ScalazTask] {
+
+      import external.library.syntax.ioAdapt._
+
+      def parallelMap2[A, B, R](fa: =>ScalazTask[A], fb: =>ScalazTask[B])(
+        t: FiniteDuration
+      )(f: (A, B) => R): ScalazTask[R] =
+        ev.parallelMap2(fa.transformTo[IO], fb.transformTo[IO])(t)(f).transformTo[ScalazTask]
     }
 }
 

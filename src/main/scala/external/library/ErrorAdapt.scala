@@ -2,16 +2,16 @@ package external
 package library
 
 import cats.syntax.either._
-import monix.eval.{Task => MonixTask}
+import monix.eval.{ Task => MonixTask }
 
-import scala.concurrent.{ExecutionContext, Future}
-import scalaz.concurrent.{Task => ScalazTask}
+import scala.concurrent.{ ExecutionContext, Future }
+import scalaz.concurrent.{ Task => ScalazTask }
 
 trait ErrorAdapt[F[_]] {
   def attemptMapLeft[E, A](fa: F[A])(errM: Throwable => E): F[Either[E, A]]
 }
 
-private[library] sealed trait ErrorAdaptInstances {
+sealed private[library] trait ErrorAdaptInstances {
 
   implicit def monixTaskErrorAdapt: ErrorAdapt[MonixTask] =
     new ErrorAdapt[MonixTask] {
@@ -21,13 +21,13 @@ private[library] sealed trait ErrorAdaptInstances {
 
   implicit def futureErrorAdapt(implicit ec: ExecutionContext): ErrorAdapt[Future] =
     new ErrorAdapt[Future] {
-      def attemptMapLeft[E, A](fa: Future[A])(errM: Throwable => E): Future[Either[E,A]] =
+      def attemptMapLeft[E, A](fa: Future[A])(errM: Throwable => E): Future[Either[E, A]] =
         fa map (_.asRight[E]) recover { case e: Throwable => errM(e).asLeft }
     }
 
   implicit def scalazTaskErrorAdapt: ErrorAdapt[ScalazTask] =
     new ErrorAdapt[ScalazTask] {
-      def attemptMapLeft[E, A](fa: ScalazTask[A])(errM: Throwable => E): ScalazTask[Either[E,A]] =
+      def attemptMapLeft[E, A](fa: ScalazTask[A])(errM: Throwable => E): ScalazTask[Either[E, A]] =
         fa.attempt map (dj => (dj leftMap errM).toEither)
     }
 }

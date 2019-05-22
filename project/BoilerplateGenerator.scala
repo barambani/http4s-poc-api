@@ -73,7 +73,7 @@ final private[BoilerplateGeneration] case class BlockMembersExpansions(private v
           symbols
             .dropRight(2)
             .foldRight(s"(${symbols.dropRight(1).last}, ${symbols.last})")((an, exp) => s"($an, $prefix$exp)")
-  
+
   def rightAssociativeWithSuffixExpansionOf: Seq[String] => String => String => String =
     symbols =>
       prefix =>
@@ -82,7 +82,9 @@ final private[BoilerplateGeneration] case class BlockMembersExpansions(private v
           else
             symbols
               .dropRight(2)
-              .foldRight(s"(${symbols.dropRight(1).last}, ${symbols.last}$suffix)")((an, exp) => s"($an, $prefix$exp$suffix)")
+              .foldRight(s"(${symbols.dropRight(1).last}, ${symbols.last}$suffix)")(
+                (an, exp) => s"($an, $prefix$exp$suffix)"
+        )
 
   private[BoilerplateGeneration] def arityRange: Range = 0 until upToArity
 }

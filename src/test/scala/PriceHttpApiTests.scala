@@ -4,9 +4,6 @@ import java.util.concurrent.ForkJoinPool
 import cats.effect.IO
 import cats.syntax.validated._
 import errors.ServiceError._
-import errors.ThrowableInstances._
-import http4s.extend.syntax.httpService._
-import http4s.extend.syntax.responseVerification._
 import interpreters.TestDependencies._
 import interpreters.TestLogger._
 import io.circe.generic.auto._
@@ -19,6 +16,8 @@ import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.scalatest.{ FlatSpec, Matchers }
 import server.PriceHttpApi
 import service.PriceService
+import syntax.http4sService._
+import syntax.responseVerification._
 import model.DomainModelCodecs._
 
 import scala.concurrent.ExecutionContext

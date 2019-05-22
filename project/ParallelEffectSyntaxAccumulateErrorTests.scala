@@ -12,14 +12,17 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
     maxArity => {
 
       val staticTop =
-        static"""package external
-          |
+        static"""
+          |import cats.Eq
           |import cats.Semigroup
           |import cats.effect.IO
           |import cats.effect.laws.util.TestContext
           |import cats.effect.util.CompositeException
+          |import cats.instances.unit._
+          |import cats.laws._
+          |import cats.laws.discipline._
           |import cats.syntax.semigroup._
-          |import external.library.ParallelEffect
+          |import external.library.syntax.ioAdapt._
           |import external.library.syntax.parallelEffect._
           |import org.scalacheck.Prop
           |import scalaz.concurrent.{Task => ScalazTask}
@@ -34,6 +37,12 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
           |    new Semigroup[Throwable]{
           |      def combine(x: Throwable, y: Throwable): Throwable =
           |        CompositeException(x, y, Nil)
+          |    }
+          |    
+          |  implicit def taskEq[A](implicit ev: Eq[IO[A]]): Eq[ScalazTask[A]] =
+          |    new Eq[ScalazTask[A]] {
+          |      def eqv(x: ScalazTask[A], y: ScalazTask[A]): Boolean =
+          |        ev.eqv(x.transformTo[IO], y.transformTo[IO])
           |    }
           |    
           |  val timeout = 1.seconds"""
@@ -52,7 +61,7 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
             `sym e0..en-1` map (e => s"$e: Throwable") mkString ", "
 
           lazy val `ioEff.fail[Int](e0)..ioEff.fail[Int](en-1)` =
-            `sym e0..en-1` map (e => s"IO.raiseError($e)") mkString ", "
+            `sym e0..en-1` map (e => s"IO.raiseError[Int]($e)") mkString ", "
 
           lazy val `scalazTaskEff.fail[Int](e0)..scalazTaskEff.fail[Int](en-1)` =
             `sym e0..en-1` map (e => s"ScalazTask.fail[Int]($e)") mkString ", "

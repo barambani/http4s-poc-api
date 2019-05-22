@@ -3,7 +3,7 @@ package interpreters
 import cats.MonadError
 import cats.effect.IO
 import cats.syntax.apply._
-import errors.{DependencyFailure, ServiceError}
+import errors.{ DependencyFailure, ServiceError }
 import external.TeamThreeCacheApi._
 import external._
 import external.library.syntax.errorAdapt._

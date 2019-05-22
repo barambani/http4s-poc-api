@@ -43,6 +43,7 @@ object Dependencies {
     "io.monix"      %% "monix-eval"          % versionOf.monix,
     "io.monix"      %% "monix-execution"     % versionOf.monix,
     "org.scalaz"    %% "scalaz-concurrent"   % versionOf.scalaz,
+    "org.scalaz"    %% "scalaz-core"         % versionOf.scalaz,
     "org.http4s"    %% "http4s-core"         % versionOf.http4s,
     "org.http4s"    %% "http4s-server"       % versionOf.http4s,
     "org.http4s"    %% "http4s-dsl"          % versionOf.http4s excludeAll (transitiveDependencies: _*),
@@ -56,11 +57,12 @@ object Dependencies {
   ) map (_.withSources)
 
   val testDependencies = Seq(
-    "org.scalacheck" %% "scalacheck"       % versionOf.scalaCheck % "test",
-    "org.scalatest"  %% "scalatest"        % versionOf.scalaTest  % "test",
-    "org.typelevel"  %% "cats-testkit"     % versionOf.cats       % "test",
-    "org.typelevel"  %% "cats-effect-laws" % versionOf.catsEffect % "test"
-  )
+    "org.scalacheck" %% "scalacheck"          % versionOf.scalaCheck % "test",
+    "org.scalatest"  %% "scalatest"           % versionOf.scalaTest  % "test",
+    "org.typelevel"  %% "cats-testkit"        % versionOf.cats       % "test",
+    "org.typelevel"  %% "cats-effect-laws"    % versionOf.catsEffect % "test",
+    "org.http4s"     %% "http4s-blaze-client" % versionOf.http4s     % "test"
+  ) map (_.withSources)
 
   val compilerPlugins: Seq[ModuleID] = Seq(
     compilerPlugin("org.spire-math" %% "kind-projector" % versionOf.kindProjector)

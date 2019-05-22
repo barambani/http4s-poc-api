@@ -5,13 +5,13 @@ import cats.Eval.always
 import cats.arrow.FunctionK
 import cats.effect.IO
 import cats.instances.future.catsStdInstancesForFuture
-import cats.{Eval, Functor}
+import cats.{ Eval, Functor }
 import external.library.IoAdapt.~~>
-import monix.eval.{Task => MonixTask}
+import monix.eval.{ Task => MonixTask }
 import monix.execution.Scheduler
-import scalaz.concurrent.{Task => ScalazTask}
+import scalaz.concurrent.{ Task => ScalazTask }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
   * Models a natural transformation between the Functors `F[_]` and `G[_]`.
@@ -30,7 +30,7 @@ sealed trait IoAdapt[F[_], G[_]] {
     λ[FunctionK[F, G]](apply(_))
 }
 
-private[library] sealed trait IoAdaptInstances {
+sealed private[library] trait IoAdaptInstances {
 
   implicit def futureToIo(implicit ec: ExecutionContext): Future ~~> IO =
     new IoAdapt[Future, IO] {
@@ -67,9 +67,12 @@ private[library] sealed trait IoAdaptInstances {
       val evG = scalazTaskFunctor
 
       def apply[A]: (=>IO[A]) => ScalazTask[A] =
-        fa => Eval.always[ScalazTask[A]](
-          fa.attempt.unsafeRunSync.fold(ScalazTask.fail, a => ScalazTask.delay(a))
-        ).value
+        fa =>
+          Eval
+            .always[ScalazTask[A]](
+              fa.attempt.unsafeRunSync.fold(ScalazTask.fail, a => ScalazTask.delay(a))
+            )
+            .value
     }
 
   private def scalazTaskFunctor: Functor[ScalazTask] =

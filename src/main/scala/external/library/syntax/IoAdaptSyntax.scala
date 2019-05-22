@@ -11,15 +11,16 @@ private[syntax] trait IoAdaptSyntax {
 
   implicit def ioAdaptSyntax[F[_], A](fa: =>F[A]): IoAdaptOps[F, A] = new IoAdaptOps(fa)
 
-  implicit def ioAdaptEitherSyntax[F[_], A, E](fa: =>F[Either[E, A]]): IoAdaptEitherOps[F, A, E] = new IoAdaptEitherOps(fa)
+  implicit def ioAdaptEitherSyntax[F[_], A, E](fa: =>F[Either[E, A]]): IoAdaptEitherOps[F, A, E] =
+    new IoAdaptEitherOps(fa)
 }
 
-private[syntax] final class IoAdaptOps[F[_], A](fa: =>F[A]) {
+final private[syntax] class IoAdaptOps[F[_], A](fa: =>F[A]) {
   def transformTo[G[_]](implicit nt: F ~~> G): G[A] = nt.apply(fa)
-  def ~~>[G[_] : F ~~> ?[_]]: G[A] = transformTo
+  def ~~>[G[_]: F ~~> ?[_]]: G[A]                   = transformTo
 }
 
-private[syntax] class IoAdaptEitherOps[F[_], A, E](val fa: F[Either[E, A]]) extends AnyVal {
+private[syntax] class IoAdaptEitherOps[F[_], A, E](private val fa: F[Either[E, A]]) extends AnyVal {
   def liftIntoMonadError[G[_]](implicit nt: F ~~> G, err: MonadError[G, E]): G[A] =
     (err.rethrow[A] _ compose nt.apply)(fa)
 }

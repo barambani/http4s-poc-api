@@ -5,7 +5,7 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import errors.ServiceError
 import external.library.ParallelEffect
-import interpreters.{Dependencies, Logger}
+import interpreters.{ Dependencies, Logger }
 import model.DomainModel._
 import external.library.syntax.parallelEffect._
 
@@ -14,9 +14,9 @@ import scala.concurrent.duration._
 final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParallelEffect](
   dep: Dependencies[F],
   logger: Logger[F],
-  productTimeout: FiniteDuration,
-  preferenceTimeout: FiniteDuration,
-  priceTimeout: FiniteDuration
+  productTimeout: FiniteDuration = 8.seconds,
+  preferenceTimeout: FiniteDuration = 8.seconds,
+  priceTimeout: FiniteDuration = 8.seconds
 ) {
 
   /**

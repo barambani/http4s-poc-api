@@ -1,8 +1,12 @@
 import cats.effect.IO
-import http4s.extend.syntax.Verified
+import cats.effect.laws.util.TestInstances
+import cats.tests.TestSettings
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.scalatest.{ Matchers, Succeeded }
+import org.scalatest.{ FunSuite, Matchers, Succeeded }
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.typelevel.discipline.scalatest.Discipline
+import syntax.Verified
 
 trait Fixtures extends Matchers {
 
@@ -12,3 +16,11 @@ trait Fixtures extends Matchers {
   def assertOn[A](v: Verified[A]) =
     v.fold(es => es map { fail(_) }, _ => Succeeded)
 }
+
+abstract class MinimalSuite
+    extends FunSuite
+    with Matchers
+    with ScalaCheckDrivenPropertyChecks
+    with Discipline
+    with TestSettings
+    with TestInstances

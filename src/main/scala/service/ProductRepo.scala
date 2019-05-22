@@ -10,7 +10,7 @@ import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.traverse._
 import external.library.ParallelEffect
-import interpreters.{Dependencies, Logger}
+import interpreters.{ Dependencies, Logger }
 import model.DomainModel._
 import external.library.syntax.parallelEffect._
 
@@ -33,8 +33,7 @@ object ProductRepo {
     dep: Dependencies[F],
     logger: Logger[F],
     timeout: FiniteDuration
-  )
-      extends ProductRepo[F] {
+  ) extends ProductRepo[F] {
 
     /**
       * Tries to retrieve the products by ProductId from the cache, if results

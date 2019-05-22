@@ -1,8 +1,6 @@
 import cats.effect.IO
 import cats.instances.string._
 import cats.syntax.apply._
-import http4s.extend.syntax.httpService._
-import http4s.extend.syntax.responseVerification._
 import io.circe.generic.auto._
 import io.circe.{ Decoder, Encoder }
 import model.DomainModel.ServiceSignature
@@ -10,6 +8,8 @@ import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ HttpService, Status }
 import org.scalatest.{ FlatSpec, Matchers }
 import server.HealthCheckHttpApi
+import syntax.http4sService._
+import syntax.responseVerification._
 
 final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
