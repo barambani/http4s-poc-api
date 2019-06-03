@@ -7,7 +7,7 @@ object Dependencies {
    * Versions
    */
   private object versionOf {
-    val cats          = "1.6.0"
+    val cats          = "1.6.1"
     val catsEffect    = "1.0.0-RC"
     val circe         = "0.11.1"
     val fs2           = "0.10.7"
