@@ -10,9 +10,10 @@ import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.traverse._
 import external.library.ParallelEffect
-import interpreters.{ Dependencies, Logger }
-import model.DomainModel._
 import external.library.syntax.parallelEffect._
+import integration.{ CacheIntegration, ProductIntegration }
+import log.effect.LogWriter
+import model.DomainModel._
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -23,15 +24,17 @@ sealed trait ProductRepo[F[_]] {
 object ProductRepo {
 
   @inline def apply[F[_]: Monad: ParallelEffect](
-    dependencies: Dependencies[F],
-    logger: Logger[F],
+    cache: CacheIntegration[F],
+    productInt: ProductIntegration[F],
+    logger: LogWriter[F],
     timeout: FiniteDuration
   ): ProductRepo[F] =
-    new ProductRepoImpl(dependencies, logger, timeout)
+    new ProductRepoImpl(cache, productInt, logger, timeout)
 
   final private class ProductRepoImpl[F[_]: Monad: ParallelEffect](
-    dep: Dependencies[F],
-    logger: Logger[F],
+    cache: CacheIntegration[F],
+    productDep: ProductIntegration[F],
+    logger: LogWriter[F],
     timeout: FiniteDuration
   ) extends ProductRepo[F] {
 
@@ -43,7 +46,7 @@ object ProductRepo {
       * found in the http store it will be added to the cache.
       */
     def storedProducts: Seq[ProductId] => F[List[Product]] =
-      _.toList.parallelTraverse(id => (cacheMissFetch(id) compose dep.cachedProduct)(id))(timeout) map (_.flatten)
+      _.toList.parallelTraverse(id => (cacheMissFetch(id) compose cache.cachedProduct)(id))(timeout) map (_.flatten)
 
     private def cacheMissFetch: ProductId => F[Option[Product]] => F[Option[Product]] =
       id =>
@@ -51,22 +54,23 @@ object ProductRepo {
           for {
             mayBeCached <- cacheResult
             mayBeStored <- mayBeCached.fold(
-                            productStoreFetch(id) <* logger.debug(
-                              s"Product $id not found in cache, fetched from the product store repo"
-                            )
+                            productStoreFetch(id) <*
+                              logger.debug(
+                                s"Product $id not found in cache, fetched from the product store repo"
+                              )
                           )(_.some.pure[F] <* logger.debug(s"Product $id found in cache"))
           } yield mayBeStored
 
     private def productStoreFetch(id: ProductId): F[Option[Product]] =
       for {
-        mayBeProd <- dep.product(id)
+        mayBeProd <- productDep.product(id)
         _         <- (mayBeProd map storeInCache).sequence
       } yield mayBeProd
 
     private def storeInCache: Product => F[Unit] =
       prod =>
-        logger.debug(s"Storing the product ${prod.id} to cache") *>
-          dep.storeProductToCache(prod.id)(prod) <*
+        logger.debug(s"Storing the product ${prod.id} to cache") >>
+          cache.storeProductToCache(prod.id)(prod) <*
           logger.debug(s"Product ${prod.id} stored into the cache")
   }
 }

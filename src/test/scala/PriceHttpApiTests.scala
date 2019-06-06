@@ -3,9 +3,7 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.effect.IO
 import cats.syntax.validated._
-import errors.ServiceError._
-import interpreters.TestDependencies._
-import interpreters.TestLogger._
+import errors.PriceServiceError._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.{ Decoder, Encoder }

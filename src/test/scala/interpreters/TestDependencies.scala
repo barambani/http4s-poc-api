@@ -15,8 +15,8 @@ object TestDependencies {
     productsInStore: Map[ProductId, Product],
     productsInCache: Map[ProductId, Product],
     price: Price
-  )(testLogger: Logger[IO])(implicit ec: ExecutionContext): Dependencies[IO] =
-    new Dependencies[IO] {
+  )(testLogger: Logger[IO])(implicit ec: ExecutionContext): Integration[IO] =
+    new Integration[IO] {
       def user: UserId => IO[User] =
         _ =>
           IO.shift *> testLogger.debug("DEP user -> Getting the user in test") *> Timer[IO].sleep(1.second) *> IO(
@@ -55,8 +55,8 @@ object TestDependencies {
             ].sleep(200.milliseconds) *> IO.unit
     }
 
-  def testFailingDependencies(implicit ec: ExecutionContext): Dependencies[IO] =
-    new Dependencies[IO] {
+  def testFailingDependencies(implicit ec: ExecutionContext): Integration[IO] =
+    new Integration[IO] {
       def user: UserId => IO[User] =
         _ =>
           Timer[IO].sleep(200.milliseconds) *>

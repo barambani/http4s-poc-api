@@ -1,13 +1,12 @@
-package errors
+package external
+package library
 
+import cats.Show
 import cats.effect.util.CompositeException
-import cats.{ Monad, Semigroup, Show }
-import external.library.ErrorResponse
-import org.http4s.Response
 
-sealed trait ThrowableInstances {
+private[library] trait ThrowableInstances {
 
-  implicit def throwableShow: Show[Throwable] =
+  implicit final def throwableShow: Show[Throwable] =
     new Show[Throwable] {
       def show(t: Throwable): String =
         apiErrorDecomposition(t)
@@ -21,24 +20,24 @@ sealed trait ThrowableInstances {
         ev.show(e)
     }
 
-  implicit def compositeFailureShow(implicit ev: Show[Throwable]): Show[CompositeException] =
+  implicit final def compositeFailureShow(implicit ev: Show[Throwable]): Show[CompositeException] =
     new Show[CompositeException] {
       def show(t: CompositeException): String =
         (t.all map ev.show).toList mkString "\n"
     }
 
-  implicit def throwableResponse[F[_]: Monad]: ErrorResponse[F, Throwable] =
-    new ErrorResponse[F, Throwable] {
-      val ev = Show[Throwable]
-      def responseFor: Throwable => F[Response[F]] =
-        e => InternalServerError(ev.show(e))
-    }
+//  implicit final def throwableResponse[F[_]: Monad]: ErrorResponse[F, Throwable] =
+//    new ErrorResponse[F, Throwable] {
+//      val ev = Show[Throwable]
+//      def responseFor: Throwable => F[Response[F]] =
+//        e => InternalServerError(ev.show(e))
+//    }
 
-  implicit def throwableSemigroup: Semigroup[Throwable] =
-    new Semigroup[Throwable] {
-      def combine(x: Throwable, y: Throwable): Throwable =
-        CompositeException(x, y, Nil)
-    }
+//  implicit final def throwableSemigroup: Semigroup[Throwable] =
+//    new Semigroup[Throwable] {
+//      def combine(x: Throwable, y: Throwable): Throwable =
+//        CompositeException(x, y, Nil)
+//    }
 
   private[this] def flatten: Throwable => Seq[String] =
     th => {
@@ -53,5 +52,3 @@ sealed trait ThrowableInstances {
       loop(Option(th), Vector.empty)
     }
 }
-
-object ThrowableInstances extends ThrowableInstances

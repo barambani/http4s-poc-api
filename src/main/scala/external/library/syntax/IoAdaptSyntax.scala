@@ -3,7 +3,7 @@ package library
 package syntax
 
 import cats.MonadError
-import external.library.IoAdapt.~~>
+import external.library.IoAdapt.-->
 
 import scala.language.implicitConversions
 
@@ -16,11 +16,12 @@ private[syntax] trait IoAdaptSyntax {
 }
 
 final private[syntax] class IoAdaptOps[F[_], A](fa: =>F[A]) {
-  def transformTo[G[_]](implicit nt: F ~~> G): G[A] = nt.apply(fa)
-  def ~~>[G[_]: F ~~> ?[_]]: G[A]                   = transformTo
+
+  def as[G[_]](implicit nt: F --> G): G[A] = nt.apply(fa)
 }
 
 private[syntax] class IoAdaptEitherOps[F[_], A, E](private val fa: F[Either[E, A]]) extends AnyVal {
-  def liftIntoMonadError[G[_]](implicit nt: F ~~> G, err: MonadError[G, E]): G[A] =
+
+  def liftIntoMonadError[G[_]](implicit nt: F --> G, err: MonadError[G, E]): G[A] =
     (err.rethrow[A] _ compose nt.apply)(fa)
 }

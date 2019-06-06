@@ -1,44 +1,48 @@
 package server
 
-import cats.MonadError
+import cats.effect.Sync
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import errors.ServiceError
-import external.library.ErrorResponse
+import errors.PriceServiceError._
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{ EntityDecoder, EntityEncoder, HttpService, Method, Request, Response }
+import org.http4s.{ EntityDecoder, EntityEncoder, HttpRoutes, Method, Request, Response }
 import service.PriceService
 
-sealed abstract class PriceHttpApi[F[_]](
+sealed abstract class PriceHttpApi[F[_]: Sync](
   implicit
-  ME: MonadError[F, ServiceError],
   RD: EntityDecoder[F, PricesRequestPayload],
   RE: EntityEncoder[F, List[Price]],
-  ER: ErrorResponse[F, ServiceError]
 ) extends Http4sDsl[F] {
 
-  def service(priceService: PriceService[F]): HttpService[F] =
-    HttpService[F] {
-      case req @ Method.POST -> Root => postResponse(req, priceService) handleErrorWith ER.responseFor
+  def service(priceService: PriceService[F]): HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ Method.POST -> Root => postResponse(req, priceService) recoverWith priceServiceErrors
     }
 
-  private def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
+  private[this] def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
     for {
       payload <- request.as[PricesRequestPayload]
       prices  <- priceService.prices(payload.userId, payload.productIds)
       resp    <- Ok(prices)
     } yield resp
+
+  private[this] def priceServiceErrors: PartialFunction[Throwable, F[Response[F]]] = {
+    case UserErr(r)                => FailedDependency(r)
+    case PreferenceErr(r)          => FailedDependency(r)
+    case ProductErr(r)             => FailedDependency(r)
+    case ProductPriceErr(r)        => FailedDependency(r)
+    case InvalidShippingCountry(r) => BadRequest(r)
+    case CacheLookupError(r)       => BadGateway(r)
+  }
 }
 
 object PriceHttpApi {
-  def apply[F[_]](
+  def apply[F[_]: Sync](
     implicit
-    ME: MonadError[F, ServiceError],
     RD: EntityDecoder[F, PricesRequestPayload],
-    RE: EntityEncoder[F, List[Price]],
-    ER: ErrorResponse[F, ServiceError]
+    RE: EntityEncoder[F, List[Price]]
   ): PriceHttpApi[F] =
     new PriceHttpApi[F] {}
 }

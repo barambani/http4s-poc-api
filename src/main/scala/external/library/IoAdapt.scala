@@ -6,7 +6,7 @@ import cats.arrow.FunctionK
 import cats.effect.IO
 import cats.instances.future.catsStdInstancesForFuture
 import cats.{ Eval, Functor }
-import external.library.IoAdapt.~~>
+import external.library.IoAdapt.-->
 import monix.eval.{ Task => MonixTask }
 import monix.execution.Scheduler
 import scalaz.concurrent.{ Task => ScalazTask }
@@ -32,7 +32,7 @@ sealed trait IoAdapt[F[_], G[_]] {
 
 sealed private[library] trait IoAdaptInstances {
 
-  implicit def futureToIo(implicit ec: ExecutionContext): Future ~~> IO =
+  implicit def futureToIo(implicit ec: ExecutionContext): Future --> IO =
     new IoAdapt[Future, IO] {
       val evF = Functor[Future]
       val evG = Functor[IO]
@@ -41,7 +41,7 @@ sealed private[library] trait IoAdaptInstances {
         IO.fromFuture[A] _ compose IO.eval[Future[A]] compose always
     }
 
-  implicit def monixTaskToIo(implicit s: Scheduler): MonixTask ~~> IO =
+  implicit def monixTaskToIo(implicit s: Scheduler): MonixTask --> IO =
     new IoAdapt[MonixTask, IO] {
       val evF = Functor[MonixTask]
       val evG = Functor[IO]
@@ -49,7 +49,7 @@ sealed private[library] trait IoAdaptInstances {
       def apply[A]: (=>MonixTask[A]) => IO[A] = _.toIO
     }
 
-  implicit def scalazTaskToIo: ScalazTask ~~> IO =
+  implicit def scalazTaskToIo: ScalazTask --> IO =
     new IoAdapt[ScalazTask, IO] {
       val evF = scalazTaskFunctor
       val evG = Functor[IO]
@@ -61,7 +61,7 @@ sealed private[library] trait IoAdaptInstances {
         )
     }
 
-  implicit def ioToScalazTask: IO ~~> ScalazTask =
+  implicit def ioToScalazTask: IO --> ScalazTask =
     new IoAdapt[IO, ScalazTask] {
       val evF = Functor[IO]
       val evG = scalazTaskFunctor
@@ -82,5 +82,5 @@ sealed private[library] trait IoAdaptInstances {
 }
 
 object IoAdapt extends IoAdaptInstances {
-  type ~~>[F[_], G[_]] = IoAdapt[F, G]
+  type -->[F[_], G[_]] = IoAdapt[F, G]
 }

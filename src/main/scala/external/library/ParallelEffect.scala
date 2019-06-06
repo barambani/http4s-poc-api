@@ -2,16 +2,13 @@ package external
 package library
 
 import cats.effect.util.CompositeException
-import cats.effect.{ Concurrent, IO, Timer }
+import cats.effect.{ Concurrent, ContextShift, IO, Timer }
 import cats.instances.parallel._
-import cats.syntax.apply._
-import cats.syntax.flatMap._
 import cats.syntax.parallel._
-import scalaz.concurrent.{ Task => ScalazTask }
 import cats.{ Applicative, Id, Monoid, Semigroup, Traverse }
+import scalaz.concurrent.{ Task => ScalazTask }
 
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ ExecutionContext, TimeoutException }
 
 /**
   * The semantic of this type-class is slightly different from the Parallel
@@ -43,7 +40,11 @@ object ParallelEffect
 
 sealed private[library] trait ParallelEffectInstances {
 
-  implicit def ioParallelEffect(implicit ec: ExecutionContext): ParallelEffect[IO] =
+  implicit def ioParallelEffect(
+    implicit
+    cs: ContextShift[IO],
+    ti: Timer[IO]
+  ): ParallelEffect[IO] =
     new ParallelEffect[IO] {
 
       implicit private def tS: Semigroup[Throwable] =
@@ -51,29 +52,12 @@ sealed private[library] trait ParallelEffectInstances {
 
       def parallelMap2[A, B, R](fa: =>IO[A], fb: =>IO[B])(t: FiniteDuration)(f: (A, B) => R): IO[R] =
         (for {
-          fibA <- timeout(fa, t).start
-          fibB <- timeout(fb, t).start
+          fibA <- fa.timeout(t).start
+          fibB <- fb.timeout(t).start
         } yield
-          (fibA.join.attempt, fibB.join.attempt) mapN {
+          (fibA.join.attempt, fibB.join.attempt) parMapN {
             case (eta, etb) => (eta, etb) parMapN f
           }) flatMap Concurrent[IO].rethrow
-
-      //  Workaround waiting for the version 1 to be released
-      final private def timeout[F[_]: Timer, A](fa: F[A], after: FiniteDuration)(
-        implicit
-        F: Concurrent[F]
-      ): F[A] =
-        timeoutTo(fa, after, F.raiseError(new TimeoutException(after.toString)))
-
-      final private def timeoutTo[F[_], A](fa: F[A], after: FiniteDuration, fallback: F[A])(
-        implicit
-        F: Concurrent[F],
-        T: Timer[F]
-      ): F[A] =
-        F.race(fa, T.sleep(after)) flatMap {
-          case Left(a)  => F.pure(a)
-          case Right(_) => fallback
-        }
     }
 
   implicit def scalazTaskEffectfulOp(implicit ev: ParallelEffect[IO]): ParallelEffect[ScalazTask] =
@@ -84,7 +68,7 @@ sealed private[library] trait ParallelEffectInstances {
       def parallelMap2[A, B, R](fa: =>ScalazTask[A], fb: =>ScalazTask[B])(
         t: FiniteDuration
       )(f: (A, B) => R): ScalazTask[R] =
-        ev.parallelMap2(fa.transformTo[IO], fb.transformTo[IO])(t)(f).transformTo[ScalazTask]
+        ev.parallelMap2(fa.as[IO], fb.as[IO])(t)(f).as[ScalazTask]
     }
 }
 

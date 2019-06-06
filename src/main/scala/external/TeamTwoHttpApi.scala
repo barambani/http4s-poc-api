@@ -12,9 +12,7 @@ object TeamTwoHttpApi {
 
   @inline def apply(): TeamTwoHttpApi =
     new TeamTwoHttpApi {
-
-      def user: UserId => Task[User] = ???
-
+      def user: UserId => Task[User]                  = ???
       def product: ProductId => Task[Option[Product]] = ???
     }
 }

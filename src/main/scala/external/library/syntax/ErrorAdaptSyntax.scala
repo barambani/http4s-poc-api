@@ -2,6 +2,9 @@ package external
 package library
 package syntax
 
+import cats.MonadError
+import cats.syntax.monadError._
+
 import scala.language.implicitConversions
 
 private[syntax] trait ErrorAdaptSyntax {
@@ -9,6 +12,7 @@ private[syntax] trait ErrorAdaptSyntax {
 }
 
 private[syntax] class ErrorAdaptOps[F[_], A](private val anFa: F[A]) extends AnyVal {
-  def attemptMapLeft[E](errM: Throwable => E)(implicit F: ErrorAdapt[F]): F[Either[E, A]] =
-    F.attemptMapLeft(anFa)(errM)
+
+  def narrowFailure[E <: Throwable](ef: Throwable => E)(implicit ev1: MonadError[F, Throwable]): F[A] =
+    anFa adaptError { case th: Throwable => ef(th) }
 }

@@ -3,17 +3,19 @@ package service
 import cats.MonadError
 import cats.syntax.apply._
 import cats.syntax.flatMap._
-import errors.ServiceError
 import external.library.ParallelEffect
-import interpreters.{ Dependencies, Logger }
-import model.DomainModel._
 import external.library.syntax.parallelEffect._
+import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
+import log.effect.LogWriter
+import model.DomainModel._
 
 import scala.concurrent.duration._
 
-final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParallelEffect](
-  dep: Dependencies[F],
-  logger: Logger[F],
+final case class PriceService[F[_]: ParallelEffect: MonadError[?[_], Throwable]](
+  cache: CacheIntegration[F],
+  userInt: UserIntegration[F],
+  productInt: ProductIntegration[F],
+  logger: LogWriter[F],
   productTimeout: FiniteDuration = 8.seconds,
   preferenceTimeout: FiniteDuration = 8.seconds,
   priceTimeout: FiniteDuration = 8.seconds
@@ -35,7 +37,7 @@ final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParallelEffe
 
   private def userFor(userId: UserId): F[User] =
     logger.debug(s"Collecting user details for id $userId") >>
-      dep.user(userId) <*
+      userInt.user(userId) <*
       logger.debug(s"User details collected for id $userId")
 
   private def preferencesFor(userId: UserId): F[UserPreferences] =
@@ -49,11 +51,11 @@ final case class PriceService[F[_]: MonadError[?[_], ServiceError]: ParallelEffe
       logger.debug(s"Product details collection for $productIds completed")
 
   private lazy val preferenceFetcher: PreferenceFetcher[F] =
-    PreferenceFetcher(dep, logger)
+    PreferenceFetcher(userInt, logger)
 
   private lazy val productRepo: ProductRepo[F] =
-    ProductRepo(dep, logger, productTimeout)
+    ProductRepo(cache, productInt, logger, productTimeout)
 
   private lazy val priceCalculator: PriceCalculator[F] =
-    PriceCalculator(dep, logger, priceTimeout)
+    PriceCalculator(productInt, logger, priceTimeout)
 }

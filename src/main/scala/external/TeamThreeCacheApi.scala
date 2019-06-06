@@ -11,7 +11,7 @@ sealed trait TeamThreeCacheApi[K, V] {
 
 object TeamThreeCacheApi extends TeamThreeCacheApiInstances {
 
-  @inline def apply[K, V](implicit INST: TeamThreeCacheApi[K, V]): TeamThreeCacheApi[K, V] = INST
+  @inline def apply[K, V](implicit ev: TeamThreeCacheApi[K, V]): TeamThreeCacheApi[K, V] = implicitly
 
   implicit def productCache: TeamThreeCacheApi[ProductId, Product] =
     new TeamThreeCacheApi[ProductId, Product] {
