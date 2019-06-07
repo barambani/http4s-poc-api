@@ -17,18 +17,40 @@ object TestUserIntegration {
   ): UserIntegration[IO] =
     new UserIntegration[IO] {
 
-      def user: UserId => IO[User] = { _ =>
+      def user: UserId => IO[User] = { id =>
         IO.shift >>
-          testLogger.debug("DEP user -> Getting the user in test") >>
+          testLogger.debug(s"DEP user -> Getting the user $id in test") >>
           IO.sleep(1.second) >>
           IO(aUser)
       }
 
-      def usersPreferences: UserId => IO[UserPreferences] = { _ =>
+      def usersPreferences: UserId => IO[UserPreferences] = { id =>
         IO.shift >>
-          testLogger.debug("DEP usersPreferences -> Getting the preferences in test") >>
+          testLogger.debug(s"DEP usersPreferences -> Getting the preferences for user $id in test") >>
           IO.sleep(1.second) >>
           IO(preferences)
+      }
+    }
+
+  @inline def makeFail(implicit ev: Timer[IO]): UserIntegration[IO] =
+    new UserIntegration[IO] {
+
+      def user: UserId => IO[User] = { _ =>
+        IO.sleep(200.milliseconds) >>
+          IO(
+            throw new Throwable(
+              "DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure"
+            )
+          )
+      }
+
+      def usersPreferences: UserId => IO[UserPreferences] = { _ =>
+        IO.sleep(100.milliseconds) >>
+          IO(
+            throw new Throwable(
+              "DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout"
+            )
+          )
       }
     }
 }

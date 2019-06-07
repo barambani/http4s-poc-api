@@ -5,15 +5,14 @@ import io.circe.generic.auto._
 import io.circe.{ Decoder, Encoder }
 import model.DomainModel.ServiceSignature
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
-import org.http4s.{ HttpRoutes, Status }
-import org.scalatest.{ FlatSpec, Matchers }
+import org.http4s.{ HttpRoutes, Status, Uri }
+import org.scalatest.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
 import server.HealthCheckHttpApi
 import syntax.http4sService._
 import syntax.responseVerification._
 
-final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures {
-
-  import EitherHttp4sDsl._
+final class HealthCheckHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
   implicit def testEncoder[A: Encoder] = jsonEncoderOf[IO, A]
   implicit def testDecoder[A: Decoder] = jsonOf[IO, A]
@@ -23,7 +22,7 @@ final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures
     val httpApi: HttpRoutes[IO] =
       HealthCheckHttpApi[IO].service()
 
-    val request = GET("/")
+    val request = GET(Uri.uri("/"))
 
     val verified = httpApi
       .runForF(request)

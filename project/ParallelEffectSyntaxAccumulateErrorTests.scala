@@ -12,17 +12,11 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
     maxArity => {
 
       val staticTop =
-        static"""
-          |import cats.Eq
-          |import cats.Semigroup
-          |import cats.effect.IO
-          |import cats.effect.laws.util.TestContext
-          |import cats.effect.util.CompositeException
+        static"""import cats.effect.IO
           |import cats.instances.unit._
           |import cats.laws._
           |import cats.laws.discipline._
           |import cats.syntax.semigroup._
-          |import external.library.syntax.ioAdapt._
           |import external.library.syntax.parallelEffect._
           |import org.scalacheck.Prop
           |import scalaz.concurrent.{Task => ScalazTask}
@@ -31,20 +25,6 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
           |
           |final class ParallelEffectSyntaxAccumulateErrorTests extends MinimalSuite {
           |
-          |  implicit val C = TestContext()
-          |
-          |  implicit def throwableSemigroup: Semigroup[Throwable] =
-          |    new Semigroup[Throwable]{
-          |      def combine(x: Throwable, y: Throwable): Throwable =
-          |        CompositeException(x, y, Nil)
-          |    }
-          |    
-          |  implicit def taskEq[A](implicit ev: Eq[IO[A]]): Eq[ScalazTask[A]] =
-          |    new Eq[ScalazTask[A]] {
-          |      def eqv(x: ScalazTask[A], y: ScalazTask[A]): Boolean =
-          |        ev.eqv(x.transformTo[IO], y.transformTo[IO])
-          |    }
-          |    
           |  val timeout = 1.seconds"""
 
       val staticBottom = static"""}"""
@@ -75,13 +55,13 @@ private[BoilerplateGeneration] object ParallelEffectSyntaxAccumulateErrorTests e
           static"""
             |  test("$arityS io errors are accumulated by parallelMap") {
             |    Prop.forAll { (${`e0: Throwable..en-1: Throwable`}) => {
-            |      (${`ioEff.fail[Int](e0)..ioEff.fail[Int](en-1)`}).parallelMap(timeout){ ${`(_, ... , _)`} => () } <-> IO.raiseError[Unit](${`(e1 combine e2) ... combine en-1`})
+            |      (${`ioEff.fail[Int](e0)..ioEff.fail[Int](en-1)`}).parallelMap(timeout){ ${`(_, ... , _)`} => () } <-> IO.raiseError[Unit]${`(e1 combine e2) ... combine en-1`}
             |    }}
             |  }
             |
             |  test("$arityS scalaz task errors are accumulated by parallelMap") {
             |    Prop.forAll { (${`e0: Throwable..en-1: Throwable`}) => {
-            |      (${`scalazTaskEff.fail[Int](e0)..scalazTaskEff.fail[Int](en-1)`}).parallelMap(timeout){ ${`(_: Int, ... , _: Int)`} => () } <-> ScalazTask.fail(${`(e1 combine e2) ... combine en-1`}).map((_: Int) => ())
+            |      (${`scalazTaskEff.fail[Int](e0)..scalazTaskEff.fail[Int](en-1)`}).parallelMap(timeout){ ${`(_: Int, ... , _: Int)`} => () } <-> ScalazTask.fail${`(e1 combine e2) ... combine en-1`}.map((_: Int) => ())
             |    }}
             |  }""".stripMargin
         }

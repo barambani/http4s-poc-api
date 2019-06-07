@@ -19,16 +19,38 @@ object TestProductIntegration {
 
       def product: ProductId => IO[Option[Product]] = { id =>
         IO.shift >>
-          testLogger.debug("DEP product -> Getting the product from the repo in test") >>
+          testLogger.debug(s"DEP product -> Getting the product $id from the repo in test") >>
           IO.sleep(1.second) >>
           IO(productsInStore.get(id))
       }
 
-      def productPrice: Product => UserPreferences => IO[Price] = { _ => _ =>
+      def productPrice: Product => UserPreferences => IO[Price] = { p => _ =>
         IO.shift >>
-          testLogger.debug("DEP productPrice -> Getting the price in test") >>
+          testLogger.debug(s"DEP productPrice -> Getting the price for ${p.id} in test") >>
           IO.sleep(1.second) >>
           IO(price)
+      }
+    }
+
+  @inline def makeFail(implicit ev: Timer[IO]): ProductIntegration[IO] =
+    new ProductIntegration[IO] {
+
+      def product: ProductId => IO[Option[Product]] = { _ =>
+        IO.sleep(400.milliseconds) >>
+          IO(
+            throw new Throwable(
+              "DependencyFailure. The dependency def product: ProductId => IO[Option[Product]] failed with message network failure"
+            )
+          )
+      }
+
+      def productPrice: Product => UserPreferences => IO[Price] = { _ => _ =>
+        IO.sleep(600.milliseconds) >>
+          IO(
+            throw new Throwable(
+              "DependencyFailure. The dependency def productPrice: Product => UserPreferences => IO[Price] failed with message timeout"
+            )
+          )
       }
     }
 }
