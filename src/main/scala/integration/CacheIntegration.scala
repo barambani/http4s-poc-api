@@ -12,7 +12,7 @@ import external.library.syntax.ioAdapt._
 import model.DomainModel._
 import scalaz.concurrent.Task
 
-sealed trait CacheIntegration[F[_]] {
+trait CacheIntegration[F[_]] {
   def cachedProduct: ProductId => F[Option[Product]]
   def storeProductToCache: ProductId => Product => F[Unit]
 }

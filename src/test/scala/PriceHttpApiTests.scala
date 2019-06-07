@@ -67,7 +67,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(uri("/"), reqPayload.asJson)
+    val request = POST("/", reqPayload.asJson)
 
     val verified = httpApi
       .runForF(request)
@@ -103,7 +103,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(uri("/"), reqPayload.asJson)
+    val request = POST("/", reqPayload.asJson)
 
     val verified = httpApi
       .runForF(request)
@@ -126,7 +126,7 @@ final class PriceHttpApiTests extends FlatSpec with Matchers with Fixtures {
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(uri("/"), reqPayload.asJson)
+    val request = POST("/", reqPayload.asJson)
 
     val verified = httpApi
       .runForF(request)

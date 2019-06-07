@@ -5,7 +5,7 @@ import io.circe.generic.auto._
 import io.circe.{ Decoder, Encoder }
 import model.DomainModel.ServiceSignature
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
-import org.http4s.{ HttpService, Status }
+import org.http4s.{ HttpRoutes, Status }
 import org.scalatest.{ FlatSpec, Matchers }
 import server.HealthCheckHttpApi
 import syntax.http4sService._
@@ -13,7 +13,6 @@ import syntax.responseVerification._
 
 final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures {
 
-  import EitherHtt4sClientDsl._
   import EitherHttp4sDsl._
 
   implicit def testEncoder[A: Encoder] = jsonEncoderOf[IO, A]
@@ -21,10 +20,10 @@ final class HealthCheckHttpApiTests extends FlatSpec with Matchers with Fixtures
 
   it should "respond with Ok status 200 and the correct service signature" in {
 
-    val httpApi: HttpService[IO] =
+    val httpApi: HttpRoutes[IO] =
       HealthCheckHttpApi[IO].service()
 
-    val request = GET(uri("/"))
+    val request = GET("/")
 
     val verified = httpApi
       .runForF(request)

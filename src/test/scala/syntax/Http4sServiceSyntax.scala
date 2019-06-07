@@ -3,12 +3,12 @@ package syntax
 import cats.data.{ Kleisli, OptionT }
 import cats.syntax.flatMap._
 import cats.{ FlatMap, Functor }
-import org.http4s.{ HttpService, Request, Response }
+import org.http4s.{ HttpRoutes, Request, Response }
 
 import scala.language.implicitConversions
 
 private[syntax] trait Http4sServiceSyntax {
-  implicit def httpServiceSyntax[F[_]](s: HttpService[F]): HttpServiceOps[F] = new HttpServiceOps(s)
+  implicit def httpServiceSyntax[F[_]](s: HttpRoutes[F]): HttpServiceOps[F] = new HttpServiceOps(s)
 }
 
 /**

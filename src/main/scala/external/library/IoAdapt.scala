@@ -1,7 +1,6 @@
 package external
 package library
 
-import cats.Eval.always
 import cats.arrow.FunctionK
 import cats.effect.IO
 import cats.instances.future.catsStdInstancesForFuture
@@ -38,7 +37,7 @@ sealed private[library] trait IoAdaptInstances {
       val evG = Functor[IO]
 
       def apply[A]: (=>Future[A]) => IO[A] =
-        IO.fromFuture[A] _ compose IO.eval[Future[A]] compose always
+        IO.fromFuture[A] _ compose IO.delay
     }
 
   implicit def monixTaskToIo(implicit s: Scheduler): MonixTask --> IO =

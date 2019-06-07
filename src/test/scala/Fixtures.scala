@@ -3,8 +3,9 @@ import cats.effect.laws.util.TestInstances
 import cats.tests.TestSettings
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.scalatest.{ FunSuite, Matchers, Succeeded }
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatest.check.ScalaCheckDrivenPropertyChecks
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{ Matchers, Succeeded }
 import org.typelevel.discipline.scalatest.Discipline
 import syntax.Verified
 
@@ -18,7 +19,7 @@ trait Fixtures extends Matchers {
 }
 
 abstract class MinimalSuite
-    extends FunSuite
+    extends AnyFunSuite
     with Matchers
     with ScalaCheckDrivenPropertyChecks
     with Discipline

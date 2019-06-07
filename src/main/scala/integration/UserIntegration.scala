@@ -13,7 +13,7 @@ import monix.eval.Task
 
 import scala.concurrent.Future
 
-sealed trait UserIntegration[F[_]] {
+trait UserIntegration[F[_]] {
   def user: UserId => F[User]
   def usersPreferences: UserId => F[UserPreferences]
 }

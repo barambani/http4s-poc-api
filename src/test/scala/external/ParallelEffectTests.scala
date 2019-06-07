@@ -4,7 +4,7 @@ import java.util.concurrent.ForkJoinPool
 
 import cats.Show
 import cats.effect.util.CompositeException
-import cats.effect.{ Effect, IO, Timer }
+import cats.effect.{ Effect, IO }
 import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.show._
@@ -16,11 +16,12 @@ import scala.concurrent.{ ExecutionContext, TimeoutException }
 
 final class ParallelEffectTests extends WordSpecLike with Matchers {
 
-  implicit val C = ExecutionContext.fromExecutor(new ForkJoinPool())
+  implicit val C            = ExecutionContext.fromExecutor(new ForkJoinPool())
+  implicit val timer        = IO.timer(C)
+  implicit val contextShift = IO.contextShift(C)
 
-  def eff   = Effect[IO]
-  def pEff  = ParallelEffect[IO]
-  def timer = Timer[IO]
+  def eff  = Effect[IO]
+  def pEff = ParallelEffect[IO]
 
   val e1 = new Throwable("error 1")
   val e2 = new Throwable("error 2")

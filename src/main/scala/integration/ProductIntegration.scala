@@ -13,7 +13,7 @@ import monix.eval.Task
 
 import scala.concurrent.Future
 
-sealed trait ProductIntegration[F[_]] {
+trait ProductIntegration[F[_]] {
   def product: ProductId => F[Option[Product]]
   def productPrice: Product => UserPreferences => F[Price]
 }
