@@ -16,7 +16,7 @@ object Dependencies {
     val `log-effect`  = "0.7.0"
     val monix         = "3.0.0-RC1"
     val scalaCheck    = "1.14.0"
-    val scalaTest     = "3.0.7"
+    val scalaTest     = "3.0.8"
     val scalaz        = "7.3.0-M27"
     val shapeless     = "2.3.3"
     val silencer      = "1.3.3"
