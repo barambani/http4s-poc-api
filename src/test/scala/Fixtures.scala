@@ -1,17 +1,17 @@
 import java.util.concurrent.ForkJoinPool
 
-import cats.{ Eq, Semigroup }
 import cats.effect.IO
 import cats.effect.laws.util.{ TestContext, TestInstances }
 import cats.effect.util.CompositeException
 import cats.tests.TestSettings
+import cats.{ Eq, Semigroup }
 import external.library.syntax.ioAdapt._
 import log.effect.fs2.SyncLogWriter.consoleLog
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.scalatest.check.ScalaCheckDrivenPropertyChecks
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.{ Matchers, Succeeded }
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.typelevel.discipline.scalatest.Discipline
 import scalaz.concurrent.{ Task => ScalazTask }
 import syntax.Verified
