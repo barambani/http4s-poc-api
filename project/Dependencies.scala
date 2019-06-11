@@ -19,7 +19,7 @@ object Dependencies {
     val scalaTest     = "3.0.8"
     val scalaz        = "7.3.0-M27"
     val shapeless     = "2.3.3"
-    val silencer      = "1.3.3"
+    val silencer      = "1.3.4"
   }
 
   /*
