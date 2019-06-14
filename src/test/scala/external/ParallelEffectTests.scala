@@ -9,12 +9,13 @@ import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.show._
 import external.library.ParallelEffect
-import org.scalatest.{ Matchers, WordSpecLike }
+import org.scalatest.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, TimeoutException }
 
-final class ParallelEffectTests extends WordSpecLike with Matchers {
+final class ParallelEffectTests extends AnyWordSpecLike with Matchers {
 
   implicit val C            = ExecutionContext.fromExecutor(new ForkJoinPool())
   implicit val timer        = IO.timer(C)
