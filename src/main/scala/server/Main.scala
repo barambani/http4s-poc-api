@@ -5,6 +5,7 @@ import java.util.concurrent.ForkJoinPool
 import cats.effect.{ ExitCode, IO, IOApp }
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import com.github.ghik.silencer.silent
 import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
 import io.circe.generic.auto._
 import log.effect.fs2.SyncLogWriter._
@@ -21,25 +22,8 @@ import model.DomainModelCodecs._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object Main extends IOApp {
-
-  implicit val futureExecutionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(new ForkJoinPool())
-
-  implicit val monixTaskScheduler: Scheduler =
-    Scheduler.global
-
-  /**
-    * encoding / decoding
-    */
-  implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
-    jsonOf[IO, PricesRequestPayload]
-
-  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, List[Price]] =
-    jsonEncoderOf[IO, List[Price]]
-
-  implicit val healthCheckResponsePayloadEncoder: EntityEncoder[IO, ServiceSignature] =
-    jsonEncoderOf[IO, ServiceSignature]
+@silent
+private object Main extends IOApp with RuntimePools with Encoding {
 
   /**
     * services
@@ -78,4 +62,25 @@ object Main extends IOApp {
         .drain
         .as(ExitCode.Success)
     }
+}
+
+sealed private[this] trait RuntimePools {
+
+  implicit val futureExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(new ForkJoinPool())
+
+  implicit val monixTaskScheduler: Scheduler =
+    Scheduler.global
+}
+
+sealed private[this] trait Encoding {
+
+  implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
+    jsonOf[IO, PricesRequestPayload]
+
+  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, List[Price]] =
+    jsonEncoderOf[IO, List[Price]]
+
+  implicit val healthCheckResponsePayloadEncoder: EntityEncoder[IO, ServiceSignature] =
+    jsonEncoderOf[IO, ServiceSignature]
 }
