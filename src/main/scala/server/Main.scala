@@ -5,7 +5,6 @@ import java.util.concurrent.ForkJoinPool
 import cats.effect.{ ExitCode, IO, IOApp }
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.github.ghik.silencer.silent
 import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
 import io.circe.generic.auto._
 import log.effect.fs2.SyncLogWriter._
@@ -22,14 +21,10 @@ import model.DomainModelCodecs._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-@silent
-private object Main extends IOApp with RuntimePools with Encoding {
+object Main extends IOApp with RuntimePools with Encoding {
 
-  /**
-    * services
-    */
   private[this] val priceService: IO[PriceService[IO]] =
-    log4sLog[IO]("a logger") map { log =>
+    log4sLog[IO]("App logger") map { log =>
       PriceService(
         CacheIntegration[IO],
         UserIntegration[IO],
@@ -41,10 +36,7 @@ private object Main extends IOApp with RuntimePools with Encoding {
       )
     }
 
-  /**
-    * routes
-    */
-  private[this] val routes: IO[HttpApp[IO]] =
+  private[this] val httpApp: IO[HttpApp[IO]] =
     priceService map { ps =>
       Router(
         "/pricing-api/prices"       -> PriceHttpApi[IO].service(ps),
@@ -53,18 +45,19 @@ private object Main extends IOApp with RuntimePools with Encoding {
     }
 
   def run(args: List[String]): IO[ExitCode] =
-    routes >>= { rs =>
+    httpApp >>= { app =>
       BlazeServerBuilder[IO]
+        .bindHttp(17171, "localhost")
+        .withConnectorPoolSize(64)
         .enableHttp2(true)
-        .withHttpApp(rs)
-        .serve
-        .compile
-        .drain
+        .withHttpApp(app)
+        .resource
+        .use(_ => IO.never)
         .as(ExitCode.Success)
     }
 }
 
-sealed private[this] trait RuntimePools {
+sealed trait RuntimePools {
 
   implicit val futureExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
@@ -73,7 +66,7 @@ sealed private[this] trait RuntimePools {
     Scheduler.global
 }
 
-sealed private[this] trait Encoding {
+sealed trait Encoding {
 
   implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
     jsonOf[IO, PricesRequestPayload]
