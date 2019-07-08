@@ -3,37 +3,39 @@ package syntax
 import java.nio.charset.StandardCharsets
 
 import cats.data.Validated
-import cats.effect.IO
 import cats.instances.string._
 import cats.syntax.eq._
 import cats.syntax.show._
 import cats.syntax.validated._
 import cats.{ Eq, Show }
 import org.http4s.{ EntityDecoder, Response, Status }
+import typeclasses.RunSync
+import zio.Task
+import zio.interop.catz._
 
 import scala.language.implicitConversions
-import scala.util.Right
 
 private[syntax] trait ResponseVerificationSyntax {
 
   implicit def verifiedSyntax[A](a: A): VerifiedOps[A]                     = new VerifiedOps(a)
   implicit def verifiedOptionSyntax[A](a: Option[A]): VerifiedOptionOps[A] = new VerifiedOptionOps(a)
 
-  implicit def responseVerificationSyntax(response: IO[Response[IO]]) =
+  implicit def responseVerificationSyntax(response: Task[Response[Task]]) =
     new IoResponseResultOps(response)
 }
 
-private[syntax] class IoResponseResultOps(private val response: IO[Response[IO]]) extends AnyVal {
+private[syntax] class IoResponseResultOps(private val response: Task[Response[Task]]) extends AnyVal {
 
   import syntax.responseVerification._
 
-  def verify[A: EntityDecoder[IO, ?]](status: Status, check: A => Verified[A])(
+  def verify[A: EntityDecoder[Task, ?]](status: Status, check: A => Verified[A])(
     implicit
     ev1: Eq[Status],
-    ev2: Show[Status]
+    ev2: Show[Status],
+    run: RunSync[Task]
   ): Verified[A] =
-    response.attempt
-      .unsafeRunSync()
+    run
+      .syncUnsafe(response)
       .fold(
         err => s"Should succeed but returned the error $err".invalidNel,
         res =>
@@ -45,10 +47,11 @@ private[syntax] class IoResponseResultOps(private val response: IO[Response[IO]]
   def verifyResponseText(status: Status, expected: String)(
     implicit
     ev1: Eq[Status],
-    ev2: Show[Status]
+    ev2: Show[Status],
+    run: RunSync[Task]
   ): Verified[String] =
-    response.attempt
-      .unsafeRunSync()
+    run
+      .syncUnsafe(response)
       .fold(
         err => s"Should succeed but returned the error $err".invalidNel,
         res =>
@@ -57,27 +60,26 @@ private[syntax] class IoResponseResultOps(private val response: IO[Response[IO]]
         }
       )
 
-  private def verifiedResponse[A: EntityDecoder[IO, ?]](
-    res: Response[IO],
-    check: A => Verified[A]
+  private def verifiedResponse[A: EntityDecoder[Task, ?]](res: Response[Task], check: A => Verified[A])(
+    implicit run: RunSync[Task]
   ): Verified[A] =
-    res
-      .as[A]
-      .attempt
-      .unsafeRunSync()
+    run
+      .syncUnsafe(res.as[A])
       .fold(
         respErr => s"Response should succeed but returned the error $respErr".invalidNel,
         respRes => check(respRes)
       )
 
-  private def verifiedResponseText[A](res: Response[IO], expected: String): Verified[String] =
-    (res.body.compile.toVector.attempt.unsafeRunSync() match {
-      case Right(b) => Right(b.toArray)
-      case Left(e)  => Left(e)
-    }).fold(
-      respErr => s"Response should succeed but returned the error $respErr".invalidNel,
-      respMsg => new String(respMsg, StandardCharsets.UTF_8) isSameAs expected
-    )
+  private def verifiedResponseText[A](res: Response[Task], expected: String)(
+    implicit run: RunSync[Task]
+  ): Verified[String] =
+    run
+      .syncUnsafe(res.body.compile.toVector)
+      .map(_.toArray)
+      .fold(
+        respErr => s"Response should succeed but returned the error $respErr".invalidNel,
+        respMsg => new String(respMsg, StandardCharsets.UTF_8) isSameAs expected
+      )
 }
 
 private[syntax] class VerifiedOps[A](private val a: A) extends AnyVal {

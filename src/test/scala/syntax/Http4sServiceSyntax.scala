@@ -1,8 +1,7 @@
 package syntax
 
+import cats.Functor
 import cats.data.{ Kleisli, OptionT }
-import cats.syntax.flatMap._
-import cats.{ FlatMap, Functor }
 import org.http4s.{ HttpRoutes, Request, Response }
 
 import scala.language.implicitConversions
@@ -22,7 +21,4 @@ private[syntax] class HttpServiceOps[F[_]](
 
   def runFor(req: Request[F])(implicit F: Functor[F]): F[Response[F]] =
     service.run(req).getOrElse(Response.notFound)
-
-  def runForF(req: F[Request[F]])(implicit F: FlatMap[F]): F[Response[F]] =
-    req >>= (service.run(_).getOrElse(Response.notFound))
 }

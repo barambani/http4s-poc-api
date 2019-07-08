@@ -1,6 +1,7 @@
 package integration
 
-import cats.effect.{ ContextShift, Sync }
+import cats.effect.syntax.concurrent._
+import cats.effect.{ Concurrent, ContextShift, IO, Timer }
 import cats.syntax.flatMap._
 import errors.PriceServiceError.{ ProductErr, ProductPriceErr }
 import external._
@@ -9,18 +10,22 @@ import external.library.ThrowableMap
 import external.library.syntax.errorAdapt._
 import external.library.syntax.ioAdapt._
 import model.DomainModel._
-import monix.eval.Task
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
-trait ProductIntegration[F[_]] {
+sealed trait ProductIntegration[F[_]] {
   def product: ProductId => F[Option[Product]]
   def productPrice: Product => UserPreferences => F[Price]
 }
 
 object ProductIntegration {
 
-  @inline def apply[F[_]: Sync: -->[Task, ?[_]]: -->[Future, ?[_]]](
+  @inline def apply[F[_]: Concurrent: Timer: -->[IO, ?[_]]: -->[Future, ?[_]]](
+    productDep: TeamTwoHttpApi,
+    pricesDep: TeamOneHttpApi,
+    t: FiniteDuration
+  )(
     implicit
     CS: ContextShift[F],
     PE: ThrowableMap[ProductErr],
@@ -29,11 +34,11 @@ object ProductIntegration {
     new ProductIntegration[F] {
 
       def product: ProductId => F[Option[Product]] = { ps =>
-        CS.shift >> TeamTwoHttpApi().product(ps).as[F].narrowFailure(PE.map)
+        CS.shift >> productDep.product(ps).as[F].timeout(t).narrowFailure(PE.map)
       }
 
       def productPrice: Product => UserPreferences => F[Price] = { p => pref =>
-        CS.shift >> TeamOneHttpApi().productPrice(p)(pref).as[F].narrowFailure(PPE.map)
+        CS.shift >> pricesDep.productPrice(p)(pref).as[F].timeout(t).narrowFailure(PPE.map)
       }
     }
 }

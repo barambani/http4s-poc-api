@@ -16,34 +16,29 @@ sealed trait PreferenceFetcher[F[_]] {
 
 object PreferenceFetcher {
 
-  @inline def apply[F[_]: MonadError[?[_], Throwable]](
-    dependencies: UserIntegration[F],
-    logger: LogWriter[F]
-  ): PreferenceFetcher[F] =
-    new PreferenceFetcherImpl(dependencies, logger)
-
-  final private class PreferenceFetcherImpl[F[_]](
+  @inline def apply[F[_]](
     dep: UserIntegration[F],
     log: LogWriter[F]
   )(
-    implicit AE: MonadError[F, Throwable]
-  ) extends PreferenceFetcher[F] {
+    implicit ME: MonadError[F, Throwable]
+  ): PreferenceFetcher[F] =
+    new PreferenceFetcher[F] {
 
-    def userPreferences: UserId => F[UserPreferences] =
-      id =>
-        for {
-          pres <- dep.usersPreferences(id) <* log.debug(s"User preferences for $id collected successfully")
-          valid <- log.debug(s"Validating user preferences for user $id") >>
-                    validate(pres, id) <*
-                    log.debug(s"User preferences for $id validated")
-        } yield valid
+      def userPreferences: UserId => F[UserPreferences] =
+        id =>
+          for {
+            pres <- dep.usersPreferences(id) <* log.debug(s"User preferences for $id collected successfully")
+            valid <- log.debug(s"Validating user preferences for user $id") >>
+                      validate(pres, id) <*
+                      log.debug(s"User preferences for $id validated")
+          } yield valid
 
-    private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =
-      if (p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
-        log.error(s"InvalidShippingCountry: Cannot ship $id outside Italy") *>
-          AE.raiseError[UserPreferences](
-            InvalidShippingCountry("InvalidShippingCountry: Cannot ship outside Italy")
-          )
-      else p.pure[F]
-  }
+      private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =
+        if (p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
+          log.error(s"InvalidShippingCountry: Cannot ship $id outside Italy") *>
+            ME.raiseError[UserPreferences](
+              InvalidShippingCountry("InvalidShippingCountry: Cannot ship outside Italy")
+            )
+        else p.pure[F]
+    }
 }

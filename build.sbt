@@ -1,24 +1,23 @@
 import java.time.Instant
 
-import BoilerplateGeneration.{ ArityFunctionsGenerator, ArityTestsGenerator }
-import ScalacOptions._
 import sbt.Keys.javaOptions
+import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 
 lazy val versionOf = new {
-  val cats              = "2.0.0-M4"
-  val catsEffect        = "2.0.0-M4"
-  val circe             = "0.11.1"
-  val fs2               = "1.0.5"
-  val http4s            = "0.20.3"
-  val kindProjector     = "0.9.10"
-  val `log-effect`      = "0.7.0"
-  val `logback-classic` = "1.2.3"
-  val monix             = "3.0.0-RC1"
-  val scalaCheck        = "1.14.0"
-  val scalaTest         = "3.0.8"
-  val scalaz            = "7.3.0-M27"
-  val shapeless         = "2.3.3"
-  val silencer          = "1.4.1"
+  val cats               = "2.0.0-M4"
+  val catsEffect         = "2.0.0-M4"
+  val circe              = "0.11.1"
+  val fs2                = "1.0.5"
+  val http4s             = "0.20.4"
+  val kindProjector      = "0.9.10"
+  val `log-effect`       = "0.8.0"
+  val `logback-classic`  = "1.2.3"
+  val scalaCheck         = "1.14.0"
+  val scalaTest          = "3.0.8"
+  val zio                = "1.0.0-RC9-4"
+  val `zio-interop-cats` = "1.3.1.0-RC3"
+  val shapeless          = "2.3.3"
+  val silencer           = "1.4.1"
 }
 
 /*
@@ -37,13 +36,8 @@ lazy val transitiveDependencies: Seq[ExclusionRule] = Seq(
  */
 val externalDependencies = Seq(
   "org.typelevel"   %% "cats-core"           % versionOf.cats,
-  "org.typelevel"   %% "cats-kernel"         % versionOf.cats,
   "org.typelevel"   %% "cats-effect"         % versionOf.catsEffect,
   "co.fs2"          %% "fs2-core"            % versionOf.fs2,
-  "io.monix"        %% "monix-eval"          % versionOf.monix,
-  "io.monix"        %% "monix-execution"     % versionOf.monix,
-  "org.scalaz"      %% "scalaz-concurrent"   % versionOf.scalaz,
-  "org.scalaz"      %% "scalaz-core"         % versionOf.scalaz,
   "org.http4s"      %% "http4s-core"         % versionOf.http4s,
   "org.http4s"      %% "http4s-server"       % versionOf.http4s,
   "org.http4s"      %% "http4s-dsl"          % versionOf.http4s excludeAll (transitiveDependencies: _*),
@@ -53,9 +47,11 @@ val externalDependencies = Seq(
   "io.circe"        %% "circe-generic"       % versionOf.circe,
   "com.chuusai"     %% "shapeless"           % versionOf.shapeless,
   "io.laserdisc"    %% "log-effect-core"     % versionOf.`log-effect`,
-  "io.laserdisc"    %% "log-effect-fs2"      % versionOf.`log-effect`,
+  "io.laserdisc"    %% "log-effect-zio"      % versionOf.`log-effect`,
   "ch.qos.logback"  % "logback-classic"      % versionOf.`logback-classic`,
-  "com.github.ghik" %% "silencer-lib"        % versionOf.silencer
+  "com.github.ghik" %% "silencer-lib"        % versionOf.silencer,
+  "dev.zio"         %% "zio"                 % versionOf.zio,
+  "dev.zio"         %% "zio-interop-cats"    % versionOf.`zio-interop-cats`
 ) map (_.withSources)
 
 /*
@@ -77,6 +73,59 @@ val compilerPlugins: Seq[ModuleID] = Seq(
   compilerPlugin("com.github.ghik" %% "silencer-plugin" % versionOf.silencer)
 )
 
+val generalOptions: Seq[String] = Seq(
+  "-deprecation",
+  "-encoding",
+  "UTF-8",
+  "-explaintypes",
+  "-Yrangepos",
+  "-feature",
+  "-Xfuture",
+  "-Ypartial-unification",
+  "-language:higherKinds",
+  "-language:existentials",
+  "-unchecked",
+  "-Yno-adapted-args",
+  "-Xlint:_,-type-parameter-shadow",
+  "-Xsource:2.13",
+  "-Ywarn-dead-code",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any",
+  "-Ywarn-nullary-override",
+  "-Ywarn-nullary-unit",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfatal-warnings",
+  "-Ywarn-unused:imports",
+  "-Ywarn-unused:_,imports",
+  "-opt-warnings",
+  "-Xlint:constant",
+  "-Ywarn-extra-implicit"
+)
+
+val nonTestExceptions: Seq[String] = Seq(
+  "-Ywarn-unused:imports",
+  "-Xfatal-warnings"
+)
+
+val testOnlyOptions: Seq[String] = Seq("-Yrangepos")
+
+lazy val jreRuntimeOptions = Seq(
+  "-J-Xmx512m",
+  "-J-Xms512m",
+  "-J-XX:+UseG1GC",
+  "-J-XX:MaxGCPauseMillis=300",
+  "-J-XX:InitiatingHeapOccupancyPercent=35",
+  "-J-verbosegc",
+  "-J-Xloggc:/var/log/server-gc.log",
+  "-J-XX:+PrintGCDetails",
+  "-J-XX:+PrintTenuringDistribution",
+  "-J-XX:+PrintGCDateStamps",
+  "-J-XX:+UseGCLogFileRotation",
+  "-J-XX:GCLogFileSize=10m",
+  "-J-XX:NumberOfGCLogFiles=10"
+)
+
 val buildInfoSettings = Seq(
   buildInfoPackage := "server",
   buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
@@ -88,37 +137,19 @@ val dockerSettings = Seq(
   dockerBaseImage in Docker := "hirokimatsumoto/alpine-openjdk-11"
 )
 
-lazy val jreRuntimeOptions = Seq(
-  "-J-Xmx512m",
-  "-J-Xms512m",
-  "-J-XX:+UseG1GC",
-  "-J-XX:MaxGCPauseMillis=300",
-  "-J-XX:InitiatingHeapOccupancyPercent=35",
-  "-J-verbosegc",
-  "-J-Xloggc:/catalog-streams/gc/log/catalog-streams-gc.log",
-  "-J-XX:+PrintGCDetails",
-  "-J-XX:+PrintTenuringDistribution",
-  "-J-XX:+PrintGCDateStamps",
-  "-J-XX:+UseGCLogFileRotation",
-  "-J-XX:GCLogFileSize=10m",
-  "-J-XX:NumberOfGCLogFiles=10"
-)
-
 val root = project
   .in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
   .settings(buildInfoSettings)
-  .settings(
-    sourceGenerators in Compile += ((sourceManaged in Compile) map ArityFunctionsGenerator.run(22)).taskValue,
-    sourceGenerators in Test    += ((sourceManaged in Test) map ArityTestsGenerator.run(8)).taskValue
-  )
+  .settings(dockerSettings)
   .settings(
     name                := "http4s-poc-api",
     organization        := "com.github.barambani",
     scalaVersion        := "2.12.8",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
+    unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
     addCommandAlias(
       "checkFormat",
@@ -135,6 +166,5 @@ val root = project
     scalacOptions ++= generalOptions,
     scalacOptions in Test ++= testOnlyOptions,
     scalacOptions in (Compile, console) --= nonTestExceptions,
-    javaOptions   in Universal := jreRuntimeOptions,
-    cancelable    in Global := true
+    javaOptions   in Universal := jreRuntimeOptions
   )

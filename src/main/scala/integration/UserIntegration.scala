@@ -1,6 +1,7 @@
 package integration
 
-import cats.effect.{ ContextShift, Sync }
+import cats.effect.syntax.concurrent._
+import cats.effect.{ Concurrent, ContextShift, IO, Timer }
 import cats.syntax.flatMap._
 import errors.PriceServiceError.{ PreferenceErr, UserErr }
 import external._
@@ -9,18 +10,22 @@ import external.library.ThrowableMap
 import external.library.syntax.errorAdapt._
 import external.library.syntax.ioAdapt._
 import model.DomainModel._
-import monix.eval.Task
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
-trait UserIntegration[F[_]] {
+sealed trait UserIntegration[F[_]] {
   def user: UserId => F[User]
   def usersPreferences: UserId => F[UserPreferences]
 }
 
 object UserIntegration {
 
-  @inline def apply[F[_]: Sync: -->[Task, ?[_]]: -->[Future, ?[_]]](
+  @inline def apply[F[_]: Concurrent: Timer: -->[IO, ?[_]]: -->[Future, ?[_]]](
+    userDep: TeamTwoHttpApi,
+    preferencesDep: TeamOneHttpApi,
+    t: FiniteDuration
+  )(
     implicit
     CS: ContextShift[F],
     UE: ThrowableMap[UserErr],
@@ -29,11 +34,11 @@ object UserIntegration {
     new UserIntegration[F] {
 
       def user: UserId => F[User] = { id =>
-        CS.shift >> TeamTwoHttpApi().user(id).as[F].narrowFailure(UE.map)
+        CS.shift >> userDep.user(id).as[F].timeout(t).narrowFailure(UE.map)
       }
 
       def usersPreferences: UserId => F[UserPreferences] = { id =>
-        CS.shift >> TeamOneHttpApi().usersPreferences(id).as[F].narrowFailure(PE.map)
+        CS.shift >> preferencesDep.usersPreferences(id).as[F].timeout(t).narrowFailure(PE.map)
       }
     }
 }

@@ -1,13 +1,12 @@
 package server
 
 import cats.effect.Sync
-import cats.effect.util.CompositeException
+import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.show._
 import errors.PriceServiceError
 import errors.PriceServiceError._
-import external.library.instances.throwable._
 import external.library.syntax.response._
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
@@ -16,14 +15,14 @@ import service.PriceService
 
 sealed abstract class PriceHttpApi[F[_]: Sync](
   implicit
-  RD: EntityDecoder[F, PricesRequestPayload],
-  RE: EntityEncoder[F, List[Price]],
+  requestDecoder: EntityDecoder[F, PricesRequestPayload],
+  responseEncoder: EntityEncoder[F, List[Price]],
 ) extends Http4sDsl[F] {
 
   def service(priceService: PriceService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ Method.POST -> Root =>
-        postResponse(req, priceService) handlingFailures priceServiceErrors handlingFailures compositeError
+        postResponse(req, priceService) handlingFailures priceServiceErrors handleErrorWith unhandledThrowable
     }
 
   private[this] def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
@@ -42,8 +41,10 @@ sealed abstract class PriceHttpApi[F[_]: Sync](
     case CacheLookupError(r)       => BadGateway(r)
   }
 
-  private[this] def compositeError: CompositeException => F[Response[F]] =
-    e => BadGateway(e.show)
+  private[this] def unhandledThrowable: Throwable => F[Response[F]] = { th =>
+    import external.library.instances.throwable._
+    InternalServerError(th.show)
+  }
 }
 
 object PriceHttpApi {

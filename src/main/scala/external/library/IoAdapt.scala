@@ -1,13 +1,10 @@
 package external
 package library
 
-import cats.Eval
 import cats.arrow.FunctionK
-import cats.effect.{ ContextShift, IO }
+import cats.effect.{ Concurrent, ContextShift, IO }
 import external.library.IoAdapt.-->
-import monix.eval.{ Task => MonixTask }
-import monix.execution.Scheduler
-import scalaz.concurrent.{ Task => ScalazTask }
+import zio.{ Task, ZIO }
 
 import scala.concurrent.Future
 
@@ -27,35 +24,22 @@ sealed trait IoAdapt[F[_], G[_]] {
 
 sealed private[library] trait IoAdaptInstances {
 
+  implicit def catsIoToZioTask(implicit cc: Concurrent[Task]): IO --> Task =
+    new IoAdapt[IO, Task] {
+      def apply[A]: (=>IO[A]) => Task[A] =
+        io => cc.liftIO(io)
+    }
+
+  implicit val futureToZioTask: Future --> Task =
+    new IoAdapt[Future, Task] {
+      def apply[A]: (=>Future[A]) => Task[A] =
+        ft => ZIO.fromFuture(ec => ft.map(identity)(ec))
+    }
+
   implicit def futureToIo(implicit cs: ContextShift[IO]): Future --> IO =
     new IoAdapt[Future, IO] {
       def apply[A]: (=>Future[A]) => IO[A] =
         IO.fromFuture[A] _ compose IO.delay
-    }
-
-  implicit def monixTaskToIo(implicit s: Scheduler): MonixTask --> IO =
-    new IoAdapt[MonixTask, IO] {
-      def apply[A]: (=>MonixTask[A]) => IO[A] = _.toIO
-    }
-
-  implicit def scalazTaskToIo: ScalazTask --> IO =
-    new IoAdapt[ScalazTask, IO] {
-      def apply[A]: (=>ScalazTask[A]) => IO[A] =
-        _.unsafePerformSyncAttempt.fold(
-          e => IO.raiseError(e),
-          a => IO.pure(a)
-        )
-    }
-
-  implicit def ioToScalazTask: IO --> ScalazTask =
-    new IoAdapt[IO, ScalazTask] {
-      def apply[A]: (=>IO[A]) => ScalazTask[A] =
-        fa =>
-          Eval
-            .always[ScalazTask[A]](
-              fa.attempt.unsafeRunSync.fold(ScalazTask.fail, a => ScalazTask.delay(a))
-            )
-            .value
     }
 }
 

@@ -1,18 +1,18 @@
 package external
 
+import cats.effect.IO
 import model.DomainModel._
-import monix.eval.Task
 
-sealed trait TeamTwoHttpApi {
-  def user: UserId => Task[User]
-  def product: ProductId => Task[Option[Product]]
+trait TeamTwoHttpApi {
+  def user: UserId => IO[User]
+  def product: ProductId => IO[Option[Product]]
 }
 
 object TeamTwoHttpApi {
 
   @inline def apply(): TeamTwoHttpApi =
     new TeamTwoHttpApi {
-      def user: UserId => Task[User]                  = ???
-      def product: ProductId => Task[Option[Product]] = ???
+      def user: UserId => IO[User]                  = ???
+      def product: ProductId => IO[Option[Product]] = ???
     }
 }

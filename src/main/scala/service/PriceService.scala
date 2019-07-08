@@ -1,25 +1,33 @@
 package service
 
-import cats.MonadError
+import cats.Parallel
+import cats.effect.{ Concurrent, ContextShift, IO, Timer }
 import cats.syntax.apply._
 import cats.syntax.flatMap._
-import external.library.ParallelEffect
-import external.library.syntax.parallelEffect._
+import cats.syntax.parallel._
+import external.library.IoAdapt.-->
+import external.{ TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi }
 import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
 import log.effect.LogWriter
 import model.DomainModel._
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-final case class PriceService[F[_]: ParallelEffect: MonadError[?[_], Throwable]](
-  cache: CacheIntegration[F],
-  userInt: UserIntegration[F],
-  productInt: ProductIntegration[F],
-  logger: LogWriter[F],
-  productTimeout: FiniteDuration = 8.seconds,
-  preferenceTimeout: FiniteDuration = 8.seconds,
-  priceTimeout: FiniteDuration = 8.seconds
+final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[?[_], ParTask]](
+  cacheDep: TeamThreeCacheApi[ProductId, Product],
+  teamOneStupidName: TeamOneHttpApi,
+  teamTwoStupidName: TeamTwoHttpApi,
+  logger: LogWriter[F]
+)(
+  implicit
+  ev1: IO --> F,
+  ev2: Future --> F
 ) {
+
+  private[this] val cache      = CacheIntegration[F](cacheDep, 10.seconds)
+  private[this] val userInt    = UserIntegration[F](teamTwoStupidName, teamOneStupidName, 10.seconds)
+  private[this] val productInt = ProductIntegration[F](teamTwoStupidName, teamOneStupidName, 10.seconds)
 
   /**
     * Going back to ParallelEffect and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
@@ -32,30 +40,30 @@ final case class PriceService[F[_]: ParallelEffect: MonadError[?[_], Throwable]]
     */
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
     (userFor(userId), productsFor(productIds), preferencesFor(userId))
-      .parallelMap(6.seconds)(priceCalculator.finalPrices)
+      .parMapN(priceCalculator.finalPrices)
       .flatten
 
-  private def userFor(userId: UserId): F[User] =
+  private[this] def userFor(userId: UserId): F[User] =
     logger.debug(s"Collecting user details for id $userId") >>
       userInt.user(userId) <*
       logger.debug(s"User details collected for id $userId")
 
-  private def preferencesFor(userId: UserId): F[UserPreferences] =
+  private[this] def preferencesFor(userId: UserId): F[UserPreferences] =
     logger.debug(s"Looking up user preferences for user $userId") >>
       preferenceFetcher.userPreferences(userId) <*
       logger.debug(s"User preferences look up for $userId completed")
 
-  private def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
+  private[this] def productsFor(productIds: Seq[ProductId]): F[List[Product]] =
     logger.debug(s"Collecting product details for products $productIds") >>
       productRepo.storedProducts(productIds) <*
       logger.debug(s"Product details collection for $productIds completed")
 
-  private lazy val preferenceFetcher: PreferenceFetcher[F] =
+  private[this] lazy val preferenceFetcher: PreferenceFetcher[F] =
     PreferenceFetcher(userInt, logger)
 
-  private lazy val productRepo: ProductRepo[F] =
-    ProductRepo(cache, productInt, logger, productTimeout)
+  private[this] lazy val productRepo: ProductRepo[F] =
+    ProductRepo(cache, productInt, logger)
 
-  private lazy val priceCalculator: PriceCalculator[F] =
-    PriceCalculator(productInt, logger, priceTimeout)
+  private[this] lazy val priceCalculator: PriceCalculator[F] =
+    PriceCalculator(productInt, logger)
 }

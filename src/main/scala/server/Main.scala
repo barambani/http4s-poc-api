@@ -2,78 +2,70 @@ package server
 
 import java.util.concurrent.ForkJoinPool
 
-import cats.effect.{ ExitCode, IO, IOApp }
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
+import external.{ TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi }
 import io.circe.generic.auto._
-import log.effect.fs2.SyncLogWriter._
+import log.effect.zio.ZioLogWriter._
 import model.DomainModel._
-import monix.execution.Scheduler
 import org.http4s.circe._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 import org.http4s.{ EntityDecoder, EntityEncoder, HttpApp }
 import service.PriceService
-import model.DomainModelCodecs._
+import zio.interop.catz._
+import zio.interop.catz.implicits._
+import zio.{ Task, TaskR, ZIO }
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
+import model.DomainModelCodecs._
 
-object Main extends IOApp with RuntimePools with Encoding {
+object Main extends CatsApp with RuntimePools with Encoding {
 
-  private[this] val priceService: IO[PriceService[IO]] =
-    log4sLog[IO]("App logger") map { log =>
-      PriceService(
-        CacheIntegration[IO],
-        UserIntegration[IO],
-        ProductIntegration[IO],
-        log,
-        productTimeout = 10.seconds,
-        preferenceTimeout = 10.seconds,
-        priceTimeout = 10.seconds
+  private[this] val priceService: TaskR[String, PriceService[Task]] =
+    log4sFromName map { log =>
+      PriceService[Task](
+        TeamThreeCacheApi.productCache,
+        TeamOneHttpApi(),
+        TeamTwoHttpApi(),
+        log
       )
     }
 
-  private[this] val httpApp: IO[HttpApp[IO]] =
+  private[this] val httpApp: TaskR[String, HttpApp[Task]] =
     priceService map { ps =>
       Router(
-        "/pricing-api/prices"       -> PriceHttpApi[IO].service(ps),
-        "/pricing-api/health-check" -> HealthCheckHttpApi[IO].service()
+        "/pricing-api/prices"       -> PriceHttpApi[Task].service(ps),
+        "/pricing-api/health-check" -> HealthCheckHttpApi[Task].service(ps.logger)
       ).orNotFound
     }
 
-  def run(args: List[String]): IO[ExitCode] =
-    httpApp >>= { app =>
-      BlazeServerBuilder[IO]
+  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
+    (httpApp.provide("App log") >>= { app =>
+      BlazeServerBuilder[Task]
         .bindHttp(17171, "localhost")
         .withConnectorPoolSize(64)
         .enableHttp2(true)
         .withHttpApp(app)
-        .resource
-        .use(_ => IO.never)
-        .as(ExitCode.Success)
-    }
+        .serve
+        .compile
+        .drain
+    }).fold(_ => 0, _ => 1)
 }
 
 sealed trait RuntimePools {
 
   implicit val futureExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
-
-  implicit val monixTaskScheduler: Scheduler =
-    Scheduler.global
 }
 
 sealed trait Encoding {
 
-  implicit val priceRequestPayloadDecoder: EntityDecoder[IO, PricesRequestPayload] =
-    jsonOf[IO, PricesRequestPayload]
+  implicit val priceRequestPayloadDecoder: EntityDecoder[Task, PricesRequestPayload] =
+    jsonOf[Task, PricesRequestPayload]
 
-  implicit val priceResponsePayloadEncoder: EntityEncoder[IO, List[Price]] =
-    jsonEncoderOf[IO, List[Price]]
+  implicit val priceResponsePayloadEncoder: EntityEncoder[Task, List[Price]] =
+    jsonEncoderOf[Task, List[Price]]
 
-  implicit val healthCheckResponsePayloadEncoder: EntityEncoder[IO, ServiceSignature] =
-    jsonEncoderOf[IO, ServiceSignature]
+  implicit val healthCheckResponsePayloadEncoder: EntityEncoder[Task, ServiceSignature] =
+    jsonEncoderOf[Task, ServiceSignature]
 }

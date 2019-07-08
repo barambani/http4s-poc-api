@@ -1,27 +1,28 @@
 import java.time.Instant
 
-import cats.effect.IO
 import cats.syntax.validated._
-import interpreters.{ TestCacheIntegration, TestProductIntegration, TestUserIntegration }
+import interpreters.{ TestTeamOneHttpApi, TestTeamThreeCacheApi, TestTeamTwoHttpApi }
 import io.circe.generic.auto._
-import io.circe.syntax._
 import io.circe.{ Decoder, Encoder }
 import model.DomainModel._
 import model.DomainModelSyntax._
-import org.http4s.{ Status, Uri }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
+import org.http4s.{ Method, Request, Status }
 import org.scalatest.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
 import server.PriceHttpApi
 import service.PriceService
 import syntax.http4sService._
 import syntax.responseVerification._
+import zio.Task
+import zio.interop.catz._
+import zio.interop.catz.implicits._
 import model.DomainModelCodecs._
 
 final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
-  implicit def testEncoder[A: Encoder] = jsonEncoderOf[IO, A]
-  implicit def testDecoder[A: Decoder] = jsonOf[IO, A]
+  implicit def testEncoder[A: Encoder] = jsonEncoderOf[Task, A]
+  implicit def testDecoder[A: Decoder] = jsonOf[Task, A]
 
   val aUser = User(111.asUserId, Nil)
 
@@ -47,24 +48,24 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
   it should "respond with Ok 200 and the correct number of prices" in {
 
-    val pricing = PriceService[IO](
-      TestCacheIntegration.make(productsInCache)(testLog),
-      TestUserIntegration.make(aUser, preferences)(testLog),
-      TestProductIntegration.make(productsInStore, price)(testLog),
+    val pricing = PriceService[Task](
+      TestTeamThreeCacheApi.make(productsInCache)(testLog),
+      TestTeamOneHttpApi.make(preferences, price),
+      TestTeamTwoHttpApi.make(aUser, productsInStore)(testLog),
       testLog
     )
 
-    val httpApi = PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[Task].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(reqPayload.asJson, Uri.uri("/"))
+    val request = Request[Task](method = Method.POST).withEntity(reqPayload)
 
     val verified = httpApi
-      .runForF(request)
+      .runFor(request)
       .verify[Seq[Price]](
         Status.Ok,
         ps =>
@@ -83,24 +84,24 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
       )
     )
 
-    val pricing = PriceService[IO](
-      TestCacheIntegration.make(productsInStore)(testLog),
-      TestUserIntegration.make(aUser, wrongPreferences)(testLog),
-      TestProductIntegration.make(productsInStore, price)(testLog),
+    val pricing = PriceService[Task](
+      TestTeamThreeCacheApi.make(productsInCache)(testLog),
+      TestTeamOneHttpApi.make(wrongPreferences, price),
+      TestTeamTwoHttpApi.make(aUser, productsInStore)(testLog),
       testLog
     )
 
-    val httpApi = PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[Task].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       18.asUserId,
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(reqPayload.asJson, Uri.uri("/"))
+    val request = Request[Task](method = Method.POST).withEntity(reqPayload)
 
     val verified = httpApi
-      .runForF(request)
+      .runFor(request)
       .verifyResponseText(
         Status.BadRequest,
         "InvalidShippingCountry: Cannot ship outside Italy"
@@ -111,31 +112,27 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
   it should "respond with Status 502 for multiple dependency failures" in {
 
-    val pricing = PriceService[IO](
-      TestCacheIntegration.makeFail,
-      TestUserIntegration.makeFail,
-      TestProductIntegration.makeFail,
+    val pricing = PriceService[Task](
+      TestTeamThreeCacheApi.makeFail,
+      TestTeamOneHttpApi.makeFail,
+      TestTeamTwoHttpApi.makeFail,
       testLog
     )
 
-    val httpApi = PriceHttpApi[IO].service(pricing)
+    val httpApi = PriceHttpApi[Task].service(pricing)
 
     val reqPayload = PricesRequestPayload(
       19.asUserId,
       Seq(123.asProductId, 456.asProductId, 171.asProductId)
     )
 
-    val request = POST(reqPayload.asJson, Uri.uri("/"))
+    val request = Request[Task](method = Method.POST).withEntity(reqPayload)
 
     val verified = httpApi
-      .runForF(request)
+      .runFor(request)
       .verifyResponseText(
-        Status.BadGateway,
-        """DependencyFailure. The dependency def user: UserId => IO[User] failed with message network failure
-        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
-        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
-        |DependencyFailure. The dependency def cachedProduct: ProductId => IO[Option[Product]] failed with message not responding
-        |DependencyFailure. The dependency def usersPreferences: UserId => IO[UserPreferences] failed with message timeout""".stripMargin
+        Status.FailedDependency,
+        "DependencyFailure. The dependency `UserId => Future[UserPreferences]` failed with message timeout"
       )
 
     assertOn(verified)
