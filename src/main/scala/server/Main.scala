@@ -42,7 +42,7 @@ object Main extends CatsApp with RuntimePools with Encoding {
   def run(args: List[String]): ZIO[Environment, Nothing, Int] =
     (httpApp.provide("App log") >>= { app =>
       BlazeServerBuilder[Task]
-        .bindHttp(17171, "localhost")
+        .bindHttp(17171, "0.0.0.0")
         .withConnectorPoolSize(64)
         .enableHttp2(true)
         .withHttpApp(app)
