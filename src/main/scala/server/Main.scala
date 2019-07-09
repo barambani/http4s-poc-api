@@ -34,8 +34,8 @@ object Main extends CatsApp with RuntimePools with Encoding {
   private[this] val httpApp: TaskR[String, HttpApp[Task]] =
     priceService map { ps =>
       Router(
-        "/pricing-api/prices"       -> PriceHttpApi[Task].service(ps),
-        "/pricing-api/health-check" -> HealthCheckHttpApi[Task].service(ps.logger)
+        "/pricing-api/prices"       -> PriceRoutes[Task].make(ps),
+        "/pricing-api/health-check" -> HealthCheckRoutes[Task].make(ps.logger)
       ).orNotFound
     }
 

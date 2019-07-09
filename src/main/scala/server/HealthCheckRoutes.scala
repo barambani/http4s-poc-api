@@ -7,11 +7,11 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{ EntityEncoder, HttpRoutes, Method }
 import cats.syntax.flatMap._
 
-sealed abstract class HealthCheckHttpApi[F[_]: Sync](
+sealed abstract class HealthCheckRoutes[F[_]: Sync](
   implicit responseEncoder: EntityEncoder[F, ServiceSignature]
 ) extends Http4sDsl[F] {
 
-  def service(log: LogWriter[F]): HttpRoutes[F] =
+  def make(log: LogWriter[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root => log.debug(s"Serving HealthCheck request") >> Ok(serviceSignature)
     }
@@ -26,10 +26,7 @@ sealed abstract class HealthCheckHttpApi[F[_]: Sync](
     )
 }
 
-object HealthCheckHttpApi {
-  def apply[F[_]: Sync](
-    implicit
-    RE: EntityEncoder[F, ServiceSignature]
-  ): HealthCheckHttpApi[F] =
-    new HealthCheckHttpApi[F] {}
+object HealthCheckRoutes {
+  def apply[F[_]: Sync: EntityEncoder[?[_], ServiceSignature]]: HealthCheckRoutes[F] =
+    new HealthCheckRoutes[F] {}
 }

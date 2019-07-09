@@ -13,13 +13,13 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{ EntityDecoder, EntityEncoder, HttpRoutes, Method, Request, Response }
 import service.PriceService
 
-sealed abstract class PriceHttpApi[F[_]: Sync](
+sealed abstract class PriceRoutes[F[_]: Sync](
   implicit
   requestDecoder: EntityDecoder[F, PricesRequestPayload],
   responseEncoder: EntityEncoder[F, List[Price]],
 ) extends Http4sDsl[F] {
 
-  def service(priceService: PriceService[F]): HttpRoutes[F] =
+  def make(priceService: PriceService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ Method.POST -> Root =>
         postResponse(req, priceService) handlingFailures priceServiceErrors handleErrorWith unhandledThrowable
@@ -47,11 +47,7 @@ sealed abstract class PriceHttpApi[F[_]: Sync](
   }
 }
 
-object PriceHttpApi {
-  def apply[F[_]: Sync](
-    implicit
-    RD: EntityDecoder[F, PricesRequestPayload],
-    RE: EntityEncoder[F, List[Price]]
-  ): PriceHttpApi[F] =
-    new PriceHttpApi[F] {}
+object PriceRoutes {
+  def apply[F[_]: Sync: EntityDecoder[?[_], PricesRequestPayload]: EntityEncoder[?[_], List[Price]]]: PriceRoutes[F] =
+    new PriceRoutes[F] {}
 }

@@ -7,7 +7,7 @@ import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ HttpRoutes, Request, Status }
 import org.scalatest.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
-import server.HealthCheckHttpApi
+import server.HealthCheckRoutes
 import syntax.http4sService._
 import syntax.responseVerification._
 import zio.Task
@@ -21,7 +21,7 @@ final class HealthCheckHttpApiTests extends AnyFlatSpec with Matchers with Fixtu
   it should "respond with Ok status 200 and the correct service signature" in {
 
     val httpApi: HttpRoutes[Task] =
-      HealthCheckHttpApi[Task].service(testLog)
+      HealthCheckRoutes[Task].make(testLog)
 
     val verified = httpApi
       .runFor(Request[Task]())

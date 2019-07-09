@@ -10,7 +10,7 @@ import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ Method, Request, Status }
 import org.scalatest.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
-import server.PriceHttpApi
+import server.PriceRoutes
 import service.PriceService
 import syntax.http4sService._
 import syntax.responseVerification._
@@ -55,7 +55,7 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
       testLog
     )
 
-    val httpApi = PriceHttpApi[Task].service(pricing)
+    val httpApi = PriceRoutes[Task].make(pricing)
 
     val reqPayload = PricesRequestPayload(
       17.asUserId,
@@ -91,7 +91,7 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
       testLog
     )
 
-    val httpApi = PriceHttpApi[Task].service(pricing)
+    val httpApi = PriceRoutes[Task].make(pricing)
 
     val reqPayload = PricesRequestPayload(
       18.asUserId,
@@ -119,7 +119,7 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
       testLog
     )
 
-    val httpApi = PriceHttpApi[Task].service(pricing)
+    val httpApi = PriceRoutes[Task].make(pricing)
 
     val reqPayload = PricesRequestPayload(
       19.asUserId,
