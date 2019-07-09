@@ -6,7 +6,64 @@
 
 This repo contains a complete example of a http api implemented with [http4s](http://http4s.org/) in tagless final Mtl style. It uses some helper tools from [Http4s Extend](https://github.com/barambani/http4s-extend).
 
-### Service Structure
+## How to run it
+To run the service locally on docker the following steps are needed:
+#### Tag
+To get a correct image tag the repo's `HEAD` needs to have a tag. If that's not the case a local tag could be added with something like
+```
+git tag v0.0.1-Test
+```
+#### Build docker image
+to create the image the most straightforward option is to use the sbt plugin that comes with the project
+```
+sbt docker:publishLocal
+```
+if that's successful, looking up for the images
+```
+docker images
+```
+should give something like
+```
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+http4s-poc-api      0.0.1-Test          4a3ba2767d13        14 minutes ago      521MB
+[...]
+```
+#### Run
+if the image has been created successfully the last step is to run it
+```
+docker run -p 17171:17171 4a3ba2767
+```
+clearly the ids will be different but the server should start with a message like
+```
+[2019-07-09 13:03:38,875][INFO ][zio-default-async-1-2104457164][o.h.b.c.nio1.NIO1SocketServerGroup] Service bound to address /0.0.0.0:17171
+[2019-07-09 13:03:38,896][DEBUG][blaze-selector-0][o.h.blaze.channel.nio1.SelectorLoop] Channel initialized.
+[2019-07-09 13:03:38,911][INFO ][zio-default-async-1-2104457164][o.h.server.blaze.BlazeServerBuilder]
+  _   _   _        _ _
+ | |_| |_| |_ _ __| | | ___
+ | ' \  _|  _| '_ \_  _(_-<
+ |_||_\__|\__| .__/ |_|/__/
+             |_|
+[2019-07-09 13:03:39,054][INFO ][zio-default-async-1-2104457164][o.h.server.blaze.BlazeServerBuilder] http4s v0.20.4 on blaze v0.14.5 started at http://0.0.0.0:17171/
+```
+to verify the service, a curl call can be executed as below (notice the below uses `jq` but should work regardless)
+```
+curl http://127.0.0.1:17171/pricing-api/health-check | jq
+```
+with a response (trhough `jq`) on the line of
+```
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   146  100   146    0     0    151      0 --:--:-- --:--:-- --:--:--   151
+{
+  "name": "http4s-poc-api",
+  "version": "0.0.1-Test",
+  "scalaVersion": "2.12.8",
+  "scalaOrganization": "org.scala-lang",
+  "buildTime": "2019-07-09T12:44:56.844Z"
+}
+```
+
+## Service Structure
 
 #### Business Logic
 The logic is encoded into a tagless final DSL that abstracts over the concrete effectful computation.
