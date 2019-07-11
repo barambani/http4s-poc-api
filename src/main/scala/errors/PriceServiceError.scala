@@ -10,4 +10,5 @@ object PriceServiceError {
   final case class ProductPriceErr(reason: String)        extends PriceServiceError
   final case class InvalidShippingCountry(reason: String) extends PriceServiceError
   final case class CacheLookupError(reason: String)       extends PriceServiceError
+  final case class CacheStoreError(reason: String)        extends PriceServiceError
 }

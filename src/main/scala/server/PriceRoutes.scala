@@ -37,8 +37,9 @@ sealed abstract class PriceRoutes[F[_]: Sync](
     case PreferenceErr(r)          => FailedDependency(r)
     case ProductErr(r)             => FailedDependency(r)
     case ProductPriceErr(r)        => FailedDependency(r)
+    case CacheLookupError(r)       => FailedDependency(r)
+    case CacheStoreError(r)        => FailedDependency(r)
     case InvalidShippingCountry(r) => BadRequest(r)
-    case CacheLookupError(r)       => BadGateway(r)
   }
 
   private[this] def unhandledThrowable: Throwable => F[Response[F]] = { th =>
