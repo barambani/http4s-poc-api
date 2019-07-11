@@ -1,10 +1,11 @@
 package external
 package library
+package instances
 
 import cats.Show
 import cats.effect.util.CompositeException
 
-trait ThrowableInstances {
+private[instances] trait ThrowableInstances {
 
   implicit final def throwableShow: Show[Throwable] =
     new Show[Throwable] {

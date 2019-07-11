@@ -2,10 +2,9 @@ package model
 
 import java.time.Instant
 
-import cats.Show
 import shapeless.tag.@@
 
-object DomainModel extends DomainModelInstances {
+object DomainModel {
 
   sealed trait UserIdT
   sealed trait UserAddressT
@@ -62,22 +61,4 @@ object DomainModel extends DomainModelInstances {
     scalaOrganization: String,
     buildTime: String
   )
-}
-
-sealed private[model] trait DomainModelInstances {
-
-  implicit val instantShow: Show[Instant] =
-    new Show[Instant] {
-      def show(t: Instant): String = t.toString
-    }
-
-  implicit val bigDecimalShow: Show[BigDecimal] =
-    new Show[BigDecimal] {
-      def show(t: BigDecimal): String = t.toString
-    }
-
-  implicit def taggedShow[A, T](implicit ev: Show[A]): Show[A @@ T] =
-    new Show[A @@ T] {
-      def show(t: A @@ T): String = ev.show(t)
-    }
 }

@@ -11,11 +11,6 @@ object CirceModule {
     * Gives a Circe Encoder for the type `A` when a `Show` instance
     * is available for it.
     *
-    * Example, Instant:
-    *
-    * val instantEncoder: Encoder[Instant] = encoderFor[Instant]
-    *
-    *
     * Example, Shapeless tag:
     *
     * def taggedLongEncoder[T]: Encoder[Long @@ T] = encoderFor[Long @@ T]
@@ -28,6 +23,19 @@ object CirceModule {
     */
   def encoderFor[A](implicit ev: Show[A]): Encoder[A] =
     Encoder.encodeString.contramap[A](ev.show)
+
+  /**
+    * Gives a Circe Encoder for the type `A` when
+    * way to go from A to string `A => String` is given
+    *
+    * Example, Instant:
+    *
+    * val instantEncoder: Encoder[Instant] = encoderFor[Instant]
+    *
+    * @return An encoder for `A`
+    */
+  def encoderFor[A]: (A => String) => Encoder[A] =
+    f => Encoder.encodeString.contramap[A](f)
 
   /**
     * Gives a Circe Decoder for the type `A` when a way to go from String to `A`

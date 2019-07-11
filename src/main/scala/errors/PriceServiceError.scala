@@ -2,12 +2,13 @@ package errors
 
 import cats.syntax.show._
 import com.github.ghik.silencer.silent
-import external.library.{ ThrowableInstances, ThrowableMap }
+import external.library.ThrowableMap
+import external.library.instances.throwable._
 import shapeless.{ ::, Generic, HNil }
 
 sealed trait PriceServiceError extends Exception with Product with Serializable
 
-object PriceServiceError extends ThrowableInstances {
+object PriceServiceError {
 
   final case class UserErr(reason: String)                extends PriceServiceError
   final case class PreferenceErr(reason: String)          extends PriceServiceError
