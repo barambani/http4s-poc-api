@@ -4,7 +4,7 @@ package library
 import cats.Show
 import cats.effect.util.CompositeException
 
-private[library] trait ThrowableInstances {
+trait ThrowableInstances {
 
   implicit final def throwableShow: Show[Throwable] =
     new Show[Throwable] {
