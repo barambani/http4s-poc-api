@@ -1,6 +1,6 @@
 package external
 package library
 
-trait ThrowableMap[E] { self =>
+trait ThrowableMap[E] {
   def map(th: Throwable): E
 }
