@@ -3,10 +3,9 @@ package integration
 import cats.effect.syntax.concurrent._
 import cats.effect.{ Concurrent, ContextShift, IO, Timer }
 import cats.syntax.flatMap._
-import errors.PriceServiceError.CacheLookupError
+import errors.PriceServiceError.{ CacheLookupError, CacheStoreError }
 import external.TeamThreeCacheApi
 import external.library.IoAdapt.-->
-import external.library.ThrowableMap
 import external.library.syntax.errorAdapt._
 import external.library.syntax.ioAdapt._
 import model.DomainModel._
@@ -24,16 +23,14 @@ object CacheIntegration {
     cache: TeamThreeCacheApi[ProductId, Product],
     t: FiniteDuration
   )(
-    implicit
-    CE: ThrowableMap[CacheLookupError],
-    CS: ContextShift[F]
+    implicit CS: ContextShift[F]
   ): CacheIntegration[F] =
     new CacheIntegration[F] {
 
       def cachedProduct: ProductId => F[Option[Product]] =
-        pId => CS.shift >> cache.get(pId).as[F].timeout(t).narrowFailure(CE.map)
+        pId => CS.shift >> cache.get(pId).as[F].timeout(t).narrowFailureTo[CacheLookupError]
 
       def storeProductToCache: ProductId => Product => F[Unit] =
-        pId => p => CS.shift >> cache.put(pId)(p).as[F].timeout(t).narrowFailure(CE.map)
+        pId => p => CS.shift >> cache.put(pId)(p).as[F].timeout(t).narrowFailureTo[CacheStoreError]
     }
 }

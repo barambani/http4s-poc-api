@@ -6,7 +6,6 @@ import cats.syntax.flatMap._
 import errors.PriceServiceError.{ ProductErr, ProductPriceErr }
 import external._
 import external.library.IoAdapt.-->
-import external.library.ThrowableMap
 import external.library.syntax.errorAdapt._
 import external.library.syntax.ioAdapt._
 import model.DomainModel._
@@ -26,19 +25,16 @@ object ProductIntegration {
     pricesDep: TeamOneHttpApi,
     t: FiniteDuration
   )(
-    implicit
-    CS: ContextShift[F],
-    PE: ThrowableMap[ProductErr],
-    PPE: ThrowableMap[ProductPriceErr]
+    implicit CS: ContextShift[F]
   ): ProductIntegration[F] =
     new ProductIntegration[F] {
 
       def product: ProductId => F[Option[Product]] = { ps =>
-        CS.shift >> productDep.product(ps).as[F].timeout(t).narrowFailure(PE.map)
+        CS.shift >> productDep.product(ps).as[F].timeout(t).narrowFailureTo[ProductErr]
       }
 
       def productPrice: Product => UserPreferences => F[Price] = { p => pref =>
-        CS.shift >> pricesDep.productPrice(p)(pref).as[F].timeout(t).narrowFailure(PPE.map)
+        CS.shift >> pricesDep.productPrice(p)(pref).as[F].timeout(t).narrowFailureTo[ProductPriceErr]
       }
     }
 }

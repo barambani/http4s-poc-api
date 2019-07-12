@@ -13,6 +13,9 @@ private[syntax] trait ErrorAdaptSyntax {
 
 private[syntax] class ErrorAdaptOps[F[_], A](private val anFa: F[A]) extends AnyVal {
 
-  def narrowFailure[E <: Throwable](ef: Throwable => E)(implicit ev1: MonadError[F, Throwable]): F[A] =
+  def narrowFailureWith[E <: Throwable](ef: Throwable => E)(implicit ev: MonadError[F, Throwable]): F[A] =
     anFa adaptError { case th: Throwable => ef(th) }
+
+  def narrowFailureTo[E <: Throwable](implicit ev: MonadError[F, Throwable], ef: ThrowableMap[E]): F[A] =
+    anFa adaptError { case th: Throwable => ef map th }
 }

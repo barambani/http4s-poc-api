@@ -2,11 +2,12 @@ package model
 
 import java.time.Instant
 
+import cats.instances.bigDecimal._
 import cats.instances.long._
 import cats.instances.string._
 import external.library.CirceModule._
+import external.library.instances.tagged._
 import io.circe.{ Decoder, Encoder }
-import model.DomainModel._
 import shapeless.tag
 import shapeless.tag.@@
 
@@ -16,7 +17,7 @@ object DomainModelCodecs {
     * Encoders
     */
   implicit val instantEncoder: Encoder[Instant] =
-    encoderFor[Instant]
+    encoderFor(_.toString)
 
   implicit def taggedStringEncoder[T]: Encoder[String @@ T] =
     encoderFor[String @@ T]
