@@ -17,7 +17,7 @@ lazy val versionOf = new {
   val zio                = "1.0.0-RC10-1"
   val `zio-interop-cats` = "2.0.0.0-RC1"
   val shapeless          = "2.3.3"
-  val silencer           = "1.4.1"
+  val silencer           = "1.4.2"
 }
 
 /*
