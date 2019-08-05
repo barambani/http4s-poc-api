@@ -14,14 +14,14 @@ import org.http4s.{ EntityDecoder, EntityEncoder, HttpApp }
 import service.PriceService
 import zio.interop.catz._
 import zio.interop.catz.implicits._
-import zio.{ Task, TaskR, ZIO }
+import zio.{ RIO, Task, ZIO }
 
 import scala.concurrent.ExecutionContext
 import model.DomainModelCodecs._
 
 object Main extends CatsApp with RuntimePools with Encoding {
 
-  private[this] val priceService: TaskR[String, PriceService[Task]] =
+  private[this] val priceService: RIO[String, PriceService[Task]] =
     log4sFromName map { log =>
       PriceService[Task](
         TeamThreeCacheApi.productCache,
@@ -31,7 +31,7 @@ object Main extends CatsApp with RuntimePools with Encoding {
       )
     }
 
-  private[this] val httpApp: TaskR[String, HttpApp[Task]] =
+  private[this] val httpApp: RIO[String, HttpApp[Task]] =
     priceService map { ps =>
       Router(
         "/pricing-api/prices"       -> PriceRoutes[Task].make(ps),
