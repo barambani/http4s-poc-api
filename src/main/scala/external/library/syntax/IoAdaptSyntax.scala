@@ -23,5 +23,5 @@ final private[syntax] class IoAdaptOps[F[_], A](fa: =>F[A]) {
 private[syntax] class IoAdaptEitherOps[F[_], A, E](private val fa: F[Either[E, A]]) extends AnyVal {
 
   def liftIntoMonadError[G[_]](implicit nt: F --> G, err: MonadError[G, E]): G[A] =
-    (err.rethrow[A] _ compose nt.apply)(fa)
+    (err.rethrow[A, E] _ compose nt.apply)(fa)
 }
