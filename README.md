@@ -147,7 +147,7 @@ The same pattern applies when there's the need to look-up some external dependen
   }
 ```
 
-#### Http Endpoints
+#### Http Routes
 The http routes are implemented following the same style. The capabilities of `F[_]` are described through type-classes. An example of that is the way evidences of `EntityDecoder` for the request payloads, of the `EntityEncoder` for the response body and of `Sync` execution are provided. This describes well everything that `F[_]` will have to guarantee to make the route's implementation possible.
 ```scala
 sealed abstract class PriceRoutes[F[_]: Sync](
