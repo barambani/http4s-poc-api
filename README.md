@@ -118,11 +118,10 @@ When there's the need of running computations (in the general sense, so possibly
             _         <- logger.debug(s"Price calculation for product ${product.id} completed")
           } yield userPrice
 
-    private def veryVeryComplexPureCalculation: Price => Seq[UserPurchase] => Price =
-      price => _ => price
+    private def veryVeryComplexPureCalculation: Price => Seq[UserPurchase] => Price = [...]
   }
 ```
-The same pattern applies when there's the need to look-up some external dependencies in parallel given a collection of known coordinates as source. This is the case, for instance, when the execution requires to check the cache for a list of `ProductId` and to collect eventual details in case they exist. As before, this behavior can be enabled constraining `F[_]` to the evidence of `Parallel[?[_], ParTask]` and using its `parTraverse` function (see [here](https://github.com/barambani/http4s-poc-api/blob/master/src/main/scala/service/ProductRepo.scala#L23) the full implementation).
+The same pattern applies when there's the need to look-up some external dependencies in parallel given a collection of known coordinates as source. This is the case, for instance, when the execution requires to check the cache for a list of `ProductId` and to collect eventual details if they exist. As before, this behavior can be enabled constraining `F[_]` to the evidence of `Parallel[?[_], ParTask]` and using its `parTraverse` function (see [here](https://github.com/barambani/http4s-poc-api/blob/master/src/main/scala/service/ProductRepo.scala#L23) the full implementation).
 ```scala
 @inline def apply[F[_]: Monad: Parallel[?[_], ParTask]](
   cache: CacheIntegration[F],
@@ -149,7 +148,7 @@ The same pattern applies when there's the need to look-up some external dependen
 ```
 
 #### Http Endpoints
-The http routes are implemented following the same style. The capabilities of `F[_]` are described through type-classes. An example of that is the way evidences of `Decoder` for the request payloads and of the `Encoder` for the response body are provided. This describes well everything that `F[_]` will have to guarantee to make the endpoint implementation doable.
+The http routes are implemented following the same style. The capabilities of `F[_]` are described through type-classes. An example of that is the way evidences of `EntityDecoder` for the request payloads, of the `EntityEncoder` for the response body and of `Sync` execution are provided. This describes well everything that `F[_]` will have to guarantee to make the route's implementation possible.
 ```scala
 sealed abstract class PriceRoutes[F[_]: Sync](
   implicit
@@ -188,7 +187,7 @@ sealed abstract class PriceRoutes[F[_]: Sync](
 ```
 
 #### Main Server
-The described approach decouples very well the details of the actual execution (logging, settings collection) and of the objects decoding/encoding from the domain logic's formalization. With this style (tagless final) is possible to describe at a very high level of abstraction the expected behavior of the parametric functional effect, refining the power of the structure to the minimum required by the implementations, and this description can always be verified by the compiler in an automatic way. The sole place where the actual runtime effect becomes relevant is in the `Main` server file where all the instances are materialized (notice all the occurrences of all the RIO and ZIO and notice the specialisation of the `zio.interop.catz.CatsApp` that don't appear in any other part of the implementation and don't pollute the internals of the actual business logic itself).
+The described approach decouples very well the details of the actual execution (logging, settings collection) and of the objects decoding/encoding from the domain logic's formalisation. With this style (tagless final) it's possible to describe at a very high level of abstraction the expected behavior of the parametric functional effect, refining the power of the structure to the minimum required by the implementations, and this description can always be verified by the compiler in an automatic way. The sole place where the actual runtime effect becomes relevant is in the `Main` server file where all the instances are materialized (notice all the occurrences of RIO and ZIO and the specialisation of the `zio.interop.catz.CatsApp` that don't appear in any other part of the implementation and don't pollute the internals of the actual business logic itself).
 ```scala
 object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs {
 
