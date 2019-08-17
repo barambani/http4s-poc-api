@@ -92,13 +92,7 @@ where the capabilities of `F[_]` are provided through implicit evidences and typ
                     log.debug(s"User preferences for $id validated")
         } yield valid
 
-    private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =
-      if (p.destination.country != "Italy") // Not very meaningful but it's to show the pattern
-        log.error(s"InvalidShippingCountry: Cannot ship $id outside Italy") *>
-          ME.raiseError[UserPreferences](
-            InvalidShippingCountry("InvalidShippingCountry: Cannot ship outside Italy")
-          )
-      else p.pure[F]
+    private def validate(p: UserPreferences, id: UserId): F[UserPreferences] = [...]
   }
 ```
 
