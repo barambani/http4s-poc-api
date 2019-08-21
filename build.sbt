@@ -9,7 +9,7 @@ lazy val versionOf = new {
   val circe              = "0.11.1"
   val fs2                = "1.0.5"
   val http4s             = "0.20.10"
-  val kindProjector      = "0.9.10"
+  val kindProjector      = "0.10.0"
   val `log-effect`       = "0.9.0"
   val `logback-classic`  = "1.2.3"
   val scalaCheck         = "1.14.0"
@@ -69,7 +69,7 @@ val testDependencies = Seq(
  * Compiler plugins
  */
 val compilerPlugins: Seq[ModuleID] = Seq(
-  compilerPlugin("org.spire-math"  %% "kind-projector"  % versionOf.kindProjector),
+  compilerPlugin("org.typelevel"  %% "kind-projector"  % versionOf.kindProjector),
   compilerPlugin("com.github.ghik" %% "silencer-plugin" % versionOf.silencer)
 )
 
