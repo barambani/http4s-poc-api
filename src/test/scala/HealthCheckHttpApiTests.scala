@@ -31,7 +31,7 @@ final class HealthCheckHttpApiTests extends AnyFlatSpec with Matchers with Fixtu
           (
             sign.name isSameAs "http4s-poc-api",
             sign.version isNotSameAs "",
-            sign.scalaVersion isSameAs "2.12.8",
+            sign.scalaVersion isSameAs "2.12.9",
             sign.scalaOrganization isSameAs "org.scala-lang"
           ).mapN((_, _, _, _) => sign)
       )
