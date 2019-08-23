@@ -16,7 +16,7 @@ import service.PriceService
 sealed abstract class PriceRoutes[F[_]: Sync](
   implicit
   requestDecoder: EntityDecoder[F, PricesRequestPayload],
-  responseEncoder: EntityEncoder[F, List[Price]],
+  responseEncoder: EntityEncoder[F, List[Price]]
 ) extends Http4sDsl[F] {
 
   def make(priceService: PriceService[F]): HttpRoutes[F] =

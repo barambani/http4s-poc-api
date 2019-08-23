@@ -41,7 +41,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
         res =>
           res.status isSameAs status andThen { _ =>
             verifiedResponse[A](res, check)
-        }
+          }
       )
 
   def verifyResponseText(status: Status, expected: String)(
@@ -57,7 +57,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
         res =>
           res.status isSameAs status andThen { _ =>
             verifiedResponseText(res, expected)
-        }
+          }
       )
 
   private def verifiedResponse[A: EntityDecoder[Task, ?]](res: Response[Task], check: A => Verified[A])(

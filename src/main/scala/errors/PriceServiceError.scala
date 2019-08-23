@@ -21,7 +21,7 @@ object PriceServiceError {
   @silent implicit def stringThrowableMap[A](
     implicit
     ev: A <:< PriceServiceError,
-    gen: Generic.Aux[A, String :: HNil],
+    gen: Generic.Aux[A, String :: HNil]
   ): ThrowableMap[A] =
     new ThrowableMap[A] {
       def map(th: Throwable): A =

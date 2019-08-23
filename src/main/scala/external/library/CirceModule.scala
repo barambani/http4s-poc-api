@@ -71,5 +71,5 @@ object CirceModule {
       f =>
         Decoder.decodeString emap { str =>
           Either.catchNonFatal[A](ff(str)) leftMap (_ => s"Cannot parse $str to Long") map f
-    }
+        }
 }
