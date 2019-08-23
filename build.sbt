@@ -147,7 +147,7 @@ val root = project
   .settings(
     name                := "http4s-poc-api",
     organization        := "com.github.barambani",
-    scalaVersion        := "2.12.8",
+    scalaVersion        := "2.12.9",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
