@@ -222,3 +222,187 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
     }).fold(_ => 0, _ => 1)
 }
 ```
+
+### Notes
+The repo's [library](https://github.com/barambani/http4s-poc-api/tree/master/src/main/scala/external/library) folder contains some helpers that are not strictly needed to create the service and they help reducing the noise in the actual service code. The structure above could be created also without using these modules.
+
+#### Newtypes
+The [newtype](https://github.com/barambani/http4s-poc-api/blob/master/src/main/scala/external/library/newtype.scala) trait is a building block to help create zero allocation new types like
+```scala
+object MkAndBoolean extends newtype[Boolean]
+
+val AndBoolean = MkAndBoolean
+type AndBoolean = AndBoolean.T
+```
+This tecnique is a great help when trying to avoid orphan type class instances for, creating a `newtype`, allows to have eventual instances in the implicit scope even when the type of interest and the type class itself are owned by someone else and their companion objects cannot be changed. Having this possibility without paying an allocation cost per use is very desirable and cannot be achieved with the language's Value Classes. Considering this example in fact
+```scala
+class ValueClass(val v: Boolean) extends AnyVal
+
+class testNewType {
+
+  val ntA1 = AndBoolean(true)
+  val ntA2 = AndBoolean(false)
+
+  val ntTuple = (ntA1, ntA2)
+
+  val ntLs = List(ntA1, ntA2)
+
+  val ntId = identity(ntA1)
+}
+
+class testValueClass {
+
+  val vcA1 = new ValueClass(true)
+  val vcA2 = new ValueClass(false)
+
+  val vcTuple = (vcA1, vcA2)
+
+  val vcLs = List(vcA1, vcA2)
+
+  val vcId = identity(vcA1)
+}
+```
+and giving a look at its disassembled code we can see how `NewType`'s approach differs from the Value Classes in terms of allocations (see how the occurrences of `new` differ).
+
+**Tuple**
+```scala
+public http4s.extend.testValueClass();
+  descriptor: ()V
+    Code:
+      37: new           #54                 // class scala/Tuple2
+      40: dup
+
+      41: new           #81                 // class http4s/extend/ValueClass
+      44: dup
+      45: aload_0
+      46: invokevirtual #83                 // Method vcA1:()Z
+      49: invokespecial #86                 // Method http4s/extend/ValueClass."<init>":(Z)V
+
+      52: new           #81                 // class http4s/extend/ValueClass
+      55: dup
+      56: aload_0
+      57: invokevirtual #88                 // Method vcA2:()Z
+      60: invokespecial #86                 // Method http4s/extend/ValueClass."<init>":(Z)V
+
+      63: invokespecial #91                 // Method scala/Tuple2."<init>":(Ljava/lang/Object;Ljava/lang/Object;)V
+      66: putfield      #50                 // Field vcTuple:Lscala/Tuple2;
+
+
+public http4s.extend.testNewType();
+  descriptor: ()V
+    Code:
+      55: new           #59                 // class scala/Tuple2
+      58: dup
+
+      59: aload_0
+      60: invokevirtual #116                // Method ntA1:()Ljava/lang/Object;
+
+      63: aload_0
+      64: invokevirtual #118                // Method ntA2:()Ljava/lang/Object;
+
+      67: invokespecial #121                // Method scala/Tuple2."<init>":(Ljava/lang/Object;Ljava/lang/Object;)V
+      70: putfield      #55                 // Field ntTuple:Lscala/Tuple2;
+```
+**List**
+```scala
+public http4s.extend.testValueClass();
+    descriptor: ()V
+    Code:
+      81: getstatic     #97                 // Field scala/collection/immutable/List$.MODULE$:Lscala/collection/immutable/List$;
+      84: getstatic     #102                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+      87: iconst_2
+      88: anewarray     #81                 // class http4s/extend/ValueClass
+      91: dup
+      92: iconst_0
+      
+      93: new           #81                 // class http4s/extend/ValueClass
+      96: dup
+      97: aload_0
+      98: invokevirtual #83                 // Method vcA1:()Z
+     101: invokespecial #86                 // Method http4s/extend/ValueClass."<init>":(Z)V
+     104: aastore
+     
+     105: dup
+     106: iconst_1
+     
+     107: new           #81                 // class http4s/extend/ValueClass
+     110: dup
+     111: aload_0
+     112: invokevirtual #88                 // Method vcA2:()Z
+     115: invokespecial #86                 // Method http4s/extend/ValueClass."<init>":(Z)V
+     118: aastore
+     
+     119: invokevirtual #106                // Method scala/Predef$.genericWrapArray:(Ljava/lang/Object;)Lscala/collection/mutable/WrappedArray;
+     122: invokevirtual #110                // Method scala/collection/immutable/List$.apply:(Lscala/collection/Seq;)Lscala/collection/immutable/List;
+     125: putfield      #57                 // Field vcLs:Lscala/collection/immutable/List;
+
+
+public http4s.extend.testNewType();
+    descriptor: ()V
+    Code:
+      85: getstatic     #126                // Field scala/collection/immutable/List$.MODULE$:Lscala/collection/immutable/List$;
+      88: getstatic     #131                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+      91: iconst_2
+      92: anewarray     #4                  // class java/lang/Object
+      
+      95: dup
+      96: iconst_0
+      97: aload_0
+      98: invokevirtual #116                // Method ntA1:()Ljava/lang/Object;
+     101: aastore
+     
+     102: dup
+     103: iconst_1
+     104: aload_0
+     105: invokevirtual #118                // Method ntA2:()Ljava/lang/Object;
+     108: aastore
+     
+     109: invokevirtual #135                // Method scala/Predef$.genericWrapArray:(Ljava/lang/Object;)Lscala/collection/mutable/WrappedArray;
+     112: invokevirtual #138                // Method scala/collection/immutable/List$.apply:(Lscala/collection/Seq;)Lscala/collection/immutable/List;
+     115: putfield      #62                 // Field ntLs:Lscala/collection/immutable/List;
+```
+**Identity**
+```scala
+public http4s.extend.testValueClass();
+    descriptor: ()V
+    Code:
+      141: getstatic     #102                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+      
+      144: new           #81                 // class http4s/extend/ValueClass
+      147: dup
+      148: aload_0
+      149: invokevirtual #83                 // Method vcA1:()Z
+      152: invokespecial #86                 // Method http4s/extend/ValueClass."<init>":(Z)V
+      155: invokevirtual #114                // Method scala/Predef$.identity:(Ljava/lang/Object;)Ljava/lang/Object;
+      158: checkcast     #81                 // class http4s/extend/ValueClass
+      
+      161: invokevirtual #117                // Method http4s/extend/ValueClass.v:()Z
+      164: putfield      #63                 // Field vcId:Z
+
+
+public http4s.extend.testNewType();
+    descriptor: ()V
+    Code:
+      131: getstatic     #131                // Field scala/Predef$.MODULE$:Lscala/Predef$;
+      
+      134: aload_0
+      135: invokevirtual #116                // Method ntA1:()Ljava/lang/Object;
+      
+      138: invokevirtual #141                // Method scala/Predef$.identity:(Ljava/lang/Object;)Ljava/lang/Object;
+      141: putfield      #68                 // Field ntId:Ljava/lang/Object;
+```
+Even if this approach is understandably the best compromise available in Scala at the moment, it comes at a cost. When the `newtype`s are used on value types in fact, they are not erased to the original base type as it's the case for Value Classes, but they are erased to `Object` as can be seen from the disassembled code above and from the snippet below
+```java
+public boolean vcA1();
+  descriptor: ()Z
+
+public boolean vcA2();
+  descriptor: ()Z
+```
+```java
+public java.lang.Object ntA1();
+  descriptor: ()Ljava/lang/Object;
+
+public java.lang.Object ntA2();
+  descriptor: ()Ljava/lang/Object;
+```
