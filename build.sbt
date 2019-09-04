@@ -4,8 +4,8 @@ import sbt.Keys.javaOptions
 import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 
 lazy val versionOf = new {
-  val cats               = "2.0.0-RC1"
-  val catsEffect         = "2.0.0-RC1"
+  val cats               = "2.0.0-RC2"
+  val catsEffect         = "2.0.0-RC2"
   val circe              = "0.11.1"
   val fs2                = "1.0.5"
   val http4s             = "0.20.10"
@@ -15,7 +15,7 @@ lazy val versionOf = new {
   val scalaCheck         = "1.14.0"
   val scalaTest          = "3.1.0-SNAP13"
   val zio                = "1.0.0-RC12-1"
-  val `zio-interop-cats` = "2.0.0.0-RC2"
+  val `zio-interop-cats` = "2.0.0.0-RC3"
   val shapeless          = "2.3.3"
   val silencer           = "1.4.2"
 }

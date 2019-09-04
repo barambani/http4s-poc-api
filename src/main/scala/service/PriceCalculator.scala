@@ -16,7 +16,7 @@ sealed trait PriceCalculator[F[_]] {
 
 object PriceCalculator {
 
-  @inline def apply[F[_]: Monad: Parallel[?[_], ParTask]](
+  @inline def apply[F[_]: Monad: Parallel[?[_]]](
     productStore: ProductIntegration[F],
     logger: LogWriter[F]
   ): PriceCalculator[F] =

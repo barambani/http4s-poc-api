@@ -20,7 +20,7 @@ sealed trait ProductRepo[F[_]] {
 
 object ProductRepo {
 
-  @inline def apply[F[_]: Monad: Parallel[?[_], ParTask]](
+  @inline def apply[F[_]: Monad: Parallel[?[_]]](
     cache: CacheIntegration[F],
     productInt: ProductIntegration[F],
     logger: LogWriter[F]

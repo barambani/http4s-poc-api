@@ -14,7 +14,7 @@ import model.DomainModel._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[?[_], ParTask]](
+final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[?[_]]](
   cacheDep: TeamThreeCacheApi[ProductId, Product],
   teamOneStupidName: TeamOneHttpApi,
   teamTwoStupidName: TeamTwoHttpApi,
