@@ -6,9 +6,9 @@ import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 lazy val versionOf = new {
   val cats               = "2.0.0-RC2"
   val catsEffect         = "2.0.0-RC2"
-  val circe              = "0.11.1"
-  val fs2                = "1.0.5"
-  val http4s             = "0.20.10"
+  val circe              = "0.12.0-RC4"
+  val fs2                = "1.1.0-M1"
+  val http4s             = "0.21.0-M4"
   val kindProjector      = "0.10.3"
   val `log-effect`       = "0.9.0"
   val `logback-classic`  = "1.2.3"
@@ -80,19 +80,12 @@ val generalOptions: Seq[String] = Seq(
   "-explaintypes",
   "-Yrangepos",
   "-feature",
-  "-Xfuture",
-  "-Ypartial-unification",
   "-language:higherKinds",
   "-language:existentials",
   "-unchecked",
-  "-Yno-adapted-args",
   "-Xlint:_,-type-parameter-shadow",
   "-Xsource:2.13",
   "-Ywarn-dead-code",
-  "-Ywarn-inaccessible",
-  "-Ywarn-infer-any",
-  "-Ywarn-nullary-override",
-  "-Ywarn-nullary-unit",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard",
   "-Xfatal-warnings",
@@ -147,7 +140,7 @@ val root = project
   .settings(
     name                := "http4s-poc-api",
     organization        := "com.github.barambani",
-    scalaVersion        := "2.12.9",
+    scalaVersion        := "2.13.0",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
