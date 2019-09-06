@@ -20,7 +20,7 @@ sealed trait ProductIntegration[F[_]] {
 
 object ProductIntegration {
 
-  @inline def apply[F[_]: Concurrent: Timer: -->[IO, ?[_]]: -->[Future, ?[_]]](
+  @inline def apply[F[_]: Concurrent: Timer: -->[IO, *[_]]: -->[Future, *[_]]](
     productDep: TeamTwoHttpApi,
     pricesDep: TeamOneHttpApi,
     t: FiniteDuration

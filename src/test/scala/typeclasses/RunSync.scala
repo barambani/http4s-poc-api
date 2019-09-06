@@ -17,8 +17,8 @@ object RunSync {
         fa.attempt.unsafeRunSync()
     }
 
-  implicit def zioRunSync[R](implicit rt: Runtime[R]): RunSync[ZIO[R, Throwable, ?]] =
-    new RunSync[ZIO[R, Throwable, ?]] {
+  implicit def zioRunSync[R](implicit rt: Runtime[R]): RunSync[ZIO[R, Throwable, *]] =
+    new RunSync[ZIO[R, Throwable, *]] {
       def syncUnsafe[A](fa: ZIO[R, Throwable, A]): Either[Throwable, A] =
         rt.unsafeRunSync(fa).toEither
     }

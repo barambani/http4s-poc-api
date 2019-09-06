@@ -28,7 +28,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
 
   import syntax.responseVerification._
 
-  def verify[A: EntityDecoder[Task, ?]](status: Status, check: A => Verified[A])(
+  def verify[A: EntityDecoder[Task, *]](status: Status, check: A => Verified[A])(
     implicit
     ev1: Eq[Status],
     ev2: Show[Status],
@@ -60,7 +60,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
           }
       )
 
-  private def verifiedResponse[A: EntityDecoder[Task, ?]](res: Response[Task], check: A => Verified[A])(
+  private def verifiedResponse[A: EntityDecoder[Task, *]](res: Response[Task], check: A => Verified[A])(
     implicit run: RunSync[Task]
   ): Verified[A] =
     run

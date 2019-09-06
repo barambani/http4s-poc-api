@@ -49,6 +49,6 @@ sealed abstract class PriceRoutes[F[_]: Sync](
 }
 
 object PriceRoutes {
-  def apply[F[_]: Sync: EntityDecoder[?[_], PricesRequestPayload]: EntityEncoder[?[_], List[Price]]]: PriceRoutes[F] =
+  def apply[F[_]: Sync: EntityDecoder[*[_], PricesRequestPayload]: EntityEncoder[*[_], List[Price]]]: PriceRoutes[F] =
     new PriceRoutes[F] {}
 }

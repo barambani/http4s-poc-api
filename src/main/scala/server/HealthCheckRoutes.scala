@@ -27,6 +27,6 @@ sealed abstract class HealthCheckRoutes[F[_]: Sync](
 }
 
 object HealthCheckRoutes {
-  def apply[F[_]: Sync: EntityEncoder[?[_], ServiceSignature]]: HealthCheckRoutes[F] =
+  def apply[F[_]: Sync: EntityEncoder[*[_], ServiceSignature]]: HealthCheckRoutes[F] =
     new HealthCheckRoutes[F] {}
 }

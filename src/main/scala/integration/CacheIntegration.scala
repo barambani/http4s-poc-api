@@ -19,7 +19,7 @@ sealed trait CacheIntegration[F[_]] {
 
 object CacheIntegration {
 
-  @inline def apply[F[_]: Concurrent: Timer: -->[IO, ?[_]]](
+  @inline def apply[F[_]: Concurrent: Timer: -->[IO, *[_]]](
     cache: TeamThreeCacheApi[ProductId, Product],
     t: FiniteDuration
   )(

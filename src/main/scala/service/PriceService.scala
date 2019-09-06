@@ -14,7 +14,7 @@ import model.DomainModel._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[?[_]]](
+final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[*[_]]](
   cacheDep: TeamThreeCacheApi[ProductId, Product],
   teamOneStupidName: TeamOneHttpApi,
   teamTwoStupidName: TeamTwoHttpApi,
@@ -34,7 +34,7 @@ final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[?[
     * of parMapN because of the cancellation. It is not able anymore to collect multiple errors in the resulting
     * MonadError as explained in this gitter conversation
     *
-    * https://gitter.im/typelevel/cats-effect?at=5aac5013458cbde55742ef7e
+    * https://gitter.im/typelevel/cats-effect*at=5aac5013458cbde55742ef7e
     *
     * While waiting for a different solution with cats.Parallel, this suits the purpose better
     */

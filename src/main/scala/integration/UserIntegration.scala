@@ -20,7 +20,7 @@ sealed trait UserIntegration[F[_]] {
 
 object UserIntegration {
 
-  @inline def apply[F[_]: Concurrent: Timer: -->[IO, ?[_]]: -->[Future, ?[_]]](
+  @inline def apply[F[_]: Concurrent: Timer: -->[IO, *[_]]: -->[Future, *[_]]](
     userDep: TeamTwoHttpApi,
     preferencesDep: TeamOneHttpApi,
     t: FiniteDuration
