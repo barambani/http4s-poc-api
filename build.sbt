@@ -4,7 +4,7 @@ import sbt.Keys.javaOptions
 import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 
 lazy val versionOf = new {
-  val cats               = "2.0.0-RC2"
+  val cats               = "2.0.0-RC3"
   val catsEffect         = "2.0.0-RC2"
   val circe              = "0.12.0-RC4"
   val fs2                = "1.1.0-M2"
