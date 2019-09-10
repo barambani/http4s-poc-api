@@ -6,7 +6,7 @@ import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 lazy val versionOf = new {
   val cats               = "2.0.0"
   val catsEffect         = "2.0.0"
-  val circe              = "0.12.0-RC4"
+  val circe              = "0.12.1"
   val fs2                = "1.1.0-M2"
   val http4s             = "0.21.0-M4"
   val kindProjector      = "0.10.3"
