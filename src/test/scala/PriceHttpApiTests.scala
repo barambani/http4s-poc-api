@@ -8,7 +8,6 @@ import model.DomainModel._
 import model.DomainModelSyntax._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ Method, Request, Status }
-import org.scalatest.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
 import server.PriceRoutes
 import service.PriceService
@@ -18,6 +17,7 @@ import zio.Task
 import zio.interop.catz._
 import zio.interop.catz.implicits._
 import model.DomainModelCodecs._
+import org.scalatest.matchers.should.Matchers
 
 final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
