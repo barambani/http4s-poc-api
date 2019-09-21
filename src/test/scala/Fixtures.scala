@@ -4,13 +4,14 @@ import cats.effect.IO
 import log.effect.zio.ZioLogWriter.console
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.scalatest.{ Matchers, Succeeded }
+import org.scalatest.Succeeded
 import syntax.Verified
 import zio.DefaultRuntime
 import zio.internal.PlatformLive
 import zio.internal.tracing.TracingConfig
 
 import scala.concurrent.ExecutionContext
+import org.scalatest.matchers.should.Matchers
 
 trait Fixtures extends Matchers with Http4sDsl[IO] with Http4sClientDsl[IO] {
 

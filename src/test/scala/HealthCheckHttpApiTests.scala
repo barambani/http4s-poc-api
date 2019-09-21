@@ -5,13 +5,13 @@ import io.circe.{ Decoder, Encoder }
 import model.DomainModel.ServiceSignature
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ HttpRoutes, Request, Status }
-import org.scalatest.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
 import server.HealthCheckRoutes
 import syntax.http4sService._
 import syntax.responseVerification._
 import zio.Task
 import zio.interop.catz._
+import org.scalatest.matchers.should.Matchers
 
 final class HealthCheckHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
