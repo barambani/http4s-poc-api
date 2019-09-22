@@ -4,11 +4,13 @@ import cats.syntax.validated._
 import interpreters.{ TestTeamOneHttpApi, TestTeamThreeCacheApi, TestTeamTwoHttpApi }
 import io.circe.generic.auto._
 import io.circe.{ Decoder, Encoder }
+import log.effect.zio.ZioLogWriter.consoleLog
 import model.DomainModel._
 import model.DomainModelSyntax._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ Method, Request, Status }
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import server.PriceRoutes
 import service.PriceService
 import syntax.http4sService._
@@ -17,7 +19,6 @@ import zio.Task
 import zio.interop.catz._
 import zio.interop.catz.implicits._
 import model.DomainModelCodecs._
-import org.scalatest.matchers.should.Matchers
 
 final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
 
@@ -49,10 +50,10 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
   it should "respond with Ok 200 and the correct number of prices" in {
 
     val pricing = PriceService[Task](
-      TestTeamThreeCacheApi.make(productsInCache)(testLog),
+      TestTeamThreeCacheApi.make(productsInCache)(consoleLog),
       TestTeamOneHttpApi.make(preferences, price),
-      TestTeamTwoHttpApi.make(aUser, productsInStore)(testLog),
-      testLog
+      TestTeamTwoHttpApi.make(aUser, productsInStore)(consoleLog),
+      consoleLog
     )
 
     val httpApi = PriceRoutes[Task].make(pricing)
@@ -85,10 +86,10 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
     )
 
     val pricing = PriceService[Task](
-      TestTeamThreeCacheApi.make(productsInCache)(testLog),
+      TestTeamThreeCacheApi.make(productsInCache)(consoleLog),
       TestTeamOneHttpApi.make(wrongPreferences, price),
-      TestTeamTwoHttpApi.make(aUser, productsInStore)(testLog),
-      testLog
+      TestTeamTwoHttpApi.make(aUser, productsInStore)(consoleLog),
+      consoleLog
     )
 
     val httpApi = PriceRoutes[Task].make(pricing)
@@ -116,7 +117,7 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
       TestTeamThreeCacheApi.makeFail,
       TestTeamOneHttpApi.makeFail,
       TestTeamTwoHttpApi.makeFail,
-      testLog
+      consoleLog
     )
 
     val httpApi = PriceRoutes[Task].make(pricing)
