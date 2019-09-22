@@ -187,7 +187,9 @@ sealed abstract class PriceRoutes[F[_]: Sync](
 ```
 
 #### Main Server
-The described approach decouples very well the details of the actual execution (logging, settings collection) and of the objects decoding/encoding from the domain logic's formalisation. With this style (tagless final) it's possible to describe at a very high level of abstraction the expected behavior of the parametric functional effect, refining the power of the structure to the minimum required by the implementations, and this description can always be verified by the compiler in an automatic way. The sole place where the actual runtime effect becomes relevant is in the `Main` server file where all the instances are materialized (notice all the occurrences of RIO and ZIO and the specialisation of the `zio.interop.catz.CatsApp` that don't appear in any other part of the implementation and don't pollute the internals of the actual business logic itself).
+The described approach decouples very well the details of the actual execution (logging, settings collection) and those of the decoding/encoding from the domain logic's formalisation. With this style (tagless final) it's possible to describe at a very high level of abstraction the expected behavior of the parametric functional effect, refining the power of the effect's structure to the minimum required by the implementations. Everything always verified by the compiler in an automatic fashion. The only place where the actual runtime system becomes relevant is the `Main` server file where all the instances are materialized (notice all the occurrences of RIO and ZIO and the specialisation of the `zio.interop.catz.CatsApp` that don't appear in any other part of the implementation and that don't pollute the internals of the actual business logic itself).
+
+As a last note, below you can also see how simple and denotational the definition of the runtime can be if the effect system in use is as powerful and descriptive as `Zio`. Note, in fact, how you can build separately the different runtime components and how nicely and easily you can assemble them thanks to `RIO`, so that the only thing left to do in `run` is to adapt the output and provide the requirements.
 ```scala
 object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs {
 
@@ -201,16 +203,16 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
       )
     }
 
-  private[this] val httpApp: RIO[String, HttpApp[Task]] =
-    priceService map { ps =>
+  private[this] val httpApp: RIO[PriceService[Task], HttpApp[Task]] =
+    ZIO.access { ps =>
       Router(
         "/pricing-api/prices"       -> PriceRoutes[Task].make(ps),
         "/pricing-api/health-check" -> HealthCheckRoutes[Task].make(ps.logger)
       ).orNotFound
     }
 
-  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
-    (httpApp.provide("App log") >>= { app =>
+  private[this] val runningServer: RIO[HttpApp[Task], Unit] =
+    ZIO.accessM { app =>
       BlazeServerBuilder[Task]
         .bindHttp(17171, "0.0.0.0")
         .withConnectorPoolSize(64)
@@ -219,7 +221,13 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
         .serve
         .compile
         .drain
-    }).fold(_ => 0, _ => 1)
+    }
+
+  private[this] val serviceRuntime: RIO[String, Unit] =
+    priceService >>> httpApp >>> runningServer
+
+  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
+    serviceRuntime.fold(_ => 0, _ => 1) provide "App log"
 }
 ```
 

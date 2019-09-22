@@ -31,16 +31,16 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
       )
     }
 
-  private[this] val httpApp: RIO[String, HttpApp[Task]] =
-    priceService map { ps =>
+  private[this] val httpApp: RIO[PriceService[Task], HttpApp[Task]] =
+    ZIO.access { ps =>
       Router(
         "/pricing-api/prices"       -> PriceRoutes[Task].make(ps),
         "/pricing-api/health-check" -> HealthCheckRoutes[Task].make(ps.logger)
       ).orNotFound
     }
 
-  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
-    (httpApp.provide("App log") >>= { app =>
+  private[this] val runningServer: RIO[HttpApp[Task], Unit] =
+    ZIO.accessM { app =>
       BlazeServerBuilder[Task]
         .bindHttp(17171, "0.0.0.0")
         .withConnectorPoolSize(64)
@@ -49,7 +49,13 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
         .serve
         .compile
         .drain
-    }).fold(_ => 0, _ => 1)
+    }
+
+  private[this] val serviceRuntime: RIO[String, Unit] =
+    priceService >>> httpApp >>> runningServer
+
+  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
+    serviceRuntime.fold(_ => 0, _ => 1) provide "App log"
 }
 
 sealed trait RuntimeThreadPools {
