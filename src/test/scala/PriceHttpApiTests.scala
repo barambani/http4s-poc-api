@@ -6,7 +6,7 @@ import io.circe.generic.auto._
 import io.circe.{ Decoder, Encoder }
 import log.effect.zio.ZioLogWriter.consoleLog
 import model.DomainModel._
-import model.DomainModelSyntax._
+import model.syntax.domainModel._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ Method, Request, Status }
 import org.scalatest.flatspec.AnyFlatSpec
