@@ -1,4 +1,4 @@
-addSbtPlugin("org.scalameta"     % "sbt-scalafmt"              % "2.0.5")
+addSbtPlugin("org.scalameta"     % "sbt-scalafmt"              % "2.0.6")
 addSbtPlugin("com.github.cb372"  % "sbt-explicit-dependencies" % "0.2.11")
 addSbtPlugin("org.scoverage"     % "sbt-scoverage"             % "1.6.0")
 addSbtPlugin("net.virtual-void"  % "sbt-dependency-graph"      % "0.9.2")
