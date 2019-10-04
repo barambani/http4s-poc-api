@@ -9,15 +9,15 @@ lazy val versionOf = new {
   val circe              = "0.12.1"
   val fs2                = "2.0.1"
   val http4s             = "0.21.0-M5"
-  val kindProjector      = "0.10.3"
-  val `log-effect`       = "0.10.1"
+  val kindProjector      = "0.11.0"
+  val `log-effect`       = "0.10.2"
   val `logback-classic`  = "1.2.3"
   val scalaCheck         = "1.14.2"
   val scalaTest          = "3.2.0-M1"
-  val zio                = "1.0.0-RC13"
+  val zio                = "1.0.0-RC14"
   val `zio-interop-cats` = "2.0.0.0-RC4"
   val shapeless          = "2.3.3"
-  val silencer           = "1.4.2"
+  val silencer           = "1.4.4"
 }
 
 /*
@@ -49,7 +49,7 @@ val externalDependencies = Seq(
   "io.laserdisc"    %% "log-effect-core"     % versionOf.`log-effect`,
   "io.laserdisc"    %% "log-effect-zio"      % versionOf.`log-effect`,
   "ch.qos.logback"  % "logback-classic"      % versionOf.`logback-classic`,
-  "com.github.ghik" %% "silencer-lib"        % versionOf.silencer,
+  "com.github.ghik" %% "silencer-lib"        % versionOf.silencer % Provided cross CrossVersion.full,
   "dev.zio"         %% "zio"                 % versionOf.zio,
   "dev.zio"         %% "zio-interop-cats"    % versionOf.`zio-interop-cats`
 ) map (_.withSources)
@@ -69,8 +69,8 @@ val testDependencies = Seq(
  * Compiler plugins
  */
 val compilerPlugins: Seq[ModuleID] = Seq(
-  compilerPlugin("org.typelevel"   %% "kind-projector"  % versionOf.kindProjector),
-  compilerPlugin("com.github.ghik" %% "silencer-plugin" % versionOf.silencer)
+  compilerPlugin("org.typelevel"   %% "kind-projector"  % versionOf.kindProjector cross CrossVersion.full),
+  compilerPlugin("com.github.ghik" %% "silencer-plugin" % versionOf.silencer cross CrossVersion.full)
 )
 
 val generalOptions: Seq[String] = Seq(
@@ -140,7 +140,7 @@ val root = project
   .settings(
     name                := "http4s-poc-api",
     organization        := "com.github.barambani",
-    scalaVersion        := "2.13.0",
+    scalaVersion        := "2.13.1",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
@@ -150,7 +150,7 @@ val root = project
     ),
     addCommandAlias(
       "fullBuild",
-      ";checkFormat;unusedCompileDependenciesTest;undeclaredCompileDependenciesTest;clean;coverage;test;coverageReport;coverageAggregate"
+      ";checkFormat;unusedCompileDependenciesTest;clean;coverage;test;coverageReport;coverageAggregate"
     ),
     addCommandAlias(
       "fullCiBuild",
@@ -159,5 +159,6 @@ val root = project
     scalacOptions ++= generalOptions,
     scalacOptions in Test ++= testOnlyOptions,
     scalacOptions in (Compile, console) --= nonTestExceptions,
-    javaOptions   in Universal := jreRuntimeOptions
+    javaOptions   in Universal := jreRuntimeOptions,
+    unusedCompileDependenciesFilter -= moduleFilter("com.github.ghik", "silencer-lib")
   )
