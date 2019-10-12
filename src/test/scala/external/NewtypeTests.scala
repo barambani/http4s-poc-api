@@ -2,6 +2,7 @@ package external
 
 import cats.instances.int._
 import cats.instances.list._
+import cats.instances.option._
 import cats.syntax.eq._
 import external.library.newtype
 import org.scalacheck.Prop.forAll
@@ -13,8 +14,13 @@ final class NewtypeTests extends Properties("newtype") {
     newtype[Int](i).unMk === i
   }
 
-  property("unMkF gives the original values in F[_]") = forAll { xs: List[Int] =>
+  property("unMkF gives the original values in F[_] for List") = forAll { xs: List[Int] =>
     val nt = newtype[Int]
     nt.unMkF(nt.mkF(xs)) === xs
+  }
+
+  property("unMkF gives the original values in F[_] for Option") = forAll { os: Option[Int] =>
+    val nt = newtype[Int]
+    nt.unMkF(nt.mkF(os)) === os
   }
 }
