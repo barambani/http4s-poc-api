@@ -13,12 +13,12 @@ To get a correct image tag the repo's `HEAD` needs to have a tag. If that's not 
 ```
 git tag v0.0.1-Test
 ```
-#### Build docker image
+#### Build a docker image
 to create the image the most straightforward option is to use the sbt plugin that comes with the project
 ```
 sbt docker:publishLocal
 ```
-if that's successful, looking up for the images
+if that's successful, looking up for the images with
 ```
 docker images
 ```
@@ -45,11 +45,12 @@ clearly the ids will be different but the server should start with a message lik
              |_|
 [2019-07-09 13:03:39,054][INFO ][zio-default-async-1-2104457164][o.h.server.blaze.BlazeServerBuilder] http4s v0.20.4 on blaze v0.14.5 started at http://0.0.0.0:17171/
 ```
-to verify the service, a curl call can be executed as below (notice the below uses `jq` but should work regardless)
+#### Verify
+to verify the service, you can send a curl request like the below (notice that the example uses `jq` but it's not required)
 ```
 curl http://127.0.0.1:17171/pricing-api/health-check | jq
 ```
-with a response (trhough `jq`) on the line of
+with a response (through `jq`) on the line of
 ```
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
