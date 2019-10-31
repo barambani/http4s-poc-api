@@ -9,7 +9,6 @@ trait TeamThreeCacheApi[K, V] {
 }
 
 object TeamThreeCacheApi {
-
   def productCache: TeamThreeCacheApi[ProductId, Product] =
     new TeamThreeCacheApi[ProductId, Product] {
       def get: ProductId => IO[Option[Product]] = ???

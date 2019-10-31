@@ -16,7 +16,6 @@ private[syntax] trait DomainModelSyntax {
 }
 
 private[syntax] object DomainModelSyntax {
-
   import syntax.domainModel._
 
   final class LongOps(private val x: Long) extends AnyVal {

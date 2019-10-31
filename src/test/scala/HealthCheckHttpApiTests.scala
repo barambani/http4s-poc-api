@@ -15,12 +15,10 @@ import zio.Task
 import zio.interop.catz._
 
 final class HealthCheckHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
-
   implicit def testEncoder[A: Encoder] = jsonEncoderOf[Task, A]
   implicit def testDecoder[A: Decoder] = jsonOf[Task, A]
 
   it should "respond with Ok status 200 and the correct service signature" in {
-
     val httpApi: HttpRoutes[Task] =
       HealthCheckRoutes[Task].make(consoleLog)
 

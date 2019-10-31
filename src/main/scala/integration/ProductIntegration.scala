@@ -19,7 +19,6 @@ sealed trait ProductIntegration[F[_]] {
 }
 
 object ProductIntegration {
-
   @inline def apply[F[_]: Concurrent: Timer: IO --> *[_]: Future --> *[_]](
     productDep: TeamTwoHttpApi,
     pricesDep: TeamOneHttpApi,
@@ -28,7 +27,6 @@ object ProductIntegration {
     implicit CS: ContextShift[F]
   ): ProductIntegration[F] =
     new ProductIntegration[F] {
-
       def product: ProductId => F[Option[Product]] = { ps =>
         CS.shift >> productDep.product(ps).as[F].timeout(t).narrowFailureTo[ProductErr]
       }

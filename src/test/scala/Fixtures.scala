@@ -13,7 +13,6 @@ import zio.internal.tracing.TracingConfig
 import scala.concurrent.ExecutionContext
 
 trait Fixtures extends Matchers with Http4sDsl[IO] with Http4sClientDsl[IO] {
-
   implicit val C            = ExecutionContext.fromExecutor(new ForkJoinPool())
   implicit val timer        = IO.timer(C)
   implicit val contextShift = IO.contextShift(C)

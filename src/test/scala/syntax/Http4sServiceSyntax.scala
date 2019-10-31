@@ -18,7 +18,6 @@ private[syntax] trait Http4sServiceSyntax {
 private[syntax] class HttpServiceOps[F[_]](
   private val service: Kleisli[OptionT[F, *], Request[F], Response[F]]
 ) extends AnyVal {
-
   def runFor(req: Request[F])(implicit F: Functor[F]): F[Response[F]] =
     service.run(req).getOrElse(Response.notFound)
 }

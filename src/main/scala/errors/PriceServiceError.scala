@@ -9,7 +9,6 @@ import shapeless.{ ::, Generic, HNil }
 sealed trait PriceServiceError extends Exception with Product with Serializable
 
 object PriceServiceError {
-
   final case class UserErr(reason: String)                extends PriceServiceError
   final case class PreferenceErr(reason: String)          extends PriceServiceError
   final case class ProductErr(reason: String)             extends PriceServiceError

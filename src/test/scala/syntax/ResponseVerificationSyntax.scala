@@ -16,7 +16,6 @@ import zio.interop.catz._
 import scala.language.implicitConversions
 
 private[syntax] trait ResponseVerificationSyntax {
-
   implicit def verifiedSyntax[A](a: A): VerifiedOps[A]                     = new VerifiedOps(a)
   implicit def verifiedOptionSyntax[A](a: Option[A]): VerifiedOptionOps[A] = new VerifiedOptionOps(a)
 
@@ -25,7 +24,6 @@ private[syntax] trait ResponseVerificationSyntax {
 }
 
 private[syntax] class IoResponseResultOps(private val response: Task[Response[Task]]) extends AnyVal {
-
   import syntax.responseVerification._
 
   def verify[A: EntityDecoder[Task, *]](status: Status, check: A => Verified[A])(
@@ -83,7 +81,6 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
 }
 
 private[syntax] class VerifiedOps[A](private val a: A) extends AnyVal {
-
   def isNotSameAs(expected: =>A)(implicit ev1: Eq[A], ev2: Show[A]): Verified[A] =
     Validated.condNel(
       a =!= expected,
@@ -99,7 +96,6 @@ private[syntax] class VerifiedOps[A](private val a: A) extends AnyVal {
 }
 
 private[syntax] class VerifiedOptionOps[A](private val a: Option[A]) extends AnyVal {
-
   def isNotEmpty: Verified[Option[A]] =
     Validated.condNel(a.isDefined, a, s"Unexpected empty option value")
 }

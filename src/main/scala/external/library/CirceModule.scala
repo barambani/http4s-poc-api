@@ -6,7 +6,6 @@ import cats.syntax.either._
 import io.circe.{ Decoder, Encoder }
 
 object CirceModule {
-
   /**
     * Gives a Circe Encoder for the type `A` when a `Show` instance
     * is available for it.

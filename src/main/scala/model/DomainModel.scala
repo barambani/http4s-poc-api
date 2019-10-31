@@ -5,7 +5,6 @@ import java.time.Instant
 import shapeless.tag.@@
 
 object DomainModel {
-
   sealed trait UserIdT
   sealed trait UserAddressT
   sealed trait CountryT

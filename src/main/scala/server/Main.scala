@@ -20,7 +20,6 @@ import scala.concurrent.ExecutionContext
 import model.DomainModelCodecs._
 
 object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs {
-
   private[this] val priceService: RIO[String, PriceService[Task]] =
     log4sFromName map { log =>
       PriceService[Task](
@@ -59,13 +58,11 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
 }
 
 sealed trait RuntimeThreadPools {
-
   implicit val futureExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutor(new ForkJoinPool())
 }
 
 sealed trait Codecs {
-
   implicit val priceRequestPayloadDecoder: EntityDecoder[Task, PricesRequestPayload] =
     jsonOf[Task, PricesRequestPayload]
 

@@ -8,7 +8,6 @@ abstract class RunSync[F[_]] {
 }
 
 object RunSync {
-
   @inline def apply[F[_]: RunSync]: RunSync[F] = implicitly
 
   implicit val catsIoRunSync: RunSync[IO] =

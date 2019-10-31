@@ -6,10 +6,8 @@ import cats.Show
 import cats.effect.util.CompositeException
 
 private[instances] trait ThrowableInstances {
-
   implicit final def throwableShow: Show[Throwable] =
     new Show[Throwable] {
-
       def show(t: Throwable): String =
         t match {
           case e: CompositeException => showOf(e)
@@ -21,7 +19,6 @@ private[instances] trait ThrowableInstances {
 
       private[this] def flatten: Throwable => Seq[String] =
         th => {
-
           @scala.annotation.tailrec
           def loop(c: Option[Throwable], acc: =>Vector[String]): Vector[String] =
             c match {

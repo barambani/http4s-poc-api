@@ -12,14 +12,12 @@ import zio.{ Runtime, Task }
 import scala.concurrent.duration._
 
 object TestTeamThreeCacheApi {
-
   @inline def make(productsInCache: Map[ProductId, Product])(testLogger: LogWriter[Task])(
     implicit
     t: Timer[IO],
     rt: Runtime[Clock]
   ): TeamThreeCacheApi[ProductId, Product] =
     new TeamThreeCacheApi[ProductId, Product] {
-
       def get: ProductId => IO[Option[Product]] = { id =>
         ConcurrentEffect[Task].toIO(
           testLogger.debug(s"DEP cachedProduct -> Getting the product $id from the cache in test")
@@ -35,7 +33,6 @@ object TestTeamThreeCacheApi {
 
   @inline def makeFail(implicit t: Timer[IO]): TeamThreeCacheApi[ProductId, Product] =
     new TeamThreeCacheApi[ProductId, Product] {
-
       def get: ProductId => IO[Option[Product]] = { _ =>
         t.sleep(300.milliseconds) >> IO.delay(
           throw new Throwable(
