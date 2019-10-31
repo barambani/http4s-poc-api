@@ -14,7 +14,6 @@ private[syntax] trait ResponseSyntax {
 }
 
 private[syntax] class ResponseOps[F[_]](private val r: F[Response[F]]) extends AnyVal {
-
   def handlingFailures[E <: Throwable: ClassTag](hf: E => F[Response[F]])(
     implicit ev: Sync[F]
   ): F[Response[F]] =

@@ -15,7 +15,6 @@ sealed trait PreferenceFetcher[F[_]] {
 }
 
 object PreferenceFetcher {
-
   @inline def apply[F[_]](
     dep: UserIntegration[F],
     log: LogWriter[F]
@@ -23,7 +22,6 @@ object PreferenceFetcher {
     implicit ME: MonadError[F, Throwable]
   ): PreferenceFetcher[F] =
     new PreferenceFetcher[F] {
-
       def userPreferences: UserId => F[UserPreferences] =
         id =>
           for {

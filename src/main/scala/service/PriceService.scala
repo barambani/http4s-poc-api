@@ -24,7 +24,6 @@ final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[*[
   ev1: IO --> F,
   ev2: Future --> F
 ) {
-
   private[this] val cache      = CacheIntegration[F](cacheDep, 10.seconds)
   private[this] val userInt    = UserIntegration[F](teamTwoStupidName, teamOneStupidName, 10.seconds)
   private[this] val productInt = ProductIntegration[F](teamTwoStupidName, teamOneStupidName, 10.seconds)

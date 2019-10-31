@@ -9,7 +9,6 @@ trait TeamTwoHttpApi {
 }
 
 object TeamTwoHttpApi {
-
   @inline def apply(): TeamTwoHttpApi =
     new TeamTwoHttpApi {
       def user: UserId => IO[User]                  = ???

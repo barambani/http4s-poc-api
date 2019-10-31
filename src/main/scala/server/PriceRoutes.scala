@@ -18,7 +18,6 @@ sealed abstract class PriceRoutes[F[_]: Sync](
   requestDecoder: EntityDecoder[F, PricesRequestPayload],
   responseEncoder: EntityEncoder[F, List[Price]]
 ) extends Http4sDsl[F] {
-
   def make(priceService: PriceService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case req @ Method.POST -> Root =>

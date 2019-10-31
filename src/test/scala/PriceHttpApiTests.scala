@@ -21,7 +21,6 @@ import zio.interop.catz.implicits._
 import model.DomainModelCodecs._
 
 final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
-
   implicit def testEncoder[A: Encoder] = jsonEncoderOf[Task, A]
   implicit def testDecoder[A: Decoder] = jsonOf[Task, A]
 
@@ -48,7 +47,6 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
   )
 
   it should "respond with Ok 200 and the correct number of prices" in {
-
     val pricing = PriceService[Task](
       TestTeamThreeCacheApi.make(productsInCache)(consoleLog),
       TestTeamOneHttpApi.make(preferences, price),
@@ -78,7 +76,6 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
   }
 
   it should "respond with Status 400 for invalid shipping country" in {
-
     val wrongPreferences = preferences.copy(
       destination = preferences.destination.copy(
         country = "NotItaly".asCountry
@@ -112,7 +109,6 @@ final class PriceHttpApiTests extends AnyFlatSpec with Matchers with Fixtures {
   }
 
   it should "respond with Status 502 for multiple dependency failures" in {
-
     val pricing = PriceService[Task](
       TestTeamThreeCacheApi.makeFail,
       TestTeamOneHttpApi.makeFail,

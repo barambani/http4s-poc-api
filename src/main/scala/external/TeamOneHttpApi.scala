@@ -10,7 +10,6 @@ trait TeamOneHttpApi {
 }
 
 object TeamOneHttpApi {
-
   @inline def apply(): TeamOneHttpApi =
     new TeamOneHttpApi {
       def usersPreferences: UserId => Future[UserPreferences]       = ???

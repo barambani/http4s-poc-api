@@ -7,14 +7,12 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.{ ExecutionContext, Future }
 
 object TestTeamOneHttpApi {
-
   private val logger = LoggerFactory.getLogger("TestTeamOneHttpApi logger")
 
   @inline def make(preferences: UserPreferences, price: Price)(
     implicit ec: ExecutionContext
   ): TeamOneHttpApi =
     new TeamOneHttpApi {
-
       def usersPreferences: UserId => Future[UserPreferences] = { id =>
         Future {
           logger.debug(s"DEP usersPreferences -> Getting the preferences for user $id in test")
@@ -36,7 +34,6 @@ object TestTeamOneHttpApi {
 
   @inline def makeFail(implicit ec: ExecutionContext): TeamOneHttpApi =
     new TeamOneHttpApi {
-
       def usersPreferences: UserId => Future[UserPreferences] = { id =>
         Future {
           logger.debug(s"DEP usersPreferences -> Starting a failing call to get preferences for $id in test")

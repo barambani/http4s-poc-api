@@ -15,13 +15,11 @@ sealed trait PriceCalculator[F[_]] {
 }
 
 object PriceCalculator {
-
   @inline def apply[F[_]: Monad: Parallel[*[_]]](
     productStore: ProductIntegration[F],
     logger: LogWriter[F]
   ): PriceCalculator[F] =
     new PriceCalculator[F] {
-
       def finalPrices(user: User, prods: Seq[Product], pref: UserPreferences): F[List[Price]] =
         prods.toList.parTraverse(userPrice(pref, user))
 

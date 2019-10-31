@@ -10,7 +10,6 @@ import cats.syntax.flatMap._
 sealed abstract class HealthCheckRoutes[F[_]: Sync](
   implicit responseEncoder: EntityEncoder[F, ServiceSignature]
 ) extends Http4sDsl[F] {
-
   def make(log: LogWriter[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case Method.GET -> Root => log.debug(s"Serving HealthCheck request") >> Ok(serviceSignature)

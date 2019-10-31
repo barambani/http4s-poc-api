@@ -12,7 +12,6 @@ import scala.concurrent.Future
   * Models a natural transformation between the Functors `F[_]` and `G[_]`.
   */
 sealed trait IoAdapt[F[_], G[_]] {
-
   /**
     * Gives the Natural Transformation from `F` to `G` for all the types `A` where `F` is called by name
     */
@@ -23,7 +22,6 @@ sealed trait IoAdapt[F[_], G[_]] {
 }
 
 sealed private[library] trait IoAdaptInstances {
-
   implicit def catsIoToZioTask(implicit cc: Concurrent[Task]): IO --> Task =
     new IoAdapt[IO, Task] {
       def apply[A]: (=>IO[A]) => Task[A] =
