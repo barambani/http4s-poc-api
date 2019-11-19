@@ -19,7 +19,7 @@ trait Fixtures extends Matchers with Http4sDsl[IO] with Http4sClientDsl[IO] {
 
   implicit val testRuntime: DefaultRuntime =
     new DefaultRuntime {
-      override val Platform =
+      override val platform =
         PlatformLive
           .makeDefault()
           .withTracingConfig(TracingConfig.disabled)
