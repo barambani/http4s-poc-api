@@ -12,6 +12,7 @@ import shapeless.tag
 import shapeless.tag.@@
 
 object DomainModelCodecs {
+
   /**
     * Encoders
     */

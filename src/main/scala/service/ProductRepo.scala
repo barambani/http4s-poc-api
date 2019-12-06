@@ -25,6 +25,7 @@ object ProductRepo {
     logger: LogWriter[F]
   ): ProductRepo[F] =
     new ProductRepo[F] {
+
       /**
         * Tries to retrieve the products by ProductId from the cache, if results
         * in a miss it tries on the http product store.
