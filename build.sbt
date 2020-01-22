@@ -8,7 +8,7 @@ lazy val versionOf = new {
   val catsEffect         = "2.0.0"
   val circe              = "0.12.3"
   val fs2                = "2.2.1"
-  val http4s             = "0.21.0-M6"
+  val http4s             = "0.21.0-RC1"
   val kindProjector      = "0.11.0"
   val `log-effect`       = "0.12.0"
   val `logback-classic`  = "1.2.3"
@@ -43,7 +43,6 @@ val externalDependencies = Seq(
   "org.http4s"      %% "http4s-dsl"          % versionOf.http4s excludeAll (transitiveDependencies: _*),
   "org.http4s"      %% "http4s-blaze-server" % versionOf.http4s,
   "org.http4s"      %% "http4s-circe"        % versionOf.http4s,
-  "io.circe"        %% "circe-core"          % versionOf.circe,
   "io.circe"        %% "circe-generic"       % versionOf.circe,
   "com.chuusai"     %% "shapeless"           % versionOf.shapeless,
   "io.laserdisc"    %% "log-effect-core"     % versionOf.`log-effect`,
