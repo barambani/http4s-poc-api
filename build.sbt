@@ -121,7 +121,7 @@ lazy val jreRuntimeOptions = Seq(
 val buildInfoSettings = Seq(
   buildInfoPackage := "server",
   buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
-  buildInfoKeys    += BuildInfoKey.action("buildTime") { Instant.now }
+  buildInfoKeys    += BuildInfoKey.action("buildTime")(Instant.now)
 )
 
 val dockerSettings = Seq(

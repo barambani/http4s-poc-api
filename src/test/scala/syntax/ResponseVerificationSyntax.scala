@@ -36,10 +36,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
       .syncUnsafe(response)
       .fold(
         err => s"Should succeed but returned the error $err".invalidNel,
-        res =>
-          res.status isSameAs status andThen { _ =>
-            verifiedResponse[A](res, check)
-          }
+        res => res.status isSameAs status andThen { _ => verifiedResponse[A](res, check) }
       )
 
   def verifyResponseText(status: Status, expected: String)(
@@ -52,10 +49,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
       .syncUnsafe(response)
       .fold(
         err => s"Should succeed but returned the error $err".invalidNel,
-        res =>
-          res.status isSameAs status andThen { _ =>
-            verifiedResponseText(res, expected)
-          }
+        res => res.status isSameAs status andThen { _ => verifiedResponseText(res, expected) }
       )
 
   private def verifiedResponse[A: EntityDecoder[Task, *]](res: Response[Task], check: A => Verified[A])(
