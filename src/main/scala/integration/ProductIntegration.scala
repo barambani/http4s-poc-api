@@ -28,11 +28,11 @@ object ProductIntegration {
   ): ProductIntegration[F] =
     new ProductIntegration[F] {
       def product: ProductId => F[Option[Product]] = { ps =>
-        CS.shift >> productDep.product(ps).as[F].timeout(t).narrowFailureTo[ProductErr]
+        CS.shift >> productDep.product(ps).adaptedTo[F].timeout(t).narrowFailureTo[ProductErr]
       }
 
       def productPrice: Product => UserPreferences => F[Price] = { p => pref =>
-        CS.shift >> pricesDep.productPrice(p)(pref).as[F].timeout(t).narrowFailureTo[ProductPriceErr]
+        CS.shift >> pricesDep.productPrice(p)(pref).adaptedTo[F].timeout(t).narrowFailureTo[ProductPriceErr]
       }
     }
 }

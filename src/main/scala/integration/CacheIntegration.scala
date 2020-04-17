@@ -26,9 +26,9 @@ object CacheIntegration {
   ): CacheIntegration[F] =
     new CacheIntegration[F] {
       def cachedProduct: ProductId => F[Option[Product]] =
-        pId => CS.shift >> cache.get(pId).as[F].timeout(t).narrowFailureTo[CacheLookupError]
+        pId => CS.shift >> cache.get(pId).adaptedTo[F].timeout(t).narrowFailureTo[CacheLookupError]
 
       def storeProductToCache: ProductId => Product => F[Unit] =
-        pId => p => CS.shift >> cache.put(pId)(p).as[F].timeout(t).narrowFailureTo[CacheStoreError]
+        pId => p => CS.shift >> cache.put(pId)(p).adaptedTo[F].timeout(t).narrowFailureTo[CacheStoreError]
     }
 }

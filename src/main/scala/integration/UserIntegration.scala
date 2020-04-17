@@ -28,11 +28,11 @@ object UserIntegration {
   ): UserIntegration[F] =
     new UserIntegration[F] {
       def user: UserId => F[User] = { id =>
-        CS.shift >> userDep.user(id).as[F].timeout(t).narrowFailureTo[UserErr]
+        CS.shift >> userDep.user(id).adaptedTo[F].timeout(t).narrowFailureTo[UserErr]
       }
 
       def usersPreferences: UserId => F[UserPreferences] = { id =>
-        CS.shift >> preferencesDep.usersPreferences(id).as[F].timeout(t).narrowFailureTo[PreferenceErr]
+        CS.shift >> preferencesDep.usersPreferences(id).adaptedTo[F].timeout(t).narrowFailureTo[PreferenceErr]
       }
     }
 }
