@@ -2,9 +2,9 @@ package external
 package library
 
 import cats.arrow.FunctionK
-import cats.effect.{ Concurrent, ContextShift, IO }
+import cats.effect.{Concurrent, ContextShift, IO}
 import external.library.IoAdapt.-->
-import zio.{ Task, ZIO }
+import zio.{Task, ZIO}
 
 import scala.concurrent.Future
 
@@ -22,7 +22,7 @@ sealed trait IoAdapt[F[_], G[_]] {
     λ[FunctionK[F, G]](apply(_))
 }
 
-sealed private[library] trait IoAdaptInstances {
+private[library] sealed trait IoAdaptInstances {
   implicit def catsIoToZioTask(implicit cc: Concurrent[Task]): IO --> Task =
     new IoAdapt[IO, Task] {
       def apply[A]: (=>IO[A]) => Task[A] =

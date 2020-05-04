@@ -14,7 +14,7 @@ private[syntax] trait IoAdaptSyntax {
     new IoAdaptEitherOps(fa)
 }
 
-final private[syntax] class IoAdaptOps[F[_], A](fa: =>F[A]) {
+private[syntax] final class IoAdaptOps[F[_], A](fa: =>F[A]) {
   def adaptedTo[G[_]](implicit nt: F --> G): G[A] = nt.apply(fa)
 }
 

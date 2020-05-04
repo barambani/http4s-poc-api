@@ -1,8 +1,8 @@
 package syntax
 
 import cats.Functor
-import cats.data.{ Kleisli, OptionT }
-import org.http4s.{ HttpRoutes, Request, Response }
+import cats.data.{Kleisli, OptionT}
+import org.http4s.{HttpRoutes, Request, Response}
 
 import scala.language.implicitConversions
 

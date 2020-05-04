@@ -26,9 +26,10 @@ object PreferenceFetcher {
         id =>
           for {
             pres <- dep.usersPreferences(id) <* log.debug(s"User preferences for $id collected successfully")
-            valid <- log.debug(s"Validating user preferences for user $id") >>
-                      validate(pres, id) <*
-                      log.debug(s"User preferences for $id validated")
+            valid <-
+              log.debug(s"Validating user preferences for user $id") >>
+                validate(pres, id) <*
+                log.debug(s"User preferences for $id validated")
           } yield valid
 
       private def validate(p: UserPreferences, id: UserId): F[UserPreferences] =

@@ -9,8 +9,8 @@ import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.parallel._
 import cats.syntax.traverse._
-import cats.{ Monad, Parallel }
-import integration.{ CacheIntegration, ProductIntegration }
+import cats.{Monad, Parallel}
+import integration.{CacheIntegration, ProductIntegration}
 import log.effect.LogWriter
 import model.DomainModel._
 
@@ -44,11 +44,11 @@ object ProductRepo {
           cacheResult =>
             for {
               mayBeStored <- cacheResult.fold(
-                              productStoreFetch(id) <*
-                                logger.debug(
-                                  s"Product $id not found in cache, fetched from the product store repo"
-                                )
-                            )(_.some.pure[F] <* logger.debug(s"Product $id found in cache"))
+                productStoreFetch(id) <*
+                  logger.debug(
+                    s"Product $id not found in cache, fetched from the product store repo"
+                  )
+              )(_.some.pure[F] <* logger.debug(s"Product $id found in cache"))
             } yield mayBeStored
 
       private[this] def productStoreFetch(id: ProductId): F[Option[Product]] =

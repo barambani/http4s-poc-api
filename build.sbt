@@ -47,7 +47,7 @@ val externalDependencies = Seq(
   "com.chuusai"     %% "shapeless"           % versionOf.shapeless,
   "io.laserdisc"    %% "log-effect-core"     % versionOf.`log-effect`,
   "io.laserdisc"    %% "log-effect-zio"      % versionOf.`log-effect`,
-  "ch.qos.logback"  % "logback-classic"      % versionOf.`logback-classic`,
+  "ch.qos.logback"   % "logback-classic"     % versionOf.`logback-classic`,
   "com.github.ghik" %% "silencer-lib"        % versionOf.silencer % Provided cross CrossVersion.full,
   "dev.zio"         %% "zio"                 % versionOf.zio,
   "dev.zio"         %% "zio-interop-cats"    % versionOf.`zio-interop-cats`
@@ -120,12 +120,12 @@ lazy val jreRuntimeOptions = Seq(
 
 val buildInfoSettings = Seq(
   buildInfoPackage := "server",
-  buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
-  buildInfoKeys    += BuildInfoKey.action("buildTime")(Instant.now)
+  buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
+  buildInfoKeys += BuildInfoKey.action("buildTime")(Instant.now)
 )
 
 val dockerSettings = Seq(
-  maintainer      in Docker := "barambani -> https://github.com/barambani",
+  maintainer in Docker := "barambani -> https://github.com/barambani",
   dockerBaseImage in Docker := "hirokimatsumoto/alpine-openjdk-11"
 )
 
@@ -137,8 +137,8 @@ val root = project
   .settings(buildInfoSettings)
   .settings(dockerSettings)
   .settings(
-    name                := "http4s-poc-api",
-    organization        := "com.github.barambani",
+    name := "http4s-poc-api",
+    organization := "com.github.barambani",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
@@ -157,6 +157,6 @@ val root = project
     scalacOptions ++= generalOptions,
     scalacOptions in Test ++= testOnlyOptions,
     scalacOptions in (Compile, console) --= nonTestExceptions,
-    javaOptions   in Universal := jreRuntimeOptions,
+    javaOptions in Universal := jreRuntimeOptions,
     unusedCompileDependenciesFilter -= moduleFilter("com.github.ghik", "silencer-lib")
   )

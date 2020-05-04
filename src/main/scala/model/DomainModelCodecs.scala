@@ -7,7 +7,7 @@ import cats.instances.long._
 import cats.instances.string._
 import external.library.CirceModule._
 import external.library.instances.tagged._
-import io.circe.{ Decoder, Encoder }
+import io.circe.{Decoder, Encoder}
 import shapeless.tag
 import shapeless.tag.@@
 

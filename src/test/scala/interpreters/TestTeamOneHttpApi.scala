@@ -1,10 +1,10 @@
 package interpreters
 
 import external.TeamOneHttpApi
-import model.DomainModel.{ Price, Product, UserId, UserPreferences }
+import model.DomainModel.{Price, Product, UserId, UserPreferences}
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object TestTeamOneHttpApi {
   private val logger = LoggerFactory.getLogger("TestTeamOneHttpApi logger")

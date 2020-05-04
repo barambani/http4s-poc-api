@@ -1,13 +1,13 @@
 package service
 
 import cats.Parallel
-import cats.effect.{ Concurrent, ContextShift, IO, Timer }
+import cats.effect.{Concurrent, ContextShift, IO, Timer}
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.parallel._
 import external.library.IoAdapt.-->
-import external.{ TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi }
-import integration.{ CacheIntegration, ProductIntegration, UserIntegration }
+import external.{TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi}
+import integration.{CacheIntegration, ProductIntegration, UserIntegration}
 import log.effect.LogWriter
 import model.DomainModel._
 
@@ -20,8 +20,7 @@ final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[*[
   teamTwoStupidName: TeamTwoHttpApi,
   logger: LogWriter[F]
 )(
-  implicit
-  ev1: IO --> F,
+  implicit ev1: IO --> F,
   ev2: Future --> F
 ) {
   private[this] val cache      = CacheIntegration[F](cacheDep, 10.seconds)

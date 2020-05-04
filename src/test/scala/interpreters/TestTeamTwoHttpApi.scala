@@ -1,20 +1,19 @@
 package interpreters
 
-import cats.effect.{ ConcurrentEffect, IO, Timer }
+import cats.effect.{ConcurrentEffect, IO, Timer}
 import cats.syntax.flatMap._
 import external.TeamTwoHttpApi
 import log.effect.LogWriter
-import model.DomainModel.{ Product, ProductId, User, UserId }
+import model.DomainModel.{Product, ProductId, User, UserId}
 import zio.clock.Clock
 import zio.interop.catz._
-import zio.{ Runtime, Task }
+import zio.{Runtime, Task}
 
 import scala.concurrent.duration._
 
 object TestTeamTwoHttpApi {
   @inline def make(aUser: User, productsInStore: Map[ProductId, Product])(testLogger: LogWriter[Task])(
-    implicit
-    t: Timer[IO],
+    implicit t: Timer[IO],
     rt: Runtime[Clock]
   ): TeamTwoHttpApi =
     new TeamTwoHttpApi {

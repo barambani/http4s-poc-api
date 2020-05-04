@@ -1,9 +1,9 @@
 package integration
 
 import cats.effect.syntax.concurrent._
-import cats.effect.{ Concurrent, ContextShift, IO, Timer }
+import cats.effect.{Concurrent, ContextShift, IO, Timer}
 import cats.syntax.flatMap._
-import errors.PriceServiceError.{ ProductErr, ProductPriceErr }
+import errors.PriceServiceError.{ProductErr, ProductPriceErr}
 import external._
 import external.library.IoAdapt.-->
 import external.library.syntax.errorAdapt._

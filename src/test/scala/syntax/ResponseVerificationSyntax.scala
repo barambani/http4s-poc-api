@@ -7,8 +7,8 @@ import cats.instances.string._
 import cats.syntax.eq._
 import cats.syntax.show._
 import cats.syntax.validated._
-import cats.{ Eq, Show }
-import org.http4s.{ EntityDecoder, Response, Status }
+import cats.{Eq, Show}
+import org.http4s.{EntityDecoder, Response, Status}
 import typeclasses.RunSync
 import zio.Task
 import zio.interop.catz._
@@ -27,8 +27,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
   import syntax.responseVerification._
 
   def verify[A: EntityDecoder[Task, *]](status: Status, check: A => Verified[A])(
-    implicit
-    ev1: Eq[Status],
+    implicit ev1: Eq[Status],
     ev2: Show[Status],
     run: RunSync[Task]
   ): Verified[A] =
@@ -40,8 +39,7 @@ private[syntax] class IoResponseResultOps(private val response: Task[Response[Ta
       )
 
   def verifyResponseText(status: Status, expected: String)(
-    implicit
-    ev1: Eq[Status],
+    implicit ev1: Eq[Status],
     ev2: Show[Status],
     run: RunSync[Task]
   ): Verified[String] =

@@ -1,7 +1,7 @@
 package typeclasses
 
 import cats.effect.IO
-import _root_.zio.{ Runtime, ZIO }
+import _root_.zio.{Runtime, ZIO}
 
 abstract class RunSync[F[_]] {
   def syncUnsafe[A](fa: F[A]): Either[Throwable, A]

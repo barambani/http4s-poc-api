@@ -5,7 +5,7 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.parallel._
-import cats.{ Monad, Parallel }
+import cats.{Monad, Parallel}
 import integration.ProductIntegration
 import log.effect.LogWriter
 import model.DomainModel._
@@ -27,10 +27,11 @@ object PriceCalculator {
         (prefs, user) =>
           product =>
             for {
-              catalogPrice <- productStore.productPrice(product)(prefs) <*
-                               logger.debug(s"Catalog price of ${product.id} collected")
+              catalogPrice <-
+                productStore.productPrice(product)(prefs) <*
+                  logger.debug(s"Catalog price of ${product.id} collected")
               userPrice = veryVeryComplexPureCalculation(catalogPrice)(user.userPurchaseHistory)
-              _         <- logger.debug(s"Price calculation for product ${product.id} completed")
+              _ <- logger.debug(s"Price calculation for product ${product.id} completed")
             } yield userPrice
 
       private def veryVeryComplexPureCalculation: Price => Seq[UserPurchase] => Price =

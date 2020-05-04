@@ -1,11 +1,11 @@
 import cats.instances.string._
 import cats.syntax.apply._
 import io.circe.generic.auto._
-import io.circe.{ Decoder, Encoder }
+import io.circe.{Decoder, Encoder}
 import log.effect.zio.ZioLogWriter.consoleLog
 import model.DomainModel.ServiceSignature
-import org.http4s.circe.{ jsonEncoderOf, jsonOf }
-import org.http4s.{ HttpRoutes, Request, Status }
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.{HttpRoutes, Request, Status}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import server.HealthCheckRoutes

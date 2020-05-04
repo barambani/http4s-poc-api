@@ -10,12 +10,11 @@ import errors.PriceServiceError._
 import external.library.syntax.response._
 import model.DomainModel._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{ EntityDecoder, EntityEncoder, HttpRoutes, Method, Request, Response }
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Method, Request, Response}
 import service.PriceService
 
 sealed abstract class PriceRoutes[F[_]: Sync](
-  implicit
-  requestDecoder: EntityDecoder[F, PricesRequestPayload],
+  implicit requestDecoder: EntityDecoder[F, PricesRequestPayload],
   responseEncoder: EntityEncoder[F, List[Price]]
 ) extends Http4sDsl[F] {
   def make(priceService: PriceService[F]): HttpRoutes[F] =
@@ -48,6 +47,8 @@ sealed abstract class PriceRoutes[F[_]: Sync](
 }
 
 object PriceRoutes {
-  def apply[F[_]: Sync: EntityDecoder[*[_], PricesRequestPayload]: EntityEncoder[*[_], List[Price]]]: PriceRoutes[F] =
+  def apply[
+    F[_]: Sync: EntityDecoder[*[_], PricesRequestPayload]: EntityEncoder[*[_], List[Price]]
+  ]: PriceRoutes[F] =
     new PriceRoutes[F] {}
 }

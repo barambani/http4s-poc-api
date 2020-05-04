@@ -3,7 +3,7 @@ package server
 import java.util.concurrent.Executors
 
 import com.github.ghik.silencer.silent
-import external.{ TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi }
+import external.{TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi}
 import io.circe.generic.auto._
 import log.effect.zio.ZioLogWriter._
 import model.DomainModel._
@@ -11,11 +11,11 @@ import org.http4s.circe._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
-import org.http4s.{ EntityDecoder, EntityEncoder, HttpApp }
+import org.http4s.{EntityDecoder, EntityEncoder, HttpApp}
 import service.PriceService
 import zio.interop.catz._
 import zio.interop.catz.implicits._
-import zio.{ RIO, Task, ZEnv, ZIO }
+import zio.{RIO, Task, ZEnv, ZIO}
 
 import scala.concurrent.ExecutionContext
 

@@ -2,7 +2,7 @@ package model
 package syntax
 
 import model.DomainModel._
-import model.syntax.DomainModelSyntax.{ domainModelTaggedOps, BigDecimalOps, LongOps, StringOps }
+import model.syntax.DomainModelSyntax.{BigDecimalOps, LongOps, StringOps, domainModelTaggedOps}
 import shapeless.tag
 import shapeless.tag.@@
 

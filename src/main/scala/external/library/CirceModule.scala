@@ -3,7 +3,7 @@ package library
 
 import cats.Show
 import cats.syntax.either._
-import io.circe.{ Decoder, Encoder }
+import io.circe.{Decoder, Encoder}
 
 object CirceModule {
 

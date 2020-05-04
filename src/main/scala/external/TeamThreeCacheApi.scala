@@ -1,7 +1,7 @@
 package external
 
 import cats.effect.IO
-import model.DomainModel.{ Product, ProductId }
+import model.DomainModel.{Product, ProductId}
 
 trait TeamThreeCacheApi[K, V] {
   def get: K => IO[Option[V]]
