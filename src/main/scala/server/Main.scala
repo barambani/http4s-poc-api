@@ -1,7 +1,8 @@
 package server
 
-import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.Executors
 
+import com.github.ghik.silencer.silent
 import external.{ TeamOneHttpApi, TeamThreeCacheApi, TeamTwoHttpApi }
 import io.circe.generic.auto._
 import log.effect.zio.ZioLogWriter._
@@ -17,9 +18,11 @@ import zio.interop.catz.implicits._
 import zio.{ RIO, Task, ZEnv, ZIO }
 
 import scala.concurrent.ExecutionContext
+
 import model.DomainModelCodecs._
 
-object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs {
+@silent
+object Main extends zio.interop.catz.CatsApp with Pools with Codecs {
   private[this] val priceService: RIO[String, PriceService[Task]] =
     log4sFromName map { log =>
       PriceService[Task](
@@ -40,9 +43,9 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
 
   private[this] val runningServer: RIO[HttpApp[Task], Unit] =
     ZIO.accessM { app =>
-      BlazeServerBuilder[Task]
+      BlazeServerBuilder[Task](serverPool)
         .bindHttp(17171, "0.0.0.0")
-        .withConnectorPoolSize(64)
+        .withConnectorPoolSize(connectorPoolSize)
         .enableHttp2(true)
         .withHttpApp(app)
         .serve
@@ -57,9 +60,14 @@ object Main extends zio.interop.catz.CatsApp with RuntimeThreadPools with Codecs
     serviceRuntime.fold(_ => 0, _ => 1) provide "App log"
 }
 
-sealed trait RuntimeThreadPools {
-  implicit val futureExecutionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(new ForkJoinPool())
+sealed trait Pools {
+
+  protected val connectorPoolSize = Runtime.getRuntime.availableProcessors() * 2
+  protected val mainThreadNumber  = Runtime.getRuntime.availableProcessors() + 1
+
+  protected val serverPool = ExecutionContext.fromExecutor(
+    Executors.newWorkStealingPool(mainThreadNumber)
+  )
 }
 
 sealed trait Codecs {

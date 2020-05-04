@@ -8,7 +8,7 @@ lazy val versionOf = new {
   val catsEffect         = "2.1.3"
   val circe              = "0.13.0"
   val fs2                = "2.3.0"
-  val http4s             = "0.21.3"
+  val http4s             = "0.21.4"
   val kindProjector      = "0.11.0"
   val `log-effect`       = "0.12.2"
   val `logback-classic`  = "1.2.3"
@@ -139,7 +139,6 @@ val root = project
   .settings(
     name                := "http4s-poc-api",
     organization        := "com.github.barambani",
-    scalaVersion        := "2.13.1",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
     unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
