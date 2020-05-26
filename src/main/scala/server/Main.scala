@@ -15,10 +15,9 @@ import org.http4s.{EntityDecoder, EntityEncoder, HttpApp}
 import service.PriceService
 import zio.interop.catz._
 import zio.interop.catz.implicits._
-import zio.{RIO, Task, ZEnv, ZIO}
+import zio.{ExitCode, RIO, Task, ZEnv, ZIO}
 
 import scala.concurrent.ExecutionContext
-
 import model.DomainModelCodecs._
 
 @silent
@@ -56,8 +55,8 @@ object Main extends zio.interop.catz.CatsApp with Pools with Codecs {
   private[this] val serviceRuntime: RIO[String, Unit] =
     priceService >>> httpApp >>> runningServer
 
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
-    serviceRuntime.fold(_ => 0, _ => 1) provide "App log"
+  def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
+    serviceRuntime.fold(_ => ExitCode.failure, _ => ExitCode.success) provide "App log"
 }
 
 sealed trait Pools {
