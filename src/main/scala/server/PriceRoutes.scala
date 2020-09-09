@@ -18,9 +18,8 @@ sealed abstract class PriceRoutes[F[_]: Sync](
   responseEncoder: EntityEncoder[F, List[Price]]
 ) extends Http4sDsl[F] {
   def make(priceService: PriceService[F]): HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case req @ Method.POST -> Root =>
-        postResponse(req, priceService) handlingFailures priceServiceErrors handleErrorWith unhandledThrowable
+    HttpRoutes.of[F] { case req @ Method.POST -> Root =>
+      postResponse(req, priceService) handlingFailures priceServiceErrors handleErrorWith unhandledThrowable
     }
 
   private[this] def postResponse(request: Request[F], priceService: PriceService[F]): F[Response[F]] =
