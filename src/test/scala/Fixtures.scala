@@ -18,5 +18,5 @@ trait Fixtures extends Matchers with Http4sDsl[IO] with Http4sClientDsl[IO] {
   implicit val testRuntime = zio.Runtime.unsafeFromLayer(zio.ZEnv.live, Platform.default)
 
   def assertOn[A](v: Verified[A]) =
-    v.fold(es => es map { fail(_) }, _ => Succeeded)
+    v.fold(es => es map fail(_), _ => Succeeded)
 }
