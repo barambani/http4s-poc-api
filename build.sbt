@@ -1,7 +1,6 @@
 import java.time.Instant
 
 import sbt.Keys.javaOptions
-import ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
 
 lazy val versionOf = new {
   val cats               = "2.2.0"
@@ -140,7 +139,6 @@ val root = project
     name := "http4s-poc-api",
     organization := "com.github.barambani",
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
-    unusedCompileDependenciesFilter -= moduleFilter("ch.qos.logback", "logback-classic"),
     addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
     addCommandAlias(
       "checkFormat",
@@ -148,7 +146,7 @@ val root = project
     ),
     addCommandAlias(
       "fullBuild",
-      ";checkFormat;unusedCompileDependenciesTest;clean;coverage;test;coverageReport;coverageAggregate"
+      ";checkFormat;clean;coverage;test;coverageReport;coverageAggregate"
     ),
     addCommandAlias(
       "fullCiBuild",
@@ -157,6 +155,5 @@ val root = project
     scalacOptions ++= generalOptions,
     scalacOptions in Test ++= testOnlyOptions,
     scalacOptions in (Compile, console) --= nonTestExceptions,
-    javaOptions in Universal := jreRuntimeOptions,
-    unusedCompileDependenciesFilter -= moduleFilter("com.github.ghik", "silencer-lib")
+    javaOptions in Universal := jreRuntimeOptions
   )
