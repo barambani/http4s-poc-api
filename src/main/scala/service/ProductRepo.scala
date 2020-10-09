@@ -27,12 +27,12 @@ object ProductRepo {
     new ProductRepo[F] {
 
       /**
-        * Tries to retrieve the products by ProductId from the cache, if results
-        * in a miss it tries on the http product store.
-        * It returns only the products existing so the result might contain less
-        * elements than the input list. If a product is not in the cache but is
-        * found in the http store it will be added to the cache.
-        */
+       * Tries to retrieve the products by ProductId from the cache, if results
+       * in a miss it tries on the http product store.
+       * It returns only the products existing so the result might contain less
+       * elements than the input list. If a product is not in the cache but is
+       * found in the http store it will be added to the cache.
+       */
       def storedProducts: Seq[ProductId] => F[List[Product]] =
         _.toList parTraverse fromCacheOrStore map (_.flatten)
 

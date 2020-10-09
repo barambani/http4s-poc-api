@@ -14,8 +14,8 @@ import shapeless.tag.@@
 object DomainModelCodecs {
 
   /**
-    * Encoders
-    */
+   * Encoders
+   */
   implicit val instantEncoder: Encoder[Instant] =
     encoderFor(_.toString)
 
@@ -29,8 +29,8 @@ object DomainModelCodecs {
     encoderFor[Long @@ T]
 
   /**
-    * Decoders
-    */
+   * Decoders
+   */
   implicit val instantDecoder: Decoder[Instant] =
     decoderFor(Instant.parse)
 

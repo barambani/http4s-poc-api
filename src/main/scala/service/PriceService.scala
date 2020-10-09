@@ -32,14 +32,14 @@ final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[*[
   private[this] lazy val preferenceFetcher: PreferenceFetcher[F] = PreferenceFetcher(userInt, logger)
 
   /**
-    * Going back to ParallelEffect and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
-    * of parMapN because of the cancellation. It is not able anymore to collect multiple errors in the resulting
-    * MonadError as explained in this gitter conversation
-    *
-    * https://gitter.im/typelevel/cats-effect*at=5aac5013458cbde55742ef7e
-    *
-    * While waiting for a different solution with cats.Parallel, this suits the purpose better
-    */
+   * Going back to ParallelEffect and the fs2 implementation as the new cats.effect version 0.10 changes the semantic
+   * of parMapN because of the cancellation. It is not able anymore to collect multiple errors in the resulting
+   * MonadError as explained in this gitter conversation
+   *
+   * https://gitter.im/typelevel/cats-effect*at=5aac5013458cbde55742ef7e
+   *
+   * While waiting for a different solution with cats.Parallel, this suits the purpose better
+   */
   def prices(userId: UserId, productIds: Seq[ProductId]): F[List[Price]] =
     (userFor(userId), productsFor(productIds), preferencesFor(userId))
       .parMapN(priceCalculator.finalPrices)
