@@ -3,8 +3,8 @@ import java.time.Instant
 import sbt.Keys.javaOptions
 
 lazy val versionOf = new {
-  val cats               = "2.2.0"
-  val catsEffect         = "2.2.0"
+  val cats               = "2.3.0"
+  val catsEffect         = "2.3.0"
   val circe              = "0.13.0"
   val fs2                = "2.4.6"
   val http4s             = "0.21.12"
