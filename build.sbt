@@ -1,6 +1,7 @@
 import java.time.Instant
-
 import sbt.Keys.javaOptions
+
+val scala_213 = "2.13.4"
 
 lazy val versionOf = new {
   val cats               = "2.3.1"
@@ -19,9 +20,6 @@ lazy val versionOf = new {
   val silencer           = "1.7.2"
 }
 
-/*
- * Transitive dependencies to exclude
- */
 lazy val transitiveDependencies: Seq[ExclusionRule] = Seq(
   ("org.typelevel", "cats-core_2.12"),
   ("org.typelevel", "cats-effect_2.12"),
@@ -30,9 +28,6 @@ lazy val transitiveDependencies: Seq[ExclusionRule] = Seq(
   ("org.scalaz", "scalaz-concurrent_2.12")
 ) map (ex => ExclusionRule(ex._1, ex._2))
 
-/*
- * Dependencies
- */
 val externalDependencies = Seq(
   "org.typelevel"   %% "cats-core"           % versionOf.cats,
   "org.typelevel"   %% "cats-effect"         % versionOf.catsEffect,
@@ -52,9 +47,6 @@ val externalDependencies = Seq(
   "dev.zio"         %% "zio-interop-cats"    % versionOf.`zio-interop-cats`
 ) map (_.withSources)
 
-/*
- * Test dependencies
- */
 val testDependencies = Seq(
   "org.scalacheck" %% "scalacheck"          % versionOf.scalaCheck % "test",
   "org.scalatest"  %% "scalatest"           % versionOf.scalaTest  % "test",
@@ -63,9 +55,6 @@ val testDependencies = Seq(
   "org.http4s"     %% "http4s-blaze-client" % versionOf.http4s     % "test"
 ) map (_.withSources)
 
-/*
- * Compiler plugins
- */
 val compilerPlugins: Seq[ModuleID] = Seq(
   compilerPlugin("org.typelevel"   %% "kind-projector"  % versionOf.kindProjector cross CrossVersion.full),
   compilerPlugin("com.github.ghik" %% "silencer-plugin" % versionOf.silencer cross CrossVersion.full)
@@ -91,7 +80,8 @@ val generalOptions: Seq[String] = Seq(
   "-Ywarn-unused:_,imports",
   "-opt-warnings",
   "-Xlint:constant",
-  "-Ywarn-extra-implicit"
+  "-Ywarn-extra-implicit",
+  "-Xlint:-byname-implicit"
 )
 
 val nonTestExceptions: Seq[String] = Seq(
@@ -138,20 +128,14 @@ val root = project
   .settings(
     name := "http4s-poc-api",
     organization := "com.github.barambani",
+    scalaVersion := scala_213,
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
-    addCommandAlias("format", ";scalafmt;test:scalafmt;scalafmtSbt"),
+    addCommandAlias("fmt", ";scalafmt;test:scalafmt"),
     addCommandAlias(
-      "checkFormat",
-      ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck"
+      "fmtCheck",
+      "all scalafmtCheck test:scalafmtCheck scalafmtSbtCheck"
     ),
-    addCommandAlias(
-      "fullBuild",
-      ";checkFormat;clean;coverage;test;coverageReport;coverageAggregate"
-    ),
-    addCommandAlias(
-      "fullCiBuild",
-      ";set scalacOptions in ThisBuild ++= Seq(\"-opt:l:inline\", \"-opt-inline-from:**\");fullBuild"
-    ),
+    addCommandAlias("fullTest", ";clean;coverage;test;coverageReport"),
     scalacOptions ++= generalOptions,
     scalacOptions in Test ++= testOnlyOptions,
     scalacOptions in (Compile, console) --= nonTestExceptions,
