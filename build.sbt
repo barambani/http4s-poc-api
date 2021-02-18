@@ -4,7 +4,7 @@ import sbt.Keys.javaOptions
 val scala_213 = "2.13.4"
 
 lazy val versionOf = new {
-  val cats               = "2.4.1"
+  val cats               = "2.4.2"
   val catsEffect         = "2.3.3"
   val circe              = "0.13.0"
   val fs2                = "2.5.0"
