@@ -130,7 +130,7 @@ val root = project
     organization := "com.github.barambani",
     scalaVersion := scala_213,
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
-    addCommandAlias("fmt", ";scalafmt;test:scalafmt"),
+    addCommandAlias("fmt", ";scalafmt;test:scalafmt;scalafmtSbt"),
     addCommandAlias(
       "fmtCheck",
       "all scalafmtCheck test:scalafmtCheck scalafmtSbtCheck"
