@@ -1,7 +1,7 @@
 import java.time.Instant
 import sbt.Keys.javaOptions
 
-val scala_213 = "2.13.4"
+val scala_213 = "2.13.5"
 
 lazy val versionOf = new {
   val cats               = "2.4.2"
