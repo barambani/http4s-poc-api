@@ -1,7 +1,7 @@
 package integration
 
 import cats.effect.syntax.concurrent._
-import cats.effect.{Concurrent, ContextShift, IO, Timer}
+import cats.effect.{Concurrent, IO}
 import cats.syntax.flatMap._
 import errors.PriceServiceError.{PreferenceErr, UserErr}
 import external._
@@ -12,6 +12,7 @@ import model.DomainModel._
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
+import cats.effect.{ Spawn, Temporal }
 
 sealed trait UserIntegration[F[_]] {
   def user: UserId => F[User]
@@ -19,20 +20,18 @@ sealed trait UserIntegration[F[_]] {
 }
 
 object UserIntegration {
-  @inline def apply[F[_]: Concurrent: Timer: IO --> *[_]: Future --> *[_]](
+  @inline def apply[F[_]: Concurrent: Temporal: IO --> *[_]: Future --> *[_]](
     userDep: TeamTwoHttpApi,
     preferencesDep: TeamOneHttpApi,
     t: FiniteDuration
-  )(
-    implicit CS: ContextShift[F]
   ): UserIntegration[F] =
     new UserIntegration[F] {
       def user: UserId => F[User] = { id =>
-        CS.shift >> userDep.user(id).adaptedTo[F].timeout(t).narrowFailureTo[UserErr]
+        Spawn[F].cede >> userDep.user(id).adaptedTo[F].timeout(t).narrowFailureTo[UserErr]
       }
 
       def usersPreferences: UserId => F[UserPreferences] = { id =>
-        CS.shift >> preferencesDep.usersPreferences(id).adaptedTo[F].timeout(t).narrowFailureTo[PreferenceErr]
+        Spawn[F].cede >> preferencesDep.usersPreferences(id).adaptedTo[F].timeout(t).narrowFailureTo[PreferenceErr]
       }
     }
 }

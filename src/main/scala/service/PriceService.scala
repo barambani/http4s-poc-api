@@ -1,7 +1,7 @@
 package service
 
 import cats.Parallel
-import cats.effect.{Concurrent, ContextShift, IO, Timer}
+import cats.effect.{Concurrent, IO}
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.parallel._
@@ -13,8 +13,9 @@ import model.DomainModel._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import cats.effect.Temporal
 
-final case class PriceService[F[_]: Concurrent: Timer: ContextShift: Parallel[*[_]]](
+final case class PriceService[F[_]: Concurrent: Temporal: ContextShift: Parallel[*[_]]](
   cacheDep: TeamThreeCacheApi[ProductId, Product],
   teamOneStupidName: TeamOneHttpApi,
   teamTwoStupidName: TeamTwoHttpApi,
