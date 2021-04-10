@@ -1,7 +1,7 @@
 package integration
 
 import cats.effect.syntax.concurrent._
-import cats.effect.{Concurrent, ContextShift, IO, Timer}
+import cats.effect.{Concurrent, IO}
 import cats.syntax.flatMap._
 import errors.PriceServiceError.{CacheLookupError, CacheStoreError}
 import external.TeamThreeCacheApi
@@ -11,6 +11,7 @@ import external.library.syntax.ioAdapt._
 import model.DomainModel._
 
 import scala.concurrent.duration.FiniteDuration
+import cats.effect.{ Spawn, Temporal }
 
 sealed trait CacheIntegration[F[_]] {
   def cachedProduct: ProductId => F[Option[Product]]
@@ -18,17 +19,15 @@ sealed trait CacheIntegration[F[_]] {
 }
 
 object CacheIntegration {
-  @inline def apply[F[_]: Concurrent: Timer: IO --> *[_]](
+  @inline def apply[F[_]: Concurrent: Temporal: IO --> *[_]](
     cache: TeamThreeCacheApi[ProductId, Product],
     t: FiniteDuration
-  )(
-    implicit CS: ContextShift[F]
   ): CacheIntegration[F] =
     new CacheIntegration[F] {
       def cachedProduct: ProductId => F[Option[Product]] =
-        pId => CS.shift >> cache.get(pId).adaptedTo[F].timeout(t).narrowFailureTo[CacheLookupError]
+        pId => Spawn[F].cede >> cache.get(pId).adaptedTo[F].timeout(t).narrowFailureTo[CacheLookupError]
 
       def storeProductToCache: ProductId => Product => F[Unit] =
-        pId => p => CS.shift >> cache.put(pId)(p).adaptedTo[F].timeout(t).narrowFailureTo[CacheStoreError]
+        pId => p => Spawn[F].cede >> cache.put(pId)(p).adaptedTo[F].timeout(t).narrowFailureTo[CacheStoreError]
     }
 }
