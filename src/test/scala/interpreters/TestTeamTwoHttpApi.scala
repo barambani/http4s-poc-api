@@ -1,6 +1,6 @@
 package interpreters
 
-import cats.effect.{ConcurrentEffect, IO, Timer}
+import cats.effect.{ConcurrentEffect, IO}
 import cats.syntax.flatMap._
 import external.TeamTwoHttpApi
 import log.effect.LogWriter
@@ -10,10 +10,11 @@ import zio.interop.catz._
 import zio.{Runtime, Task}
 
 import scala.concurrent.duration._
+import cats.effect.Temporal
 
 object TestTeamTwoHttpApi {
   @inline def make(aUser: User, productsInStore: Map[ProductId, Product])(testLogger: LogWriter[Task])(
-    implicit t: Timer[IO],
+    implicit t: Temporal[IO],
     rt: Runtime[Clock]
   ): TeamTwoHttpApi =
     new TeamTwoHttpApi {
@@ -30,7 +31,7 @@ object TestTeamTwoHttpApi {
       }
     }
 
-  @inline def makeFail(implicit t: Timer[IO]): TeamTwoHttpApi =
+  @inline def makeFail(implicit t: Temporal[IO]): TeamTwoHttpApi =
     new TeamTwoHttpApi {
       def user: UserId => IO[User] = { _ =>
         t.sleep(200.milliseconds) >> IO.delay(
