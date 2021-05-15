@@ -2,7 +2,7 @@ package external
 package library
 
 import cats.arrow.FunctionK
-import cats.effect.{Concurrent, ContextShift, IO}
+import cats.effect.{Concurrent, IO}
 import external.library.IoAdapt.-->
 import zio.{Task, ZIO}
 
@@ -35,7 +35,7 @@ private[library] sealed trait IoAdaptInstances {
         ft => ZIO.fromFuture(ec => ft.map(identity)(ec))
     }
 
-  implicit def futureToIo(implicit cs: ContextShift[IO]): Future --> IO =
+  implicit def futureToIo: Future --> IO =
     new IoAdapt[Future, IO] {
       def apply[A]: (=>Future[A]) => IO[A] =
         IO.fromFuture[A] _ compose IO.delay
