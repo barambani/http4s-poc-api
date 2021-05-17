@@ -1,7 +1,7 @@
 import java.time.Instant
 import sbt.Keys.javaOptions
 
-val scala_213 = "2.13.4"
+val scala_213 = "2.13.6"
 
 lazy val versionOf = new {
   val cats               = "2.5.0"
@@ -114,8 +114,8 @@ val buildInfoSettings = Seq(
 )
 
 val dockerSettings = Seq(
-  maintainer in Docker := "barambani -> https://github.com/barambani",
-  dockerBaseImage in Docker := "hirokimatsumoto/alpine-openjdk-11"
+  Docker / maintainer := "barambani -> https://github.com/barambani",
+  Docker / dockerBaseImage := "hirokimatsumoto/alpine-openjdk-11"
 )
 
 val root = project
@@ -137,7 +137,7 @@ val root = project
     ),
     addCommandAlias("fullTest", ";clean;coverage;test;coverageReport"),
     scalacOptions ++= generalOptions,
-    scalacOptions in Test ++= testOnlyOptions,
-    scalacOptions in (Compile, console) --= nonTestExceptions,
-    javaOptions in Universal := jreRuntimeOptions
+    Test / scalacOptions ++= testOnlyOptions,
+    Compile / console / scalacOptions --= nonTestExceptions,
+    Universal / javaOptions := jreRuntimeOptions
   )
