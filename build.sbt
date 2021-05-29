@@ -17,7 +17,7 @@ lazy val versionOf = new {
   val zio                = "1.0.7"
   val `zio-interop-cats` = "2.3.1.0"
   val shapeless          = "2.3.7"
-  val silencer           = "1.7.3"
+  val silencer           = "1.7.5"
 }
 
 lazy val transitiveDependencies: Seq[ExclusionRule] = Seq(
