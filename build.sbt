@@ -109,12 +109,12 @@ lazy val jreRuntimeOptions = Seq(
 
 val buildInfoSettings = Seq(
   buildInfoPackage := "server",
-  buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
+  buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, scalaOrganization),
   buildInfoKeys += BuildInfoKey.action("buildTime")(Instant.now)
 )
 
 val dockerSettings = Seq(
-  Docker / maintainer := "barambani -> https://github.com/barambani",
+  Docker / maintainer      := "barambani -> https://github.com/barambani",
   Docker / dockerBaseImage := "hirokimatsumoto/alpine-openjdk-11"
 )
 
@@ -126,7 +126,7 @@ val root = project
   .settings(buildInfoSettings)
   .settings(dockerSettings)
   .settings(
-    name := "http4s-poc-api",
+    name         := "http4s-poc-api",
     organization := "com.github.barambani",
     scalaVersion := scala_213,
     libraryDependencies ++= externalDependencies ++ testDependencies ++ compilerPlugins,
