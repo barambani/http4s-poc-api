@@ -8,8 +8,7 @@ import io.circe.{Decoder, Encoder}
 object CirceModule {
 
   /**
-   * Gives a Circe Encoder for the type `A` when a `Show` instance
-   * is available for it.
+   * Gives a Circe Encoder for the type `A` when a `Show` instance is available for it.
    *
    * Example, Shapeless tag:
    *
@@ -19,33 +18,34 @@ object CirceModule {
    *
    * def taggedBigDecimalEncoder[T]: Encoder[BigDecimal @@ T] = encoderFor[BigDecimal @@ T]
    *
-   * @return An encoder for `A`
+   * @return
+   *   An encoder for `A`
    */
   def encoderFor[A](implicit ev: Show[A]): Encoder[A] =
     Encoder.encodeString.contramap[A](ev.show)
 
   /**
-   * Gives a Circe Encoder for the type `A` when
-   * way to go from A to string `A => String` is given
+   * Gives a Circe Encoder for the type `A` when way to go from A to string `A => String` is given
    *
    * Example, Instant:
    *
    * val instantEncoder: Encoder[Instant] = encoderFor[Instant]
    *
-   * @return An encoder for `A`
+   * @return
+   *   An encoder for `A`
    */
   def encoderFor[A]: (A => String) => Encoder[A] =
     f => Encoder.encodeString.contramap[A](f)
 
   /**
-   * Gives a Circe Decoder for the type `A` when a way to go from String to `A`
-   * is provided
+   * Gives a Circe Decoder for the type `A` when a way to go from String to `A` is provided
    *
    * Example, Instant:
    *
    * val instantDecoder: Decoder[Instant] = decoderFor(Instant.parse)
    *
-   * @return A decoder for `A`
+   * @return
+   *   A decoder for `A`
    */
   def decoderFor[A]: (String => A) => Decoder[A] =
     f => mappedDecoderFor(f)(identity)
@@ -55,16 +55,15 @@ object CirceModule {
    *
    * Example, Shapeless tag:
    *
-   * def taggedLongDecoder[T]: Decoder[Long @@ T] =
-   *   mappedDecoderFor(_.toLong)(tag[T].apply)
+   * def taggedLongDecoder[T]: Decoder[Long @@ T] = mappedDecoderFor(_.toLong)(tag[T].apply)
    *
    * def taggedBigDecimalDecoder[T]: Decoder[BigDecimal @@ T] =
-   *   mappedDecoderFor(BigDecimal.apply)(tag[T].apply)
+   * mappedDecoderFor(BigDecimal.apply)(tag[T].apply)
    *
-   * def taggedStringDecoder[T]: Decoder[String @@ T] =
-   *   mappedDecoderFor(identity)(tag[T].apply)
+   * def taggedStringDecoder[T]: Decoder[String @@ T] = mappedDecoderFor(identity)(tag[T].apply)
    *
-   * @return A decoder for `A` that maps the result to `B` in case of successful decoding
+   * @return
+   *   A decoder for `A` that maps the result to `B` in case of successful decoding
    */
   def mappedDecoderFor[A, B]: (String => A) => (A => B) => Decoder[B] =
     ff =>
